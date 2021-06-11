@@ -1,0 +1,35 @@
+{
+  "name": "rsc-client-asm",
+  "version": "1.0.0",
+  "description": "runescape classic client ported to assemblyscript",
+  "main": "index.js",
+  "scripts": {
+    "build-dev": "asc src/index.ts --target debug",
+    "build": "asc src/index.ts --target release"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/2003scape/rsc-client-asm.git"
+  },
+  "keywords": [
+    "runescape",
+    "classic",
+    "mmorpg",
+    "game",
+    "client",
+    "java",
+    "assemblyscript"
+  ],
+  "author": "2003Scape Team",
+  "license": "AGPL-3.0+",
+  "bugs": {
+    "url": "https://github.com/2003scape/rsc-client-asm/issues"
+  },
+  "homepage": "https://github.com/2003scape/rsc-client-asm#readme",
+  "dependencies": {
+    "@assemblyscript/loader": "^0.19.1"
+  },
+  "devDependencies": {
+    "assemblyscript": "^0.19.1"
+  }
+}
