@@ -1,3 +1,5 @@
+import { getUnsignedShort, getSignedShort } from './utility';
+
 const COLOUR_TRANSPARENT: i32 = 12345678;
 
 export default class GameModel {
@@ -153,27 +155,27 @@ export default class GameModel {
     static fromBytes(data: Int8Array, offset: i32): GameModel {
         const gameModel = new GameModel();
 
-        const numVertices = Utility.getUnsignedShort(data, offset);
+        const numVertices = getUnsignedShort(data, offset);
         offset += 2;
 
-        const numFaces = Utility.getUnsignedShort(data, offset);
+        const numFaces = getUnsignedShort(data, offset);
         offset += 2;
 
         gameModel.allocate(numVertices, numFaces);
         gameModel.faceTransStateThing = new StaticArray<Int32Array>(numFaces);
 
         for (let i = 0; i < numVertices; i++) {
-            gameModel.vertexX![i] = Utility.getSignedShort(data, offset);
+            gameModel.vertexX![i] = getSignedShort(data, offset);
             offset += 2;
         }
 
         for (let i = 0; i < numVertices; i++) {
-            gameModel.vertexY![i] = Utility.getSignedShort(data, offset);
+            gameModel.vertexY![i] = getSignedShort(data, offset);
             offset += 2;
         }
 
         for (let i = 0; i < numVertices; i++) {
-            gameModel.vertexZ![i] = Utility.getSignedShort(data, offset);
+            gameModel.vertexZ![i] = getSignedShort(data, offset);
             offset += 2;
         }
 
@@ -184,7 +186,7 @@ export default class GameModel {
         }
 
         for (let i = 0; i < numFaces; i++) {
-            gameModel.faceFillFront![i] = Utility.getSignedShort(data, offset);
+            gameModel.faceFillFront![i] = getSignedShort(data, offset);
             offset += 2;
 
             if (gameModel.faceFillFront![i] == 32767) {
@@ -193,7 +195,7 @@ export default class GameModel {
         }
 
         for (let i = 0; i < numFaces; i++) {
-            gameModel.faceFillBack![i] = Utility.getSignedShort(data, offset);
+            gameModel.faceFillBack![i] = getSignedShort(data, offset);
             offset += 2;
 
             if (gameModel.faceFillBack![i] == 32767) {
@@ -215,7 +217,7 @@ export default class GameModel {
                 if (j < 256) {
                     gameModel.faceVertices![i][j] = data[offset++] & 0xff;
                 } else {
-                    gameModel.faceVertices![i][j] = Utility.getUnsignedShort(
+                    gameModel.faceVertices![i][j] = getUnsignedShort(
                         data,
                         offset
                     );
@@ -1186,7 +1188,7 @@ export default class GameModel {
         pieces[0] = this;
 
         const gameModel = GameModel._from6(
-            [this],
+            pieces,
             1,
             autocommit,
             isolated,
@@ -1213,16 +1215,16 @@ export default class GameModel {
     readBase64(buffer: Int8Array): i32 {
         for (
             ;
-            buffer[this.dataPtr] === 10 || buffer[this.dataPtr] === 13;
+            buffer[this.dataPtr] == 10 || buffer[this.dataPtr] == 13;
             this.dataPtr++
         );
 
-        let hi = GameModel.base64Alphabet[buffer[this.dataPtr++] & 0xff];
-        let mid = GameModel.base64Alphabet[buffer[this.dataPtr++] & 0xff];
-        let lo = GameModel.base64Alphabet[buffer[this.dataPtr++] & 0xff];
+        const hi = GameModel.base64Alphabet[buffer[this.dataPtr++] & 0xff];
+        const mid = GameModel.base64Alphabet[buffer[this.dataPtr++] & 0xff];
+        const lo = GameModel.base64Alphabet[buffer[this.dataPtr++] & 0xff];
         let val = (hi * 4096 + mid * 64 + lo - 0x20000) as i32;
 
-        if (val === 123456) {
+        if (val == 123456) {
             val = this.magic;
         }
 
