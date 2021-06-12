@@ -1,3 +1,4 @@
+import mudclient from './mudclient';
 import { getUnsignedShort } from './utility';
 
 const SLEEP_WIDTH = 255;
@@ -1346,7 +1347,7 @@ export default class Surface {
 
     _drawSprite_from10(
         dest: Int32Array,
-        src: Int32Array,
+        src: Int32Array | null,
         i: i32,
         srcPos: i32,
         destPos: i32,
@@ -1361,7 +1362,7 @@ export default class Surface {
 
         for (let j2 = -height; j2 < 0; j2 += yInc) {
             for (let k2 = i2; k2 < 0; k2++) {
-                i = src[srcPos++];
+                i = src![srcPos++];
 
                 if (i != 0) {
                     dest[destPos++] = i;
@@ -1369,7 +1370,7 @@ export default class Surface {
                     destPos++;
                 }
 
-                i = src[srcPos++];
+                i = src![srcPos++];
 
                 if (i != 0) {
                     dest[destPos++] = i;
@@ -1377,7 +1378,7 @@ export default class Surface {
                     destPos++;
                 }
 
-                i = src[srcPos++];
+                i = src![srcPos++];
 
                 if (i != 0) {
                     dest[destPos++] = i;
@@ -1385,7 +1386,7 @@ export default class Surface {
                     destPos++;
                 }
 
-                i = src[srcPos++];
+                i = src![srcPos++];
 
                 if (i != 0) {
                     dest[destPos++] = i;
@@ -1395,7 +1396,7 @@ export default class Surface {
             }
 
             for (let l2 = width; l2 < 0; l2++) {
-                i = src[srcPos++];
+                i = src![srcPos++];
 
                 if (i != 0) {
                     dest[destPos++] = i;
@@ -1411,8 +1412,8 @@ export default class Surface {
 
     _drawSprite_from10A(
         target: Int32Array,
-        colourIdx: Int8Array,
-        colours: Int32Array,
+        colourIdx: Int8Array | null,
+        colours: Int32Array | null,
         srcPos: i32,
         destPos: i32,
         width: i32,
@@ -1426,44 +1427,44 @@ export default class Surface {
 
         for (let i2 = -height; i2 < 0; i2 += rowInc) {
             for (let j2 = l1; j2 < 0; j2++) {
-                let byte0 = colourIdx[srcPos++];
+                let byte0 = colourIdx![srcPos++];
 
                 if (byte0 != 0) {
-                    target[destPos++] = colours[byte0 & 0xff];
+                    target[destPos++] = colours![byte0 & 0xff];
                 } else {
                     destPos++;
                 }
 
-                byte0 = colourIdx[srcPos++];
+                byte0 = colourIdx![srcPos++];
 
                 if (byte0 != 0) {
-                    target[destPos++] = colours[byte0 & 0xff];
+                    target[destPos++] = colours![byte0 & 0xff];
                 } else {
                     destPos++;
                 }
 
-                byte0 = colourIdx[srcPos++];
+                byte0 = colourIdx![srcPos++];
 
                 if (byte0 != 0) {
-                    target[destPos++] = colours[byte0 & 0xff];
+                    target[destPos++] = colours![byte0 & 0xff];
                 } else {
                     destPos++;
                 }
 
-                byte0 = colourIdx[srcPos++];
+                byte0 = colourIdx![srcPos++];
 
                 if (byte0 != 0) {
-                    target[destPos++] = colours[byte0 & 0xff];
+                    target[destPos++] = colours![byte0 & 0xff];
                 } else {
                     destPos++;
                 }
             }
 
             for (let k2 = width; k2 < 0; k2++) {
-                let byte1 = colourIdx[srcPos++];
+                let byte1 = colourIdx![srcPos++];
 
                 if (byte1 != 0) {
-                    target[destPos++] = colours[byte1 & 0xff];
+                    target[destPos++] = colours![byte1 & 0xff];
                 } else {
                     destPos++;
                 }
@@ -1476,7 +1477,7 @@ export default class Surface {
 
     _plotScale_from13(
         dest: Int32Array,
-        src: Int32Array,
+        src: Int32Array | null,
         i: i32,
         j: i32,
         k: i32,
@@ -1495,7 +1496,7 @@ export default class Surface {
             let j3 = (k >> 16) * j2;
 
             for (let k3 = -j1; k3 < 0; k3++) {
-                i = src[(j >> 16) + j3];
+                i = src![(j >> 16) + j3];
 
                 if (i != 0) {
                     dest[destPos++] = i;
@@ -1514,7 +1515,7 @@ export default class Surface {
 
     _drawSpriteAlpha_from11(
         dest: Int32Array,
-        src: Int32Array,
+        src: Int32Array | null,
         i: i32,
         srcPos: i32,
         size: i32,
@@ -1529,7 +1530,7 @@ export default class Surface {
 
         for (let k2 = -height; k2 < 0; k2 += yInc) {
             for (let l2 = -width; l2 < 0; l2++) {
-                i = src[srcPos++];
+                i = src![srcPos++];
 
                 if (i != 0) {
                     const i3 = dest[size];
@@ -1552,8 +1553,8 @@ export default class Surface {
 
     _drawSpriteAlpha_from11A(
         dest: Int32Array,
-        coloursUsed: Int8Array,
-        colourList: Int32Array,
+        coloursUsed: Int8Array | null,
+        colourList: Int32Array | null,
         listPos: i32,
         size: i32,
         width: i32,
@@ -1567,10 +1568,10 @@ export default class Surface {
 
         for (let j2 = -height; j2 < 0; j2 += yInc) {
             for (let k2 = -width; k2 < 0; k2++) {
-                let l2 = coloursUsed[listPos++];
+                let l2: i32 = coloursUsed![listPos++];
 
                 if (l2 != 0) {
-                    l2 = colourList[l2 & 0xff];
+                    l2 = colourList![l2 & 0xff];
                     const i3 = dest[size];
 
                     dest[size++] =
@@ -1591,7 +1592,7 @@ export default class Surface {
 
     transparentScale(
         dest: Int32Array,
-        src: Int32Array,
+        src: Int32Array | null,
         i: i32,
         j: i32,
         k: i32,
@@ -1612,7 +1613,7 @@ export default class Surface {
             let l3 = (k >> 16) * j2;
 
             for (let i4 = -j1; i4 < 0; i4++) {
-                i = src[(j >> 16) + l3];
+                i = src![(j >> 16) + l3];
 
                 if (i != 0) {
                     let j4 = dest[destPos];
@@ -1638,7 +1639,7 @@ export default class Surface {
 
     _plotScale_from14(
         dest: Int32Array,
-        pixels: Int32Array,
+        pixels: Int32Array | null,
         i: i32,
         j: i32,
         k: i32,
@@ -1662,7 +1663,7 @@ export default class Surface {
             const j4 = (k >> 16) * j2;
 
             for (let k4 = -width; k4 < 0; k4++) {
-                i = pixels[(j >> 16) + j4];
+                i = pixels![(j >> 16) + j4];
 
                 if (i != 0) {
                     const l4 = (i >> 16) & 0xff;
@@ -1704,9 +1705,10 @@ export default class Surface {
             this.sinCosCache = new Int32Array(512);
 
             for (let i = 0; i < 256; i++) {
-                this.sinCosCache[i] = (Math.sin(i * 0.02454369) * 32768) as i32;
+                this.sinCosCache![i] = (Math.sin(i * 0.02454369) *
+                    32768) as i32;
 
-                this.sinCosCache[i + 256] = (Math.cos(i * 0.02454369) *
+                this.sinCosCache![i + 256] = (Math.cos(i * 0.02454369) *
                     32768) as i32;
             }
         }
@@ -1728,8 +1730,8 @@ export default class Surface {
 
         rotation &= 0xff;
 
-        let i4 = this.sinCosCache[rotation] * scale;
-        let j4 = this.sinCosCache[rotation + 256] * scale;
+        let i4 = this.sinCosCache![rotation] * scale;
+        let j4 = this.sinCosCache![rotation + 256] * scale;
         let k4 = x + ((j2 * i4 + i2 * j4) >> 22);
         let l4 = y + ((j2 * j4 - i2 * i4) >> 22);
         let i5 = x + ((j3 * i4 + i3 * j4) >> 22);
@@ -1776,7 +1778,7 @@ export default class Surface {
             l6 = this.boundsBottomY;
         }
 
-        if (!this.anIntArray340 || this.anIntArray340.length != k1 + 1) {
+        if (!this.anIntArray340 || this.anIntArray340!.length != k1 + 1) {
             this.anIntArray340 = new Int32Array(k1 + 1);
             this.anIntArray341 = new Int32Array(k1 + 1);
             this.anIntArray342 = new Int32Array(k1 + 1);
@@ -1786,7 +1788,7 @@ export default class Surface {
         }
 
         for (let i7 = k6; i7 <= l6; i7++) {
-            this.anIntArray340[i7] = 99999999;
+            this.anIntArray340![i7] = 99999999;
             this.anIntArray341![i7] = -99999999;
         }
 
@@ -1838,7 +1840,7 @@ export default class Surface {
         }
 
         for (let i = j7; i <= k7; i++) {
-            this.anIntArray340[i] = this.anIntArray341![i] = l7;
+            this.anIntArray340![i] = this.anIntArray341![i] = l7;
 
             l7 += i8;
 
@@ -1878,8 +1880,8 @@ export default class Surface {
         }
 
         for (let i = j7; i <= k7; i++) {
-            if (l7 < this.anIntArray340[i]) {
-                this.anIntArray340[i] = l7;
+            if (l7 < this.anIntArray340![i]) {
+                this.anIntArray340![i] = l7;
                 this.anIntArray342![i] = j8;
                 this.anIntArray344![i] = 0;
             }
@@ -1924,7 +1926,7 @@ export default class Surface {
         }
 
         for (let i = j7; i <= k7; i++) {
-            if (l7 < this.anIntArray340[i]) {
+            if (l7 < this.anIntArray340![i]) {
                 this.anIntArray340![i] = l7;
                 this.anIntArray342![i] = j8;
                 this.anIntArray344![i] = l8;
@@ -1970,8 +1972,8 @@ export default class Surface {
         }
 
         for (let i = j7; i <= k7; i++) {
-            if (l7 < this.anIntArray340[i]) {
-                this.anIntArray340[i] = l7;
+            if (l7 < this.anIntArray340![i]) {
+                this.anIntArray340![i] = l7;
                 this.anIntArray342![i] = j8;
                 this.anIntArray344![i] = l8;
             }
@@ -1990,7 +1992,7 @@ export default class Surface {
         let ai = this.surfacePixels[sprite];
 
         for (let i = k6; i < l6; i++) {
-            let j11 = this.anIntArray340[i] >> 8;
+            let j11 = this.anIntArray340![i] >> 8;
             let k11 = this.anIntArray341![i] >> 8;
 
             if (k11 - j11 <= 0) {
@@ -2053,7 +2055,7 @@ export default class Surface {
 
     drawMinimap(
         ai: Int32Array,
-        ai1: Int32Array,
+        src: Int32Array | null,
         i: i32,
         j: i32,
         k: i32,
@@ -2064,7 +2066,7 @@ export default class Surface {
         l1: i32
     ): void {
         for (i = k1; i < 0; i++) {
-            this.pixels[j++] = ai1[(k >> 17) + (l >> 17) * l1];
+            this.pixels[j++] = src![(k >> 17) + (l >> 17) * l1];
             k += i1;
             l += j1;
         }
@@ -2072,7 +2074,7 @@ export default class Surface {
 
     drawMinimapTranslate(
         ai: Int32Array,
-        ai1: Int32Array,
+        src: Int32Array | null,
         i: i32,
         j: i32,
         k: i32,
@@ -2083,7 +2085,7 @@ export default class Surface {
         l1: i32
     ): void {
         for (let i2 = k1; i2 < 0; i2++) {
-            i = ai1[(k >> 17) + (l >> 17) * l1];
+            i = src![(k >> 17) + (l >> 17) * l1];
 
             if (i != 0) {
                 this.pixels[j++] = i;
@@ -2361,7 +2363,7 @@ export default class Surface {
 
     _transparentSpritePlot_from15(
         dest: Int32Array,
-        src: Int32Array,
+        src: Int32Array | null,
         i: i32,
         j: i32,
         k: i32,
@@ -2404,7 +2406,7 @@ export default class Surface {
 
             if (i3 != 0) {
                 for (let k6 = k5; k6 < k5 + l5; k6++) {
-                    i = src[(j >> 16) + j5];
+                    i = src![(j >> 16) + j5];
 
                     if (i != 0) {
                         let j3 = (i >> 16) & 0xff;
@@ -2434,7 +2436,7 @@ export default class Surface {
 
     _transparentSpritePlot_from16(
         dest: Int32Array,
-        src: Int32Array,
+        src: Int32Array | null,
         i: i32,
         j: i32,
         k: i32,
@@ -2479,7 +2481,7 @@ export default class Surface {
 
             if (j3 != 0) {
                 for (let k7 = k6; k7 < k6 + l6; k7++) {
-                    i = src[(j >> 16) + j6];
+                    i = src![(j >> 16) + j6];
 
                     if (i != 0) {
                         let k3 = (i >> 16) & 0xff;
@@ -2514,8 +2516,8 @@ export default class Surface {
 
     _transparentSpritePlot_from16A(
         dest: Int32Array,
-        colourIdx: Int8Array,
-        colours: Int32Array,
+        coloursUsed: Int8Array | null,
+        colourList: Int32Array | null,
         i: i32,
         j: i32,
         k: i32,
@@ -2556,10 +2558,10 @@ export default class Surface {
 
             if (i3 != 0) {
                 for (let k6 = k5; k6 < k5 + l5; k6++) {
-                    i = colourIdx[(j >> 16) + j5] & 0xff;
+                    i = coloursUsed![(j >> 16) + j5] & 0xff;
 
                     if (i != 0) {
-                        i = colours[i];
+                        i = colourList![i];
 
                         let j3 = (i >> 16) & 0xff;
                         let k3 = (i >> 8) & 0xff;
@@ -2588,8 +2590,8 @@ export default class Surface {
 
     _transparentSpritePlot_from17(
         dest: Int32Array,
-        coloursUsed: Int8Array,
-        colourList: Int32Array,
+        coloursUsed: Int8Array | null,
+        colourList: Int32Array | null,
         i: i32,
         j: i32,
         k: i32,
@@ -2634,10 +2636,10 @@ export default class Surface {
 
             if (j3 != 0) {
                 for (let k7 = k6; k7 < k6 + l6; k7++) {
-                    i = coloursUsed[(j >> 16) + j6] & 0xff;
+                    i = coloursUsed![(j >> 16) + j6] & 0xff;
 
                     if (i != 0) {
-                        i = colourList[i];
+                        i = colourList![i];
 
                         const k3 = (i >> 16) & 0xff;
                         const l3 = (i >> 8) & 0xff;
@@ -2851,13 +2853,18 @@ export default class Surface {
         x: i32,
         y: i32,
         colour: i32,
-        font: Int8Array
+        fontData: Int8Array
     ): void {
-        let i1 = x + font[width + 5];
-        let j1 = y - font[width + 6];
-        let k1 = font[width + 3];
-        let l1 = font[width + 4];
-        let i2 = font[width] * 16384 + font[width + 1] * 128 + font[width + 2];
+        let i1: i32 = x + fontData[width + 5];
+        let j1: i32 = y - fontData[width + 6];
+        let k1: i32 = fontData[width + 3];
+        let l1: i32 = fontData[width + 4];
+
+        let i2: i32 =
+            fontData[width] * 16384 +
+            fontData[width + 1] * 128 +
+            fontData[width + 2];
+
         let j2 = i1 + j1 * this.width2;
         let k2 = this.width2 - k1;
         let l2 = 0;
@@ -2892,7 +2899,17 @@ export default class Surface {
         }
 
         if (k1 > 0 && l1 > 0) {
-            this.plotLetter(this.pixels, font, colour, i2, j2, k1, l1, k2, l2);
+            this.plotLetter(
+                this.pixels,
+                fontData,
+                colour,
+                i2,
+                j2,
+                k1,
+                l1,
+                k2,
+                l2
+            );
         }
     }
 
