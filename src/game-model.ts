@@ -1,3 +1,4 @@
+import Scene from './scene';
 import { getUnsignedShort, getSignedShort } from './utility';
 
 const COLOUR_TRANSPARENT: i32 = 12345678;
@@ -467,7 +468,7 @@ export default class GameModel {
         count: i32,
         pieceMaxVertices: i32,
         pickable: bool
-    ): Array<GameModel> {
+    ): StaticArray<GameModel> {
         this.commit();
 
         let pieceNV = new Int32Array(count);
@@ -497,23 +498,21 @@ export default class GameModel {
             pieceNF[p]++;
         }
 
-        let pieces = new Array<GameModel>();
+        let pieces = new StaticArray<GameModel>(count);
 
         for (let i = 0; i < count; i++) {
             if (pieceNV[i] > pieceMaxVertices) {
                 pieceNV[i] = pieceMaxVertices;
             }
 
-            pieces.push(
-                GameModel._from7(
-                    pieceNV[i],
-                    pieceNF[i],
-                    true,
-                    true,
-                    true,
-                    pickable,
-                    true
-                )
+            pieces[i] = GameModel._from7(
+                pieceNV[i],
+                pieceNF[i],
+                true,
+                true,
+                true,
+                pickable,
+                true
             );
 
             pieces[i].lightDiffuse = this.lightDiffuse;
@@ -593,7 +592,10 @@ export default class GameModel {
             this.lightDirectionX = x;
             this.lightDirectionY = y;
             this.lightDirectionZ = z;
-            this.lightDirectionMagnitude = Math.sqrt(x * x + y * y + z * z);
+
+            this.lightDirectionMagnitude = Math.sqrt(
+                x * x + y * y + z * z
+            ) as i32;
 
             this.light();
         }
@@ -625,7 +627,7 @@ export default class GameModel {
         this.lightDirectionX = x;
         this.lightDirectionY = y;
         this.lightDirectionZ = z;
-        this.lightDirectionMagnitude = Math.sqrt(x * x + y * y + z * z);
+        this.lightDirectionMagnitude = Math.sqrt(x * x + y * y + z * z) as i32;
 
         this.light();
     }
@@ -635,7 +637,10 @@ export default class GameModel {
             this.lightDirectionX = x;
             this.lightDirectionY = y;
             this.lightDirectionZ = z;
-            this.lightDirectionMagnitude = Math.sqrt(x * x + y * y + z * z);
+
+            this.lightDirectionMagnitude = Math.sqrt(
+                x * x + y * y + z * z
+            ) as i32;
 
             this.light();
         }
@@ -649,7 +654,9 @@ export default class GameModel {
         this.orientationYaw = (this.orientationYaw + yaw) & 0xff;
         this.orientationPitch = (this.orientationPitch + pitch) & 0xff;
         this.orientationRoll = (this.orientationRoll + roll) & 0xff;
+
         this.determineTransformKind();
+
         this.transformState = 1;
     }
 
@@ -657,7 +664,9 @@ export default class GameModel {
         this.orientationYaw = yaw & 0xff;
         this.orientationPitch = pitch & 0xff;
         this.orientationRoll = roll & 0xff;
+
         this.determineTransformKind();
+
         this.transformState = 1;
     }
 
@@ -665,7 +674,9 @@ export default class GameModel {
         this.baseX += x;
         this.baseY += y;
         this.baseZ += z;
+
         this.determineTransformKind();
+
         this.transformState = 1;
     }
 
@@ -673,7 +684,9 @@ export default class GameModel {
         this.baseX = x;
         this.baseY = y;
         this.baseZ = z;
+
         this.determineTransformKind();
+
         this.transformState = 1;
     }
 

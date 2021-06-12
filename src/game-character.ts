@@ -1,0 +1,35 @@
+export default class GameCharacter {
+    hash: i64;
+    name: string|null;
+    serverIndex: i32;
+    serverId: i32;
+    currentX: i32;
+    currentY: i32;
+    npcId: i32;
+    stepCount: i32;
+    animationCurrent: i32;
+    animationNext: i32;
+    movingStep: i32;
+    waypointCurrent: i32;
+    waypointsX: Int32Array = new Int32Array(10);
+    waypointsY: Int32Array = new Int32Array(10);
+    equippedItem: Int32Array = new Int32Array(12);
+    message: string|null;
+    messageTimeout: i32;
+    bubbleItem: i32;
+    bubbleTimeout: i32;
+    damageTaken: i32;
+    healthCurrent: i32;
+    healthMax: i32;
+    combatTimer: i32;
+    level: i32 = -1;
+    colourHair: i32;
+    colourTop: i32;
+    colourBottom: i32;
+    colourSkin: i32;
+    incomingProjectileSprite: i32;
+    attackingPlayerServerIndex: i32;
+    attackingNpcServerIndex: i32;
+    projectileRange: i32;
+    skullVisible: i32;
+}

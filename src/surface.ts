@@ -4,16 +4,16 @@ import { getUnsignedShort } from './utility';
 const SLEEP_WIDTH = 255;
 const SLEEP_HEIGHT = 40;
 
-const BLACK = 0;
-const DARK_GREY = 0xa0a0a0;
-const LIGHT_GREY = 0xdcdcdc;
-
 const C_0 = '0'.charCodeAt(0);
 const C_9 = '9'.charCodeAt(0);
 const C_AT = '@'.charCodeAt(0);
 const C_TILDE = '~'.charCodeAt(0);
 const C_SPACE = ' '.charCodeAt(0);
 const C_PERCENT = '%'.charCodeAt(0);
+
+const BLACK = 0;
+const DARK_GREY = 0xa0a0a0;
+const LIGHT_GREY = 0xdcdcdc;
 
 export default class Surface {
     static anInt346: i32 = 0;
@@ -2930,25 +2930,25 @@ export default class Surface {
 
         for (let i2 = -i1; i2 < 0; i2++) {
             for (let j2 = l1; j2 < 0; j2++) {
-                if (fontData[j++] !== 0) {
+                if (fontData[j++] != 0) {
                     dest[k++] = i;
                 } else {
                     k++;
                 }
 
-                if (fontData[j++] !== 0) {
+                if (fontData[j++] != 0) {
                     dest[k++] = i;
                 } else {
                     k++;
                 }
 
-                if (fontData[j++] !== 0) {
+                if (fontData[j++] != 0) {
                     dest[k++] = i;
                 } else {
                     k++;
                 }
 
-                if (fontData[j++] !== 0) {
+                if (fontData[j++] != 0) {
                     dest[k++] = i;
                 } else {
                     k++;
@@ -2956,48 +2956,8 @@ export default class Surface {
             }
 
             for (let k2 = l; k2 < 0; k2++) {
-                if (fontData[j++] !== 0) {
+                if (fontData[j++] != 0) {
                     dest[k++] = i;
-                } else {
-                    k++;
-                }
-            }
-
-            k += j1;
-            j += k1;
-        }
-    }
-
-    method259(
-        ai: Int32Array,
-        abyte0: Int8Array,
-        i: i32,
-        j: i32,
-        k: i32,
-        l: i32,
-        i1: i32,
-        j1: i32,
-        k1: i32
-    ): void {
-        for (let l1 = -i1; l1 < 0; l1++) {
-            for (let i2 = -l; i2 < 0; i2++) {
-                let j2 = abyte0[j++] & 0xff;
-
-                if (j2 > 30) {
-                    if (j2 >= 230) {
-                        ai[k++] = i;
-                    } else {
-                        let k2 = ai[k];
-
-                        ai[k++] =
-                            ((((i & 0xff00ff) * j2 +
-                                (k2 & 0xff00ff) * (256 - j2)) &
-                                0xff00ff00) +
-                                (((i & 0xff00) * j2 +
-                                    (k2 & 0xff00) * (256 - j2)) &
-                                    0xff0000)) >>
-                            8;
-                    }
                 } else {
                     k++;
                 }
@@ -3047,7 +3007,7 @@ export default class Surface {
             if (
                 text.charCodeAt(i) == C_AT &&
                 i + 4 < text.length &&
-                text.charCodeAt(i + 4) === C_AT
+                text.charCodeAt(i + 4) == C_AT
             ) {
                 i += 4;
             } else if (
@@ -3076,7 +3036,7 @@ export default class Surface {
         let offsetX = 0;
 
         for (let i = 0; i < tabs.length; i += 1) {
-            const tabColour = selected === i ? LIGHT_GREY : DARK_GREY;
+            const tabColour = selected == i ? LIGHT_GREY : DARK_GREY;
 
             this.drawBoxAlpha(x + offsetX, y, tabWidth, height, tabColour, 128);
 
