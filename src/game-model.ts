@@ -602,7 +602,7 @@ export default class GameModel {
     }
 
     _setLight_from6(
-        gouraud: i32,
+        gouraud: bool,
         ambient: i32,
         diffuse: i32,
         x: i32,
