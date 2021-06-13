@@ -347,8 +347,12 @@ export function unpackData(
 export function loadData(
     fileName: string,
     extraSize: i32,
-    archiveData: Int8Array
+    archiveData: Int8Array | null
 ): Int8Array | null {
+    if (!archiveData) {
+        return null;
+    }
+
     return unpackData(fileName, extraSize, archiveData, null);
 }
 

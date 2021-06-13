@@ -468,7 +468,7 @@ export default class GameModel {
         count: i32,
         pieceMaxVertices: i32,
         pickable: bool
-    ): StaticArray<GameModel> {
+    ): StaticArray<GameModel|null> {
         this.commit();
 
         let pieceNV = new Int32Array(count);
@@ -498,7 +498,7 @@ export default class GameModel {
             pieceNF[p]++;
         }
 
-        let pieces = new StaticArray<GameModel>(count);
+        let pieces = new StaticArray<GameModel|null>(count);
 
         for (let i = 0; i < count; i++) {
             if (pieceNV[i] > pieceMaxVertices) {
@@ -515,8 +515,8 @@ export default class GameModel {
                 true
             );
 
-            pieces[i].lightDiffuse = this.lightDiffuse;
-            pieces[i].lightAmbience = this.lightAmbience;
+            pieces[i]!.lightDiffuse = this.lightDiffuse;
+            pieces[i]!.lightAmbience = this.lightAmbience;
         }
 
         for (let f = 0; f < this.numFaces; f++) {
@@ -534,11 +534,11 @@ export default class GameModel {
                 ((sumX / (n * pieceDx)) as i32) +
                 ((sumZ / (n * pieceDz)) as i32) * rows;
 
-            this.copyLighting(pieces[p], vertices, n, f);
+            this.copyLighting(pieces[p]!, vertices, n, f);
         }
 
         for (let p = 0; p < count; p++) {
-            pieces[p].projectionPrepare();
+            pieces[p]!.projectionPrepare();
         }
 
         return pieces;
@@ -553,18 +553,18 @@ export default class GameModel {
         let destVertices = new Int32Array(numVertices);
 
         for (let inV = 0; inV < numVertices; inV++) {
-            let outV = (destVertices![inV] = model.vertexAt(
-                this.vertexX![srcVertices![inV]],
-                this.vertexY![srcVertices![inV]],
-                this.vertexZ![srcVertices![inV]]
+            let outV = (destVertices[inV] = model.vertexAt(
+                this.vertexX![srcVertices[inV]],
+                this.vertexY![srcVertices[inV]],
+                this.vertexZ![srcVertices[inV]]
             ));
 
             model.vertexIntensity![outV] = this.vertexIntensity![
-                srcVertices![inV]
+                srcVertices[inV]
             ];
 
             model.vertexAmbience![outV] = this.vertexAmbience![
-                srcVertices![inV]
+                srcVertices[inV]
             ];
         }
 
@@ -1191,7 +1191,7 @@ export default class GameModel {
         return gameModel;
     }
 
-    copy_from4(
+    _copy_from4(
         autocommit: bool,
         isolated: bool,
         unlit: bool,

@@ -13,7 +13,7 @@ export class Int82DArray {
         return this.array[this.width * row + column];
     }
 
-    set(row: i32, column: i32, value: i8): void {
+    set(row: i32, column: i32, value: i32): void {
         this.array[this.width * row + column] = value;
     }
 }

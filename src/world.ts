@@ -1,8 +1,9 @@
+import GameData from './game-data';
 import GameModel from './game-model';
-import Surface from './surface';
 import Scene from './scene';
-import { loadData } from './utility';
+import Surface from './surface';
 import { Int82DArray, Int322DArray } from './lib/ndarray';
+import { loadData } from './utility';
 
 const COLOUR_TRANSPARENT = 12345678;
 const REGION_WIDTH = 96;
@@ -214,25 +215,25 @@ export default class World {
             return;
         }
 
-        if (GameData.objectType[id] == 1 || GameData.objectType[id] == 2) {
+        if (GameData.objectType![id] == 1 || GameData.objectType![id] == 2) {
             let tileDir = this.getTileDirection(x, y);
             let modelWidth = 0;
             let modelHeight = 0;
 
             if (tileDir == 0 || tileDir == 4) {
-                modelWidth = GameData.objectWidth[id];
-                modelHeight = GameData.objectHeight[id];
+                modelWidth = GameData.objectWidth![id];
+                modelHeight = GameData.objectHeight![id];
             } else {
-                modelHeight = GameData.objectWidth[id];
-                modelWidth = GameData.objectHeight[id];
+                modelHeight = GameData.objectWidth![id];
+                modelWidth = GameData.objectHeight![id];
             }
 
             for (let mx = x; mx < x + modelWidth; mx++) {
                 for (let my = y; my < y + modelHeight; my++) {
                     const adjacency = this.objectAdjacency.get(mx, my);
 
-                    if (GameData.objectType[id] == 1) {
-                        this.objectAdjacency.set(mx, my, adjacency as i32x40);
+                    if (GameData.objectType![id] == 1) {
+                        this.objectAdjacency.set(mx, my, adjacency | 0x40);
                     } else if (tileDir == 0) {
                         this.objectAdjacency.set(mx, my, adjacency | 2);
 
@@ -270,7 +271,7 @@ export default class World {
             return;
         }
 
-        if (GameData.wallObjectAdjacent[id] == 1) {
+        if (GameData.wallObjectAdjacent![id] == 1) {
             const adjacency = this.objectAdjacency.get(x, y);
 
             if (k == 0) {
@@ -326,11 +327,11 @@ export default class World {
     _loadSection_from4I(x: i32, y: i32, plane: i32, chunk: i32): void {
         const mapName =
             'm' +
-            plane +
-            ((x / 10) as i32) +
-            (x % 10) +
-            ((y / 10) as i32) +
-            (y % 10);
+            plane.toString() +
+            ((x / 10) as i32).toString() +
+            (x % 10).toString() +
+            ((y / 10) as i32).toString() +
+            (y % 10).toString();
 
         if (!this.landscapePack) {
             return;
@@ -682,7 +683,7 @@ export default class World {
         if (decoration == 0) {
             return fallback;
         } else {
-            return GameData.tileDecoration[decoration - 1];
+            return GameData.tileDecoration![decoration - 1];
         }
     }
 
@@ -706,6 +707,10 @@ export default class World {
         }
 
         return this.tileDecoration.get(h, x * 48 + y) & 0xff;
+    }
+
+    _getTileDecoration_from3(x: i32, y: i32, _: i32): i32 {
+        return this._getTileDecoration_from2(x, y);
     }
 
     setTileDecoration(x: i32, y: i32, value: i32): void {
@@ -958,12 +963,12 @@ export default class World {
         return readPtr;
     }
 
-    _setObjectAdjacency_from4(x:i32, y:i32, dir:i32, id:i32,):void {
+    _setObjectAdjacency_from4(x: i32, y: i32, dir: i32, id: i32): void {
         if (x < 0 || y < 0 || x >= 95 || y >= 95) {
             return;
         }
 
-        if (GameData.wallObjectAdjacent[id] == 1) {
+        if (GameData.wallObjectAdjacent![id] == 1) {
             const adjacency = this.objectAdjacency.get(x, y);
 
             if (dir == 0) {
@@ -988,7 +993,7 @@ export default class World {
         }
     }
 
-    _loadSection_from4(x:i32, y:i32, plane:i32, flag: bool): void {
+    _loadSection_from4(x: i32, y: i32, plane: i32, flag: bool): void {
         let l = ((x + 24) / 48) as i32;
         let i1 = ((y + 24) / 48) as i32;
 
@@ -1019,7 +1024,7 @@ export default class World {
                 }
             }
 
-            let gameModel = this.parentModel;
+            let gameModel = this.parentModel!;
             gameModel.clear();
 
             for (let j2 = 0; j2 < REGION_WIDTH; j2++) {
@@ -1027,36 +1032,41 @@ export default class World {
                     let i4 = -this.getTerrainHeight(j2, i3);
 
                     if (
-                        this.getTileDecoration(j2, i3, plane) > 0 &&
-                        GameData.tileType[
-                            this.getTileDecoration(j2, i3, plane) - 1
+                        this._getTileDecoration_from3(j2, i3, plane) > 0 &&
+                        GameData.tileType![
+                            this._getTileDecoration_from3(j2, i3, plane) - 1
                         ] == 4
                     ) {
                         i4 = 0;
                     }
 
                     if (
-                        this.getTileDecoration(j2 - 1, i3, plane) > 0 &&
-                        GameData.tileType[
-                            this.getTileDecoration(j2 - 1, i3, plane) - 1
+                        this._getTileDecoration_from3(j2 - 1, i3, plane) > 0 &&
+                        GameData.tileType![
+                            this._getTileDecoration_from3(j2 - 1, i3, plane) - 1
                         ] == 4
                     ) {
                         i4 = 0;
                     }
 
                     if (
-                        this.getTileDecoration(j2, i3 - 1, plane) > 0 &&
-                        GameData.tileType[
-                            this.getTileDecoration(j2, i3 - 1, plane) - 1
+                        this._getTileDecoration_from3(j2, i3 - 1, plane) > 0 &&
+                        GameData.tileType![
+                            this._getTileDecoration_from3(j2, i3 - 1, plane) - 1
                         ] == 4
                     ) {
                         i4 = 0;
                     }
 
                     if (
-                        this.getTileDecoration(j2 - 1, i3 - 1, plane) > 0 &&
-                        GameData.tileType[
-                            this.getTileDecoration(j2 - 1, i3 - 1, plane) - 1
+                        this._getTileDecoration_from3(j2 - 1, i3 - 1, plane) >
+                            0 &&
+                        GameData.tileType![
+                            this._getTileDecoration_from3(
+                                j2 - 1,
+                                i3 - 1,
+                                plane
+                            ) - 1
                         ] == 4
                     ) {
                         i4 = 0;
@@ -1088,20 +1098,22 @@ export default class World {
                         colour_2 = COLOUR_TRANSPARENT;
                     }
 
-                    if (this.getTileDecoration(lx, ly, plane) > 0) {
-                        let decorationType = this.getTileDecoration(
+                    if (this._getTileDecoration_from3(lx, ly, plane) > 0) {
+                        let decorationType = this._getTileDecoration_from3(
                             lx,
                             ly,
                             plane
                         );
 
-                        let decorationTileType =
-                            GameData.tileType[decorationType - 1];
+                        let decorationTileType = GameData.tileType![
+                            decorationType - 1
+                        ];
 
                         let tileType = this.getTileType(lx, ly, plane);
 
-                        colour = colour_1 =
-                            GameData.tileDecoration[decorationType - 1];
+                        colour = colour_1 = GameData.tileDecoration![
+                            decorationType - 1
+                        ];
 
                         if (decorationTileType == 4) {
                             colour = 1;
@@ -1119,88 +1131,92 @@ export default class World {
                                 this.getWallDiagonal(lx, ly) < 24000
                             ) {
                                 if (
-                                    this.getTileDecoration(
+                                    this._getTileDecoration_from4(
                                         lx - 1,
                                         ly,
                                         plane,
                                         colour_2
                                     ) != COLOUR_TRANSPARENT &&
-                                    this.getTileDecoration(
+                                    this._getTileDecoration_from4(
                                         lx,
                                         ly - 1,
                                         plane,
                                         colour_2
                                     ) != COLOUR_TRANSPARENT
                                 ) {
-                                    colour = this.getTileDecoration(
+                                    colour = this._getTileDecoration_from4(
                                         lx - 1,
                                         ly,
                                         plane,
                                         colour_2
                                     );
+
                                     l14 = 0;
                                 } else if (
-                                    this.getTileDecoration(
+                                    this._getTileDecoration_from4(
                                         lx + 1,
                                         ly,
                                         plane,
                                         colour_2
                                     ) != COLOUR_TRANSPARENT &&
-                                    this.getTileDecoration(
+                                    this._getTileDecoration_from4(
                                         lx,
                                         ly + 1,
                                         plane,
                                         colour_2
                                     ) != COLOUR_TRANSPARENT
                                 ) {
-                                    colour_1 = this.getTileDecoration(
+                                    colour_1 = this._getTileDecoration_from4(
                                         lx + 1,
                                         ly,
                                         plane,
                                         colour_2
                                     );
+
                                     l14 = 0;
                                 } else if (
-                                    this.getTileDecoration(
+                                    this._getTileDecoration_from4(
                                         lx + 1,
                                         ly,
                                         plane,
                                         colour_2
                                     ) != COLOUR_TRANSPARENT &&
-                                    this.getTileDecoration(
+                                    this._getTileDecoration_from4(
                                         lx,
                                         ly - 1,
                                         plane,
                                         colour_2
                                     ) != COLOUR_TRANSPARENT
                                 ) {
-                                    colour_1 = this.getTileDecoration(
+                                    colour_1 = this._getTileDecoration_from4(
                                         lx + 1,
                                         ly,
                                         plane,
                                         colour_2
                                     );
+
                                     l14 = 1;
                                 } else if (
-                                    this.getTileDecoration(
+                                    this._getTileDecoration_from4(
                                         lx - 1,
                                         ly,
                                         plane,
                                         colour_2
                                     ) != COLOUR_TRANSPARENT &&
-                                    this.getTileDecoration(
+                                    this._getTileDecoration_from4(
                                         lx,
                                         ly + 1,
                                         plane,
                                         colour_2
                                     ) != COLOUR_TRANSPARENT
                                 ) {
-                                    colour = this.getTileDecoration(
+                                    colour = this._getTileDecoration_from4(
                                         lx - 1,
                                         ly,
                                         plane,
                                         colour_2
                                     );
+
                                     l14 = 1;
                                 }
                             }
@@ -1240,12 +1256,12 @@ export default class World {
                             }
                         }
 
-                        if (GameData.tileAdjacent[decorationType - 1] != 0) {
+                        if (GameData.tileAdjacent![decorationType - 1] != 0) {
                             const adjacency = this.objectAdjacency.get(lx, ly);
                             this.objectAdjacency.set(lx, ly, adjacency | 0x40);
                         }
 
-                        if (GameData.tileType[decorationType - 1] == 2) {
+                        if (GameData.tileType![decorationType - 1] == 2) {
                             const adjacency = this.objectAdjacency.get(lx, ly);
                             this.objectAdjacency.set(lx, ly, adjacency | 0x80);
                         }
@@ -1279,7 +1295,7 @@ export default class World {
                                 this.localX[l21] = lx;
                                 this.localY[l21] = ly;
 
-                                gameModel.faceTag[l21] = 0x30d40 + l21;
+                                gameModel.faceTag![l21] = 0x30d40 + l21;
                             }
 
                             if (colour_1 != COLOUR_TRANSPARENT) {
@@ -1297,7 +1313,7 @@ export default class World {
                                 this.localX[i22] = lx;
                                 this.localY[i22] = ly;
 
-                                gameModel.faceTag[i22] = 0x30d40 + i22;
+                                gameModel.faceTag![i22] = 0x30d40 + i22;
                             }
                         } else {
                             if (colour != COLOUR_TRANSPARENT) {
@@ -1315,7 +1331,7 @@ export default class World {
                                 this.localX[j22] = lx;
                                 this.localY[j22] = ly;
 
-                                gameModel.faceTag[j22] = 0x30d40 + j22;
+                                gameModel.faceTag![j22] = 0x30d40 + j22;
                             }
 
                             if (colour_1 != COLOUR_TRANSPARENT) {
@@ -1333,7 +1349,7 @@ export default class World {
                                 this.localX[k22] = lx;
                                 this.localY[k22] = ly;
 
-                                gameModel.faceTag[k22] = 0x30d40 + k22;
+                                gameModel.faceTag![k22] = 0x30d40 + k22;
                             }
                         }
                     } else if (colour != COLOUR_TRANSPARENT) {
@@ -1353,7 +1369,7 @@ export default class World {
                         this.localX[l19] = lx;
                         this.localY[l19] = ly;
 
-                        gameModel.faceTag[l19] = 0x30d40 + l19;
+                        gameModel.faceTag![l19] = 0x30d40 + l19;
                     }
                 }
             }
@@ -1361,15 +1377,14 @@ export default class World {
             for (let k4 = 1; k4 < 95; k4++) {
                 for (let i6 = 1; i6 < 95; i6++) {
                     if (
-                        this.getTileDecoration(k4, i6, plane) > 0 &&
-                        GameData.tileType[
-                            this.getTileDecoration(k4, i6, plane) - 1
+                        this._getTileDecoration_from3(k4, i6, plane) > 0 &&
+                        GameData.tileType![
+                            this._getTileDecoration_from3(k4, i6, plane) - 1
                         ] == 4
                     ) {
-                        let l7 =
-                            GameData.tileDecoration[
-                                this.getTileDecoration(k4, i6, plane) - 1
-                            ];
+                        let l7 = GameData.tileDecoration![
+                            this._getTileDecoration_from3(k4, i6, plane) - 1
+                        ];
 
                         let j10 = gameModel.vertexAt(
                             k4 * AN_INT_585,
@@ -1395,7 +1410,11 @@ export default class World {
                             (i6 + 1) * AN_INT_585
                         );
 
-                        let ai2 = new Int32Array([j10, l12, i15, j17]);
+                        let ai2 = new Int32Array(4);
+                        ai2[0] = j10;
+                        ai2[1] = l12;
+                        ai2[2] = i15;
+                        ai2[3] = j17;
 
                         let i20 = gameModel.createFace(
                             4,
@@ -1406,25 +1425,24 @@ export default class World {
 
                         this.localX[i20] = k4;
                         this.localY[i20] = i6;
-                        gameModel.faceTag[i20] = 0x30d40 + i20;
+                        gameModel.faceTag![i20] = 0x30d40 + i20;
+
                         this.method402(k4, i6, 0, l7, l7);
                     } else if (
-                        this.getTileDecoration(k4, i6, plane) == 0 ||
-                        GameData.tileType[
-                            this.getTileDecoration(k4, i6, plane) - 1
+                        this._getTileDecoration_from3(k4, i6, plane) == 0 ||
+                        GameData.tileType![
+                            this._getTileDecoration_from3(k4, i6, plane) - 1
                         ] != 3
                     ) {
                         if (
-                            this.getTileDecoration(k4, i6 + 1, plane) > 0 &&
-                            GameData.tileType[
-                                this.getTileDecoration(k4, i6 + 1, plane) - 1
+                            this._getTileDecoration_from3(k4, i6 + 1, plane) > 0 &&
+                            GameData.tileType![
+                                this._getTileDecoration_from3(k4, i6 + 1, plane) - 1
                             ] == 4
                         ) {
-                            let i8 =
-                                GameData.tileDecoration[
-                                    this.getTileDecoration(k4, i6 + 1, plane) -
-                                        1
-                                ];
+                            let i8 = GameData.tileDecoration![
+                                this._getTileDecoration_from3(k4, i6 + 1, plane) - 1
+                            ];
 
                             let k10 = gameModel.vertexAt(
                                 k4 * AN_INT_585,
@@ -1450,7 +1468,11 @@ export default class World {
                                 (i6 + 1) * AN_INT_585
                             );
 
-                            let ai3 = new Int32Array([k10, i13, j15, k17]);
+                            let ai3 = new Int32Array(4);
+                            ai3[0] = k10;
+                            ai3[1] = i13;
+                            ai3[2] = j15;
+                            ai3[3] = k17;
 
                             let j20 = gameModel.createFace(
                                 4,
@@ -1462,20 +1484,19 @@ export default class World {
                             this.localX[j20] = k4;
                             this.localY[j20] = i6;
                             gameModel.faceTag![j20] = 0x30d40 + j20;
+
                             this.method402(k4, i6, 0, i8, i8);
                         }
 
                         if (
-                            this.getTileDecoration(k4, i6 - 1, plane) > 0 &&
-                            GameData.tileType[
-                                this.getTileDecoration(k4, i6 - 1, plane) - 1
+                            this._getTileDecoration_from3(k4, i6 - 1, plane) > 0 &&
+                            GameData.tileType![
+                                this._getTileDecoration_from3(k4, i6 - 1, plane) - 1
                             ] == 4
                         ) {
-                            let j8 =
-                                GameData.tileDecoration[
-                                    this.getTileDecoration(k4, i6 - 1, plane) -
-                                        1
-                                ];
+                            let j8 = GameData.tileDecoration![
+                                this._getTileDecoration_from3(k4, i6 - 1, plane) - 1
+                            ];
 
                             let l10 = gameModel.vertexAt(
                                 k4 * AN_INT_585,
@@ -1517,20 +1538,19 @@ export default class World {
                             this.localX[k20] = k4;
                             this.localY[k20] = i6;
                             gameModel.faceTag![k20] = 0x30d40 + k20;
+
                             this.method402(k4, i6, 0, j8, j8);
                         }
 
                         if (
-                            this.getTileDecoration(k4 + 1, i6, plane) > 0 &&
-                            GameData.tileType[
-                                this.getTileDecoration(k4 + 1, i6, plane) - 1
+                            this._getTileDecoration_from3(k4 + 1, i6, plane) > 0 &&
+                            GameData.tileType![
+                                this._getTileDecoration_from3(k4 + 1, i6, plane) - 1
                             ] == 4
                         ) {
-                            let k8 =
-                                GameData.tileDecoration[
-                                    this.getTileDecoration(k4 + 1, i6, plane) -
-                                        1
-                                ];
+                            let k8 = GameData.tileDecoration![
+                                this._getTileDecoration_from3(k4 + 1, i6, plane) - 1
+                            ];
 
                             let i11 = gameModel.vertexAt(
                                 k4 * AN_INT_585,
@@ -1556,7 +1576,7 @@ export default class World {
                                 (i6 + 1) * AN_INT_585
                             );
 
-                            let ai5 = new Int32Array(4)
+                            let ai5 = new Int32Array(4);
                             ai5[0] = i11;
                             ai5[1] = k13;
                             ai5[2] = l15;
@@ -1572,20 +1592,19 @@ export default class World {
                             this.localX[l20] = k4;
                             this.localY[l20] = i6;
                             gameModel.faceTag![l20] = 0x30d40 + l20;
+
                             this.method402(k4, i6, 0, k8, k8);
                         }
 
                         if (
-                            this.getTileDecoration(k4 - 1, i6, plane) > 0 &&
-                            GameData.tileType[
-                                this.getTileDecoration(k4 - 1, i6, plane) - 1
+                            this._getTileDecoration_from3(k4 - 1, i6, plane) > 0 &&
+                            GameData.tileType![
+                                this._getTileDecoration_from3(k4 - 1, i6, plane) - 1
                             ] == 4
                         ) {
-                            let l8 =
-                                GameData.tileDecoration[
-                                    this.getTileDecoration(k4 - 1, i6, plane) -
-                                        1
-                                ];
+                            let l8 = GameData.tileDecoration![
+                                this._getTileDecoration_from3(k4 - 1, i6, plane) - 1
+                            ];
 
                             let j11 = gameModel.vertexAt(
                                 k4 * AN_INT_585,
@@ -1613,7 +1632,7 @@ export default class World {
 
                             let ai6 = new Int32Array(4);
                             ai6[0] = j11;
-                            ai6[1] = l13
+                            ai6[1] = l13;
                             ai6[2] = i16;
                             ai6[3] = j18;
 
@@ -1627,6 +1646,7 @@ export default class World {
                             this.localX[i21] = k4;
                             this.localY[i21] = i6;
                             gameModel.faceTag![i21] = 0x30d40 + i21;
+
                             this.method402(k4, i6, 0, l8, l8);
                         }
                     }
@@ -1635,7 +1655,7 @@ export default class World {
 
             gameModel._setLight_from6(true, 40, 48, -50, -10, -50);
 
-            this.terrainModels = this.parentModel.split(
+            this.terrainModels = this.parentModel!.split(
                 0,
                 0,
                 1536,
@@ -1661,7 +1681,7 @@ export default class World {
             }
         }
 
-        this.parentModel.clear();
+        this.parentModel!.clear();
 
         let k1 = 0x606060;
 
@@ -1671,11 +1691,11 @@ export default class World {
 
                 if (
                     k3 > 0 &&
-                    (GameData.wallObjectInvisible[k3 - 1] == 0 ||
+                    (GameData.wallObjectInvisible![k3 - 1] == 0 ||
                         this.aBoolean592)
                 ) {
                     this.method422(
-                        this.parentModel,
+                        this.parentModel!,
                         k3 - 1,
                         i2,
                         k2,
@@ -1683,7 +1703,7 @@ export default class World {
                         k2
                     );
 
-                    if (flag && GameData.wallObjectAdjacent[k3 - 1] != 0) {
+                    if (flag && GameData.wallObjectAdjacent![k3 - 1] != 0) {
                         const adjacency = this.objectAdjacency.get(i2, k2);
                         this.objectAdjacency.set(i2, k2, adjacency | 1);
 
@@ -1701,11 +1721,11 @@ export default class World {
 
                 if (
                     k3 > 0 &&
-                    (GameData.wallObjectInvisible[k3 - 1] == 0 ||
+                    (GameData.wallObjectInvisible![k3 - 1] == 0 ||
                         this.aBoolean592)
                 ) {
                     this.method422(
-                        this.parentModel,
+                        this.parentModel!,
                         k3 - 1,
                         i2,
                         k2,
@@ -1713,7 +1733,7 @@ export default class World {
                         k2 + 1
                     );
 
-                    if (flag && GameData.wallObjectAdjacent[k3 - 1] != 0) {
+                    if (flag && GameData.wallObjectAdjacent![k3 - 1] != 0) {
                         const adjacency = this.objectAdjacency.get(i2, k2);
                         this.objectAdjacency.set(i2, k2, adjacency | 2);
 
@@ -1732,11 +1752,11 @@ export default class World {
                 if (
                     k3 > 0 &&
                     k3 < 12000 &&
-                    (GameData.wallObjectInvisible[k3 - 1] == 0 ||
+                    (GameData.wallObjectInvisible![k3 - 1] == 0 ||
                         this.aBoolean592)
                 ) {
                     this.method422(
-                        this.parentModel,
+                        this.parentModel!,
                         k3 - 1,
                         i2,
                         k2,
@@ -1744,7 +1764,7 @@ export default class World {
                         k2 + 1
                     );
 
-                    if (flag && GameData.wallObjectAdjacent[k3 - 1] != 0) {
+                    if (flag && GameData.wallObjectAdjacent![k3 - 1] != 0) {
                         const adjacency = this.objectAdjacency.get(i2, k2);
                         this.objectAdjacency.set(i2, k2, adjacency | 0x20);
                     }
@@ -1759,11 +1779,11 @@ export default class World {
                 if (
                     k3 > 12000 &&
                     k3 < 24000 &&
-                    (GameData.wallObjectInvisible[k3 - 12001] == 0 ||
+                    (GameData.wallObjectInvisible![k3 - 12001] == 0 ||
                         this.aBoolean592)
                 ) {
                     this.method422(
-                        this.parentModel,
+                        this.parentModel!,
                         k3 - 12001,
                         i2 + 1,
                         k2,
@@ -1771,7 +1791,7 @@ export default class World {
                         k2 + 1
                     );
 
-                    if (flag && GameData.wallObjectAdjacent[k3 - 12001] != 0) {
+                    if (flag && GameData.wallObjectAdjacent![k3 - 12001] != 0) {
                         const adjacency = this.objectAdjacency.get(i2, k2);
                         this.objectAdjacency.set(i2, k2, adjacency | 0x10);
                     }
@@ -1795,9 +1815,9 @@ export default class World {
             );
         }
 
-        this.parentModel._setLight_from6(false, 60, 24, -50, -10, -50);
+        this.parentModel!._setLight_from6(false, 60, 24, -50, -10, -50);
 
-        this.wallModels[plane] = this.parentModel.split(
+        this.wallModels[plane] = this.parentModel!.split(
             0,
             0,
             1536,
@@ -1924,7 +1944,7 @@ export default class World {
             }
         }
 
-        this.parentModel.clear();
+        this.parentModel!.clear();
 
         for (let i7 = 1; i7 < 95; i7++) {
             for (let k9 = 1; k9 < 95; k9++) {
@@ -1951,7 +1971,7 @@ export default class World {
                     let k27 = this.terrainHeightLocal.get(l18, k19);
                     let l27 = this.terrainHeightLocal.get(k21, i23);
                     let i28 = this.terrainHeightLocal.get(k23, i24);
-                    let unknown = GameData.roofHeight[roofNvs - 1];
+                    let unknown = GameData.roofHeight![roofNvs - 1];
 
                     if (this.hasRoof(j14, k16) && j27 < 0x13880) {
                         j27 += unknown + 0x13880;
@@ -2055,7 +2075,7 @@ export default class World {
                         i27 += byte0;
                     }
 
-                    roofNvs = GameData.roofNumVertices[roofNvs - 1];
+                    roofNvs = GameData.roofNumVertices![roofNvs - 1];
                     j27 = -j27;
                     k27 = -k27;
                     l27 = -l27;
@@ -2068,11 +2088,11 @@ export default class World {
                     ) {
                         let ai8 = new Int32Array(3);
 
-                        ai8[0] = this.parentModel.vertexAt(l26, l27, i26);
-                        ai8[1] = this.parentModel.vertexAt(j26, i28, i27);
-                        ai8[2] = this.parentModel.vertexAt(k25, k27, k26);
+                        ai8[0] = this.parentModel!.vertexAt(l26, l27, i26);
+                        ai8[1] = this.parentModel!.vertexAt(j26, i28, i27);
+                        ai8[2] = this.parentModel!.vertexAt(k25, k27, k26);
 
-                        this.parentModel.createFace(
+                        this.parentModel!.createFace(
                             3,
                             ai8,
                             roofNvs,
@@ -2084,11 +2104,12 @@ export default class World {
                         this.getWallRoof(i7 + 1, k9 + 1) == 0
                     ) {
                         let ai9 = new Int32Array(3);
-                        ai9[0] = this.parentModel.vertexAt(k24, j27, i25);
-                        ai9[1] = this.parentModel.vertexAt(k25, k27, k26);
-                        ai9[2] = this.parentModel.vertexAt(j26, i28, i27);
 
-                        this.parentModel.createFace(
+                        ai9[0] = this.parentModel!.vertexAt(k24, j27, i25);
+                        ai9[1] = this.parentModel!.vertexAt(k25, k27, k26);
+                        ai9[2] = this.parentModel!.vertexAt(j26, i28, i27);
+
+                        this.parentModel!.createFace(
                             3,
                             ai9,
                             roofNvs,
@@ -2101,11 +2122,11 @@ export default class World {
                     ) {
                         let ai10 = new Int32Array(3);
 
-                        ai10[0] = this.parentModel.vertexAt(j26, i28, i27);
-                        ai10[1] = this.parentModel.vertexAt(k24, j27, i25);
-                        ai10[2] = this.parentModel.vertexAt(l26, l27, i26);
+                        ai10[0] = this.parentModel!.vertexAt(j26, i28, i27);
+                        ai10[1] = this.parentModel!.vertexAt(k24, j27, i25);
+                        ai10[2] = this.parentModel!.vertexAt(l26, l27, i26);
 
-                        this.parentModel.createFace(
+                        this.parentModel!.createFace(
                             3,
                             ai10,
                             roofNvs,
@@ -2118,11 +2139,11 @@ export default class World {
                     ) {
                         let ai11 = new Int32Array(3);
 
-                        ai11[0] = this.parentModel.vertexAt(k25, k27, k26);
-                        ai11[1] = this.parentModel.vertexAt(l26, l27, i26);
-                        ai11[2] = this.parentModel.vertexAt(k24, j27, i25);
+                        ai11[0] = this.parentModel!.vertexAt(k25, k27, k26);
+                        ai11[1] = this.parentModel!.vertexAt(l26, l27, i26);
+                        ai11[2] = this.parentModel!.vertexAt(k24, j27, i25);
 
-                        this.parentModel.createFace(
+                        this.parentModel!.createFace(
                             3,
                             ai11,
                             roofNvs,
@@ -2131,12 +2152,12 @@ export default class World {
                     } else if (j27 == k27 && l27 == i28) {
                         let ai12 = new Int32Array(4);
 
-                        ai12[0] = this.parentModel.vertexAt(k24, j27, i25);
-                        ai12[1] = this.parentModel.vertexAt(k25, k27, k26);
-                        ai12[2] = this.parentModel.vertexAt(l26, l27, i26);
-                        ai12[3] = this.parentModel.vertexAt(j26, i28, i27);
+                        ai12[0] = this.parentModel!.vertexAt(k24, j27, i25);
+                        ai12[1] = this.parentModel!.vertexAt(k25, k27, k26);
+                        ai12[2] = this.parentModel!.vertexAt(l26, l27, i26);
+                        ai12[3] = this.parentModel!.vertexAt(j26, i28, i27);
 
-                        this.parentModel.createFace(
+                        this.parentModel!.createFace(
                             4,
                             ai12,
                             roofNvs,
@@ -2145,12 +2166,12 @@ export default class World {
                     } else if (j27 == i28 && k27 == l27) {
                         let ai13 = new Int32Array(4);
 
-                        ai13[0] = this.parentModel.vertexAt(j26, i28, i27);
-                        ai13[1] = this.parentModel.vertexAt(k24, j27, i25);
-                        ai13[2] = this.parentModel.vertexAt(k25, k27, k26);
-                        ai13[3] = this.parentModel.vertexAt(l26, l27, i26);
+                        ai13[0] = this.parentModel!.vertexAt(j26, i28, i27);
+                        ai13[1] = this.parentModel!.vertexAt(k24, j27, i25);
+                        ai13[2] = this.parentModel!.vertexAt(k25, k27, k26);
+                        ai13[3] = this.parentModel!.vertexAt(l26, l27, i26);
 
-                        this.parentModel.createFace(
+                        this.parentModel!.createFace(
                             4,
                             ai13,
                             roofNvs,
@@ -2170,11 +2191,11 @@ export default class World {
                         if (!flag1) {
                             let ai14 = new Int32Array(3);
 
-                            ai14[0] = this.parentModel.vertexAt(k25, k27, k26);
-                            ai14[1] = this.parentModel.vertexAt(l26, l27, i26);
-                            ai14[2] = this.parentModel.vertexAt(k24, j27, i25);
+                            ai14[0] = this.parentModel!.vertexAt(k25, k27, k26);
+                            ai14[1] = this.parentModel!.vertexAt(l26, l27, i26);
+                            ai14[2] = this.parentModel!.vertexAt(k24, j27, i25);
 
-                            this.parentModel.createFace(
+                            this.parentModel!.createFace(
                                 3,
                                 ai14,
                                 roofNvs,
@@ -2183,11 +2204,11 @@ export default class World {
 
                             let ai16 = new Int32Array(3);
 
-                            ai16[0] = this.parentModel.vertexAt(j26, i28, i27);
-                            ai16[1] = this.parentModel.vertexAt(k24, j27, i25);
-                            ai16[2] = this.parentModel.vertexAt(l26, l27, i26);
+                            ai16[0] = this.parentModel!.vertexAt(j26, i28, i27);
+                            ai16[1] = this.parentModel!.vertexAt(k24, j27, i25);
+                            ai16[2] = this.parentModel!.vertexAt(l26, l27, i26);
 
-                            this.parentModel.createFace(
+                            this.parentModel!.createFace(
                                 3,
                                 ai16,
                                 roofNvs,
@@ -2196,11 +2217,11 @@ export default class World {
                         } else {
                             let ai15 = new Int32Array(3);
 
-                            ai15[0] = this.parentModel.vertexAt(k24, j27, i25);
-                            ai15[1] = this.parentModel.vertexAt(k25, k27, k26);
-                            ai15[2] = this.parentModel.vertexAt(j26, i28, i27);
+                            ai15[0] = this.parentModel!.vertexAt(k24, j27, i25);
+                            ai15[1] = this.parentModel!.vertexAt(k25, k27, k26);
+                            ai15[2] = this.parentModel!.vertexAt(j26, i28, i27);
 
-                            this.parentModel.createFace(
+                            this.parentModel!.createFace(
                                 3,
                                 ai15,
                                 roofNvs,
@@ -2209,11 +2230,11 @@ export default class World {
 
                             let ai17 = new Int32Array(3);
 
-                            ai17[0] = this.parentModel.vertexAt(l26, l27, i26);
-                            ai17[1] = this.parentModel.vertexAt(j26, i28, i27);
-                            ai17[2] = this.parentModel.vertexAt(k25, k27, k26);
+                            ai17[0] = this.parentModel!.vertexAt(l26, l27, i26);
+                            ai17[1] = this.parentModel!.vertexAt(j26, i28, i27);
+                            ai17[2] = this.parentModel!.vertexAt(k25, k27, k26);
 
-                            this.parentModel.createFace(
+                            this.parentModel!.createFace(
                                 3,
                                 ai17,
                                 roofNvs,
@@ -2225,9 +2246,9 @@ export default class World {
             }
         }
 
-        this.parentModel._setLight_from6(true, 50, 50, -50, -10, -50);
+        this.parentModel!._setLight_from6(true, 50, 50, -50, -10, -50);
 
-        this.roofModels[plane] = this.parentModel.split(
+        this.roofModels[plane] = this.parentModel!.split(
             0,
             0,
             1536,
@@ -2249,6 +2270,291 @@ export default class World {
                     this.terrainHeightLocal.set(j12, k14, height - 0x13880);
                 }
             }
+        }
+    }
+
+    _setObjectAdjacency_from3(x: i32, y: i32, value: i32): void {
+        const adjacency = this.objectAdjacency.get(x, y);
+        this.objectAdjacency.set(x, y, adjacency | value);
+    }
+
+    getTileType(i: i32, j: i32, k: i32): i32 {
+        const decoration = this._getTileDecoration_from3(i, j, k);
+
+        if (decoration == 0) {
+            return -1;
+        }
+
+        const type = GameData.tileType![decoration - 1];
+
+        return type != 2 ? 0 : 1;
+    }
+
+    addModels(models: StaticArray<GameModel>): void {
+        for (let i = 0; i < 94; i++) {
+            for (let j = 0; j < 94; j++) {
+                if (
+                    this.getWallDiagonal(i, j) > 48000 &&
+                    this.getWallDiagonal(i, j) < 60000
+                ) {
+                    let k = this.getWallDiagonal(i, j) - 48001;
+                    let l = this.getTileDirection(i, j);
+                    let i1 = 0;
+                    let j1 = 0;
+
+                    if (l == 0 || l == 4) {
+                        i1 = GameData.objectWidth![k];
+                        j1 = GameData.objectHeight![k];
+                    } else {
+                        j1 = GameData.objectWidth![k];
+                        i1 = GameData.objectHeight![k];
+                    }
+
+                    this.removeObject2(i, j, k);
+
+                    let gameModel = models[
+                        GameData.objectModelIndex![k]
+                    ]._copy_from4(false, true, false, false);
+
+                    let k1 = (((i + i + i1) * AN_INT_585) / 2) as i32;
+                    let i2 = (((j + j + j1) * AN_INT_585) / 2) as i32;
+
+                    gameModel.translate(k1, -this.getElevation(k1, i2), i2);
+                    gameModel.orient(0, this.getTileDirection(i, j) * 32, 0);
+                    this.scene.addModel(gameModel);
+                    gameModel._setLight_from5(48, 48, -50, -10, -50);
+
+                    if (i1 > 1 || j1 > 1) {
+                        for (let k2 = i; k2 < i + i1; k2++) {
+                            for (let l2 = j; l2 < j + j1; l2++) {
+                                if (
+                                    (k2 > i || l2 > j) &&
+                                    this.getWallDiagonal(k2, l2) - 48001 == k
+                                ) {
+                                    let l1 = k2;
+                                    let j2 = l2;
+                                    let byte0 = 0;
+
+                                    if (l1 >= 48 && j2 < 48) {
+                                        byte0 = 1;
+                                        l1 -= 48;
+                                    } else if (l1 < 48 && j2 >= 48) {
+                                        byte0 = 2;
+                                        j2 -= 48;
+                                    } else if (l1 >= 48 && j2 >= 48) {
+                                        byte0 = 3;
+                                        l1 -= 48;
+                                        j2 -= 48;
+                                    }
+
+                                    this.wallsDiagonal.set(
+                                        byte0,
+                                        l1 * 48 + j2,
+                                        0
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    method422(
+        gameModel: GameModel,
+        i: i32,
+        j: i32,
+        k: i32,
+        l: i32,
+        i1: i32
+    ): void {
+        this.method425(j, k, 40);
+        this.method425(l, i1, 40);
+
+        let h = GameData.wallObjectHeight![i];
+        let front = GameData.wallObjectTextureFront![i];
+        let back = GameData.wallObjectTextureBack![i];
+        let i2 = j * AN_INT_585;
+        let j2 = k * AN_INT_585;
+        let k2 = l * AN_INT_585;
+        let l2 = i1 * AN_INT_585;
+
+        let i3 = gameModel.vertexAt(i2, -this.terrainHeightLocal.get(j, k), j2);
+
+        let j3 = gameModel.vertexAt(
+            i2,
+            -this.terrainHeightLocal.get(j, k) - h,
+            j2
+        );
+
+        let k3 = gameModel.vertexAt(
+            k2,
+            -this.terrainHeightLocal.get(l, i1) - h,
+            l2
+        );
+
+        let l3 = gameModel.vertexAt(
+            k2,
+            -this.terrainHeightLocal.get(l, i1),
+            l2
+        );
+
+        let vertices = new Int32Array(4);
+        vertices[0] = i3;
+        vertices[1] = j3;
+        vertices[2] = k3;
+        vertices[3] = l3;
+
+        let i4 = gameModel.createFace(4, vertices, front, back);
+
+        if (GameData.wallObjectInvisible![i] == 5) {
+            gameModel.faceTag![i4] = 30000 + i;
+        } else {
+            gameModel.faceTag![i4] = 0;
+        }
+    }
+
+    getTerrainHeight(x: i32, y: i32): i32 {
+        if (x < 0 || x >= REGION_WIDTH || y < 0 || y >= REGION_HEIGHT) {
+            return 0;
+        }
+
+        let d = 0;
+
+        if (x >= 48 && y < 48) {
+            d = 1;
+            x -= 48;
+        } else if (x < 48 && y >= 48) {
+            d = 2;
+            y -= 48;
+        } else if (x >= 48 && y >= 48) {
+            d = 3;
+            x -= 48;
+            y -= 48;
+        }
+
+        return (this.terrainHeight.get(d, x * 48 + y) & 0xff) * 3;
+    }
+
+    _loadSection_from3(x: i32, y: i32, plane: i32): void {
+        this.reset();
+
+        let l = ((x + 24) / 48) as i32;
+        let i1 = ((y + 24) / 48) as i32;
+
+        this._loadSection_from4(x, y, plane, true);
+
+        if (plane == 0) {
+            this._loadSection_from4(x, y, 1, false);
+            this._loadSection_from4(x, y, 2, false);
+            this._loadSection_from4I(l - 1, i1 - 1, plane, 0);
+            this._loadSection_from4I(l, i1 - 1, plane, 1);
+            this._loadSection_from4I(l - 1, i1, plane, 2);
+            this._loadSection_from4I(l, i1, plane, 3);
+            this.setTiles();
+        }
+    }
+
+    method425(i: i32, j: i32, k: i32): void {
+        let l = (i / 12) as i32;
+        let i1 = (j / 12) as i32;
+        let j1 = ((i - 1) / 12) as i32;
+        let k1 = ((j - 1) / 12) as i32;
+
+        this.setTerrainAmbience(l, i1, i, j, k);
+
+        if (l != j1) {
+            this.setTerrainAmbience(j1, i1, i, j, k);
+        }
+
+        if (i1 != k1) {
+            this.setTerrainAmbience(l, k1, i, j, k);
+        }
+
+        if (l != j1 && i1 != k1) {
+            this.setTerrainAmbience(j1, k1, i, j, k);
+        }
+    }
+
+    removeObject(x: i32, y: i32, id: i32): void {
+        if (x < 0 || y < 0 || x >= 95 || y >= 95) {
+            return;
+        }
+
+        if (GameData.objectType![id] == 1 || GameData.objectType![id] == 2) {
+            let l = this.getTileDirection(x, y);
+            let i1 = 0;
+            let j1 = 0;
+
+            if (l == 0 || l == 4) {
+                i1 = GameData.objectWidth![id];
+                j1 = GameData.objectHeight![id];
+            } else {
+                j1 = GameData.objectWidth![id];
+                i1 = GameData.objectHeight![id];
+            }
+
+            for (let k1 = x; k1 < x + i1; k1++) {
+                for (let l1 = y; l1 < y + j1; l1++) {
+                    const adjacency = this.objectAdjacency.get(k1, l1);
+
+                    if (GameData.objectType![id] == 1) {
+                        this.objectAdjacency.set(k1, l1, adjacency & 0xffbf);
+                    } else if (l == 0) {
+                        this.objectAdjacency.set(k1, l1, adjacency & 0xfffd);
+
+                        if (k1 > 0) {
+                            this.method407(k1 - 1, l1, 8);
+                        }
+                    } else if (l == 2) {
+                        this.objectAdjacency.set(k1, l1, adjacency & 0xfffb);
+
+                        if (l1 < 95) {
+                            this.method407(k1, l1 + 1, 1);
+                        }
+                    } else if (l == 4) {
+                        this.objectAdjacency.set(k1, l1, adjacency & 0xfff7);
+
+                        if (k1 < 95) {
+                            this.method407(k1 + 1, l1, 2);
+                        }
+                    } else if (l == 6) {
+                        this.objectAdjacency.set(k1, l1, adjacency & 0xfffe);
+
+                        if (l1 > 0) {
+                            this.method407(k1, l1 - 1, 4);
+                        }
+                    }
+                }
+            }
+
+            this.method404(x, y, i1, j1);
+        }
+    }
+
+    method427(x: i32, y: i32): bool {
+        return (
+            this.getWallRoof(x, y) > 0 ||
+            this.getWallRoof(x - 1, y) > 0 ||
+            this.getWallRoof(x - 1, y - 1) > 0 ||
+            this.getWallRoof(x, y - 1) > 0
+        );
+    }
+
+    method428(i: i32, j: i32, k: i32, l: i32, i1: i32): void {
+        let j1 = GameData.wallObjectHeight![i];
+
+        const height = this.terrainHeightLocal.get(j, k);
+
+        if (height < 0x13880) {
+            this.terrainHeightLocal.set(j, k, height + 0x13880 + j1);
+        }
+
+        const height2 = this.terrainHeightLocal.get(l, i1);
+
+        if (height2 < 0x13880) {
+            this.terrainHeightLocal.set(l, i1, height2 + 0x13880 + j1);
         }
     }
 }
