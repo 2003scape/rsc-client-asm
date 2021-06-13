@@ -1,4 +1,6 @@
-export default class mudclient {
+import GameShell from './game-shell';
+
+export default class mudclient extends GameShell {
     drawTeleportBubble(
         x: i32,
         y: i32,

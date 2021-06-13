@@ -52,7 +52,7 @@ export default class Surface {
     boundsBottomY: i32;
     boundsTopX: i32;
     boundsBottomX: i32;
-    mudclientref: mudclient;
+    mudclient: mudclient;
 
     static rgbToInt(red: i32, green: i32, blue: i32): i32 {
         return (red << 16) + (green << 8) + blue;
@@ -62,7 +62,7 @@ export default class Surface {
         Surface.gameFonts[id] = buffer;
     }
 
-    constructor(width: i32, height: i32, limit: i32, mudclientref: mudclient) {
+    constructor(width: i32, height: i32, limit: i32, mudclient: mudclient) {
         this.boundsBottomY = height;
         this.boundsBottomX = width;
         this.width1 = this.width2 = width;
@@ -80,7 +80,7 @@ export default class Surface {
         this.spriteHeightFull = new Int32Array(limit);
         this.spriteTranslateX = new Int32Array(limit);
         this.spriteTranslateY = new Int32Array(limit);
-        this.mudclientref = mudclientref;
+        this.mudclient = mudclient;
 
         this.setComplete();
     }
@@ -1012,22 +1012,22 @@ export default class Surface {
         ty: i32
     ): void {
         if (id >= 50000) {
-            this.mudclientref.drawTeleportBubble(x, y, w, h, id - 50000);
+            this.mudclient.drawTeleportBubble(x, y, w, h, id - 50000);
             return;
         }
 
         if (id >= 40000) {
-            this.mudclientref.drawItem(x, y, w, h, id - 40000);
+            this.mudclient.drawItem(x, y, w, h, id - 40000);
             return;
         }
 
         if (id >= 20000) {
-            this.mudclientref.drawNPC(x, y, w, h, id - 20000, tx, ty);
+            this.mudclient.drawNPC(x, y, w, h, id - 20000, tx, ty);
             return;
         }
 
         if (id >= 5000) {
-            this.mudclientref.drawPlayer(x, y, w, h, id - 5000, tx, ty);
+            this.mudclient.drawPlayer(x, y, w, h, id - 5000, tx, ty);
             return;
         }
 
@@ -1694,7 +1694,7 @@ export default class Surface {
     drawMinimapSprite(
         x: i32,
         y: i32,
-        sprite: i32,
+        spriteID: i32,
         rotation: i32,
         scale: i32
     ): void {
@@ -1713,16 +1713,16 @@ export default class Surface {
             }
         }
 
-        let i2 = -((this.spriteWidthFull[sprite] / 2) as i32);
-        let j2 = -((this.spriteHeightFull[sprite] / 2) as i32);
+        let i2 = -((this.spriteWidthFull[spriteID] / 2) as i32);
+        let j2 = -((this.spriteHeightFull[spriteID] / 2) as i32);
 
-        if (this.spriteTranslate[sprite]) {
-            i2 += this.spriteTranslateX[sprite];
-            j2 += this.spriteTranslateY[sprite];
+        if (this.spriteTranslate[spriteID]) {
+            i2 += this.spriteTranslateX[spriteID];
+            j2 += this.spriteTranslateY[spriteID];
         }
 
-        let k2 = i2 + this.spriteWidth[sprite];
-        let l2 = j2 + this.spriteHeight[sprite];
+        let k2 = i2 + this.spriteWidth[spriteID];
+        let l2 = j2 + this.spriteHeight[spriteID];
         let i3 = k2;
         let j3 = j2;
         let k3 = i2;
@@ -1795,8 +1795,8 @@ export default class Surface {
         let i8 = 0;
         let k8 = 0;
         let i9 = 0;
-        let j9 = this.spriteWidth[sprite];
-        let k9 = this.spriteHeight[sprite];
+        let j9 = this.spriteWidth[spriteID];
+        let k9 = this.spriteHeight[spriteID];
 
         i2 = 0;
         j2 = 0;
@@ -1989,7 +1989,7 @@ export default class Surface {
         }
 
         let l10 = k6 * j1;
-        let ai = this.surfacePixels[sprite];
+        let ai = this.surfacePixels[spriteID];
 
         for (let i = k6; i < l6; i++) {
             let j11 = this.anIntArray340![i] >> 8;
@@ -2019,7 +2019,7 @@ export default class Surface {
                 }
 
                 if (!this.interlace || (i & 1) == 0) {
-                    if (!this.spriteTranslate[sprite]) {
+                    if (!this.spriteTranslate[spriteID]) {
                         this.drawMinimap(
                             this.pixels,
                             ai,
