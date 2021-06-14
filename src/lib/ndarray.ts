@@ -42,7 +42,7 @@ export class Int322DArray {
 
         for (let i = 0; i < wrap.width; i += 1) {
             for (let j = 0; j < wrap.height; j += 1) {
-                wrap.set(j, i, array[i][j]);
+                wrap.set(i, j, array[i][j]);
             }
         }
 

@@ -125,26 +125,36 @@ export default class Panel {
         if (lastButton == 1) {
             for (let i = 0; i < this.controlCount; i++) {
                 if (
-                    this.controlShown[i] &&
-                    this.controlType[i] == ControlTypes.Button &&
-                    this.mouseX >= this.controlX[i] &&
-                    this.mouseY >= this.controlY[i] &&
-                    this.mouseX <= this.controlX[i] + this.controlWidth[i] &&
-                    this.mouseY <= this.controlY[i] + this.controlHeight[i]
+                    unchecked(this.controlShown[i]) &&
+                    unchecked(this.controlType[i]) == ControlTypes.Button &&
+                    this.mouseX >= unchecked(this.controlX[i]) &&
+                    this.mouseY >= unchecked(this.controlY[i]) &&
+                    this.mouseX <=
+                        unchecked(this.controlX[i]) +
+                            unchecked(this.controlWidth[i]) &&
+                    this.mouseY <=
+                        unchecked(this.controlY[i]) +
+                            unchecked(this.controlHeight[i])
                 ) {
-                    this.controlClicked[i] = true;
+                    unchecked((this.controlClicked[i] = true));
                 }
 
                 if (
-                    this.controlShown[i] &&
-                    this.controlType[i] == ControlTypes.Checkbox &&
-                    this.mouseX >= this.controlX[i] &&
-                    this.mouseY >= this.controlY[i] &&
-                    this.mouseX <= this.controlX[i] + this.controlWidth[i] &&
-                    this.mouseY <= this.controlY[i] + this.controlHeight[i]
+                    unchecked(this.controlShown[i]) &&
+                    unchecked(this.controlType[i]) == ControlTypes.Checkbox &&
+                    this.mouseX >= unchecked(this.controlX[i]) &&
+                    this.mouseY >= unchecked(this.controlY[i]) &&
+                    this.mouseX <=
+                        unchecked(this.controlX[i]) +
+                            unchecked(this.controlWidth[i]) &&
+                    this.mouseY <=
+                        unchecked(this.controlY[i]) +
+                            unchecked(this.controlHeight[i])
                 ) {
-                    this.controlListEntryMouseButtonDown[i] =
-                        1 - this.controlListEntryMouseButtonDown[i];
+                    unchecked(
+                        (this.controlListEntryMouseButtonDown[i] =
+                            1 - this.controlListEntryMouseButtonDown[i])
+                    );
                 }
             }
         }
@@ -157,8 +167,11 @@ export default class Panel {
     }
 
     isClicked(control: i32): bool {
-        if (this.controlShown[control] && this.controlClicked[control]) {
-            this.controlClicked[control] = false;
+        if (
+            unchecked(this.controlShown[control]) &&
+            unchecked(this.controlClicked[control])
+        ) {
+            unchecked((this.controlClicked[control] = false));
             return true;
         }
 
@@ -172,28 +185,39 @@ export default class Panel {
 
         if (
             this.focusControlIndex != -1 &&
-            this.controlText[this.focusControlIndex] != null &&
-            this.controlShown[this.focusControlIndex]
+            unchecked(this.controlText[this.focusControlIndex]) != null &&
+            unchecked(this.controlShown[this.focusControlIndex])
         ) {
-            const inputLength = this.controlText[this.focusControlIndex]!
-                .length;
+            const inputLength = unchecked(
+                this.controlText[this.focusControlIndex]!
+            ).length;
 
             if (key == 8 && inputLength > 0) {
-                this.controlText[this.focusControlIndex] = this.controlText[
-                    this.focusControlIndex
-                ]!.slice(0, inputLength - 1);
+                unchecked(
+                    (this.controlText[
+                        this.focusControlIndex
+                    ] = this.controlText[this.focusControlIndex]!.slice(
+                        0,
+                        inputLength - 1
+                    ))
+                );
             }
 
             if ((key == 10 || key == 13) && inputLength > 0) {
-                this.controlClicked[this.focusControlIndex] = true;
+                unchecked((this.controlClicked[this.focusControlIndex] = true));
             }
 
-            if (inputLength < this.controlInputMaxLen[this.focusControlIndex]) {
+            if (
+                inputLength <
+                unchecked(this.controlInputMaxLen[this.focusControlIndex])
+            ) {
                 for (let i = 0; i < CHAR_SET.length; i++) {
                     if (key == CHAR_SET.charCodeAt(i)) {
-                        this.controlText[
-                            this.focusControlIndex
-                        ] += String.fromCharCode(key);
+                        unchecked(
+                            (this.controlText[
+                                this.focusControlIndex
+                            ] += String.fromCharCode(key))
+                        );
                     }
                 }
             }
@@ -203,8 +227,8 @@ export default class Panel {
                     this.focusControlIndex =
                         (this.focusControlIndex + 1) % this.controlCount;
                 } while (
-                    this.controlType[this.focusControlIndex] != 5 &&
-                    this.controlType[this.focusControlIndex] != 6
+                    unchecked(this.controlType[this.focusControlIndex]) != 5 &&
+                    unchecked(this.controlType[this.focusControlIndex]) != 6
                 );
             }
         }
@@ -212,119 +236,140 @@ export default class Panel {
 
     drawPanel(): void {
         for (let i = 0; i < this.controlCount; i++) {
-            if (this.controlShown[i]) {
-                if (this.controlType[i] == ControlTypes.Text) {
+            if (unchecked(this.controlShown[i])) {
+                if (unchecked(this.controlType[i]) == ControlTypes.Text) {
                     this.drawText(
                         i,
-                        this.controlX[i],
-                        this.controlY[i],
-                        this.controlText[i]!,
-                        this.controlTextSize[i]
-                    );
-                } else if (this.controlType[i] == ControlTypes.CentreText) {
-                    this.drawText(
-                        i,
-                        this.controlX[i] -
-                            ((this.surface.textWidth(
-                                this.controlText[i]!,
-                                this.controlTextSize[i]
-                            ) / 2) as i32),
-                        this.controlY[i],
-                        this.controlText[i]!,
-                        this.controlTextSize[i]
+                        unchecked(this.controlX[i]),
+                        unchecked(this.controlY[i]),
+                        unchecked(this.controlText[i])!,
+                        unchecked(this.controlTextSize[i])
                     );
                 } else if (
-                    this.controlType[i] == ControlTypes.GradientBackground
+                    unchecked(this.controlType[i]) == ControlTypes.CentreText
+                ) {
+                    this.drawText(
+                        i,
+                        unchecked(
+                            this.controlX[i] -
+                                ((this.surface.textWidth(
+                                    this.controlText[i]!,
+                                    this.controlTextSize[i]
+                                ) / 2) as i32)
+                        ),
+                        unchecked(this.controlY[i]),
+                        unchecked(this.controlText[i])!,
+                        unchecked(this.controlTextSize[i])
+                    );
+                } else if (
+                    unchecked(this.controlType[i]) ==
+                    ControlTypes.GradientBackground
                 ) {
                     this.drawBox(
-                        this.controlX[i],
-                        this.controlY[i],
-                        this.controlWidth[i],
-                        this.controlHeight[i]
-                    );
-                } else if (this.controlType[i] == ControlTypes.HorizontalLine) {
-                    this.drawLineHoriz(
-                        this.controlX[i],
-                        this.controlY[i],
-                        this.controlWidth[i]
-                    );
-                } else if (this.controlType[i] == ControlTypes.TextList) {
-                    this.drawTextList(
-                        i,
-                        this.controlX[i],
-                        this.controlY[i],
-                        this.controlWidth[i],
-                        this.controlHeight[i],
-                        this.controlTextSize[i],
-                        this.controlListEntries[i]!,
-                        this.controlListEntryCount[i],
-                        this.controlFlashText[i]
+                        unchecked(this.controlX[i]),
+                        unchecked(this.controlY[i]),
+                        unchecked(this.controlWidth[i]),
+                        unchecked(this.controlHeight[i])
                     );
                 } else if (
-                    this.controlType[i] == ControlTypes.ListInput ||
-                    this.controlType[i] == ControlTypes.TextInput
+                    unchecked(this.controlType[i]) ==
+                    ControlTypes.HorizontalLine
+                ) {
+                    this.drawLineHoriz(
+                        unchecked(this.controlX[i]),
+                        unchecked(this.controlY[i]),
+                        unchecked(this.controlWidth[i])
+                    );
+                } else if (
+                    unchecked(this.controlType[i]) == ControlTypes.TextList
+                ) {
+                    this.drawTextList(
+                        i,
+                        unchecked(this.controlX[i]),
+                        unchecked(this.controlY[i]),
+                        unchecked(this.controlWidth[i]),
+                        unchecked(this.controlHeight[i]),
+                        unchecked(this.controlTextSize[i]),
+                        unchecked(this.controlListEntries[i])!,
+                        unchecked(this.controlListEntryCount[i]),
+                        unchecked(this.controlFlashText[i])
+                    );
+                } else if (
+                    unchecked(this.controlType[i]) == ControlTypes.ListInput ||
+                    unchecked(this.controlType[i]) == ControlTypes.TextInput
                 ) {
                     this.drawTextInput(
                         i,
-                        this.controlX[i],
-                        this.controlY[i],
-                        this.controlWidth[i],
-                        this.controlHeight[i],
-                        this.controlText[i]!,
-                        this.controlTextSize[i]
+                        unchecked(this.controlX[i]),
+                        unchecked(this.controlY[i]),
+                        unchecked(this.controlWidth[i]),
+                        unchecked(this.controlHeight[i]),
+                        unchecked(this.controlText[i])!,
+                        unchecked(this.controlTextSize[i])
                     );
                 } else if (
-                    this.controlType[i] == ControlTypes.HorizontalOption
+                    unchecked(this.controlType[i]) ==
+                    ControlTypes.HorizontalOption
                 ) {
                     this.drawOptionListHoriz(
                         i,
-                        this.controlX[i],
-                        this.controlY[i],
-                        this.controlTextSize[i],
-                        this.controlListEntries[i]!
-                    );
-                } else if (this.controlType[i] == ControlTypes.VerticalOption) {
-                    this.drawOptionListVert(
-                        i,
-                        this.controlX[i],
-                        this.controlY[i],
-                        this.controlTextSize[i],
-                        this.controlListEntries[i]!
+                        unchecked(this.controlX[i]),
+                        unchecked(this.controlY[i]),
+                        unchecked(this.controlTextSize[i]),
+                        unchecked(this.controlListEntries[i])!
                     );
                 } else if (
-                    this.controlType[i] == ControlTypes.InteractiveTextList
+                    unchecked(this.controlType[i]) ==
+                    ControlTypes.VerticalOption
+                ) {
+                    this.drawOptionListVert(
+                        i,
+                        unchecked(this.controlX[i]),
+                        unchecked(this.controlY[i]),
+                        unchecked(this.controlTextSize[i]),
+                        unchecked(this.controlListEntries[i])!
+                    );
+                } else if (
+                    unchecked(this.controlType[i]) ==
+                    ControlTypes.InteractiveTextList
                 ) {
                     this.drawTextListInteractive(
                         i,
-                        this.controlX[i],
-                        this.controlY[i],
-                        this.controlWidth[i],
-                        this.controlHeight[i],
-                        this.controlTextSize[i],
-                        this.controlListEntries[i]!,
-                        this.controlListEntryCount[i],
-                        this.controlFlashText[i]
+                        unchecked(this.controlX[i]),
+                        unchecked(this.controlY[i]),
+                        unchecked(this.controlWidth[i]),
+                        unchecked(this.controlHeight[i]),
+                        unchecked(this.controlTextSize[i]),
+                        unchecked(this.controlListEntries[i])!,
+                        unchecked(this.controlListEntryCount[i]),
+                        unchecked(this.controlFlashText[i])
                     );
-                } else if (this.controlType[i] == ControlTypes.RoundBox) {
+                } else if (
+                    unchecked(this.controlType[i]) == ControlTypes.RoundBox
+                ) {
                     this.drawRoundedBox(
-                        this.controlX[i],
-                        this.controlY[i],
-                        this.controlWidth[i],
-                        this.controlHeight[i]
+                        unchecked(this.controlX[i]),
+                        unchecked(this.controlY[i]),
+                        unchecked(this.controlWidth[i]),
+                        unchecked(this.controlHeight[i])
                     );
-                } else if (this.controlType[i] == ControlTypes.Image) {
+                } else if (
+                    unchecked(this.controlType[i]) == ControlTypes.Image
+                ) {
                     this.drawPicture(
-                        this.controlX[i],
-                        this.controlY[i],
-                        this.controlTextSize[i]
+                        unchecked(this.controlX[i]),
+                        unchecked(this.controlY[i]),
+                        unchecked(this.controlTextSize[i])
                     );
-                } else if (this.controlType[i] == ControlTypes.Checkbox) {
+                } else if (
+                    unchecked(this.controlType[i]) == ControlTypes.Checkbox
+                ) {
                     this.drawCheckbox(
                         i,
-                        this.controlX[i],
-                        this.controlY[i],
-                        this.controlWidth[i],
-                        this.controlHeight[i]
+                        unchecked(this.controlX[i]),
+                        unchecked(this.controlY[i]),
+                        unchecked(this.controlWidth[i]),
+                        unchecked(this.controlHeight[i])
                     );
                 }
             }
@@ -352,7 +397,7 @@ export default class Panel {
             this.colourBoxLeftNRight
         );
 
-        if (this.controlListEntryMouseButtonDown[control] == 1) {
+        if (unchecked(this.controlListEntryMouseButtonDown[control]) == 1) {
             for (let i = 0; i < height; i++) {
                 this.surface.drawLineHoriz(x + i, y + i, 1, 0);
                 this.surface.drawLineHoriz(x + width - 1 - i, y + i, 1, 0);
@@ -374,7 +419,7 @@ export default class Panel {
     ): void {
         let textColour: i32;
 
-        if (this.controlUseAlternativeColour[control]) {
+        if (unchecked(this.controlUseAlternativeColour[control])) {
             textColour = 0xffffff;
         } else {
             textColour = 0;
@@ -394,7 +439,7 @@ export default class Panel {
     ): void {
         let displayText = text;
 
-        if (this.controlMaskText[control]) {
+        if (unchecked(this.controlMaskText[control])) {
             const length = displayText.length;
 
             displayText = '';
@@ -404,7 +449,7 @@ export default class Panel {
             }
         }
 
-        if (this.controlType[control] == ControlTypes.ListInput) {
+        if (unchecked(this.controlType[control]) == ControlTypes.ListInput) {
             if (
                 this.mouseLastButtonDown == 1 &&
                 this.mouseX >= x &&
@@ -415,7 +460,9 @@ export default class Panel {
                 this.focusControlIndex = control;
                 this.setMobileFocus(control, text);
             }
-        } else if (this.controlType[control] == ControlTypes.TextInput) {
+        } else if (
+            unchecked(this.controlType[control]) == ControlTypes.TextInput
+        ) {
             if (
                 this.mouseLastButtonDown == 1 &&
                 this.mouseX >= x - ((width / 2) as i32) &&
@@ -623,7 +670,7 @@ export default class Panel {
             listEntryPosition = 0;
         }
 
-        this.controlFlashText[control] = listEntryPosition;
+        unchecked((this.controlFlashText[control] = listEntryPosition));
 
         if (displayedEntryCount < listEntryCount) {
             const cornerTopRight = x + width - 12;
@@ -652,7 +699,7 @@ export default class Panel {
                     listEntryPosition = maxEntries;
                 }
 
-                this.controlFlashText[control] = listEntryPosition;
+                unchecked((this.controlFlashText[control] = listEntryPosition));
             }
 
             if (
@@ -676,7 +723,7 @@ export default class Panel {
                     listEntryPosition++;
                 }
 
-                this.controlFlashText[control] = listEntryPosition;
+                unchecked((this.controlFlashText[control] = listEntryPosition));
             }
 
             if (
@@ -685,10 +732,14 @@ export default class Panel {
                     this.mouseX <= cornerTopRight + 12) ||
                     (this.mouseX >= cornerTopRight - 12 &&
                         this.mouseX <= cornerTopRight + 24 &&
-                        this.controlListScrollbarHandleDragged[control]))
+                        unchecked(
+                            this.controlListScrollbarHandleDragged[control]
+                        )))
             ) {
                 if (this.mouseY > y + 12 && this.mouseY < y + height - 12) {
-                    this.controlListScrollbarHandleDragged[control] = true;
+                    unchecked(
+                        (this.controlListScrollbarHandleDragged[control] = true)
+                    );
 
                     const l3 =
                         this.mouseY - y - 12 - ((cornerBottomLeft / 2) as i32);
@@ -704,10 +755,14 @@ export default class Panel {
                         listEntryPosition = 0;
                     }
 
-                    this.controlFlashText[control] = listEntryPosition;
+                    unchecked(
+                        (this.controlFlashText[control] = listEntryPosition)
+                    );
                 }
             } else {
-                this.controlListScrollbarHandleDragged[control] = false;
+                unchecked(
+                    (this.controlListScrollbarHandleDragged[control] = false)
+                );
             }
 
             j3 = (((height - 27 - cornerBottomLeft) * listEntryPosition) /
@@ -728,7 +783,7 @@ export default class Panel {
                 control,
                 x + 2,
                 listY,
-                listEntries[entry]!,
+                unchecked(listEntries[entry]!),
                 textSize
             );
 
@@ -810,7 +865,7 @@ export default class Panel {
 
         for (let i = 0; i < listEntryCount; i++) {
             listTotalTextWidth += this.surface.textWidth(
-                listEntries[i]!,
+                unchecked(listEntries[i]!),
                 textSize
             );
 
@@ -825,7 +880,7 @@ export default class Panel {
         for (let i = 0; i < listEntryCount; i++) {
             let textColour: i32;
 
-            if (this.controlUseAlternativeColour[control]) {
+            if (unchecked(this.controlUseAlternativeColour[control])) {
                 textColour = 0xffffff;
             } else {
                 textColour = 0;
@@ -834,24 +889,31 @@ export default class Panel {
             if (
                 this.mouseX >= left &&
                 this.mouseX <=
-                    left + this.surface.textWidth(listEntries[i]!, textSize) &&
+                    left +
+                        this.surface.textWidth(
+                            unchecked(listEntries[i]!),
+                            textSize
+                        ) &&
                 this.mouseY <= bottom &&
                 this.mouseY > bottom - this.surface.textHeight(textSize)
             ) {
-                if (this.controlUseAlternativeColour[control]) {
+                if (unchecked(this.controlUseAlternativeColour[control])) {
                     textColour = 0x808080;
                 } else {
                     textColour = 0xffffff;
                 }
 
                 if (this.mouseLastButtonDown == 1) {
-                    this.controlListEntryMouseButtonDown[control] = i;
-                    this.controlClicked[control] = true;
+                    unchecked(
+                        (this.controlListEntryMouseButtonDown[control] = i)
+                    );
+
+                    unchecked((this.controlClicked[control] = true));
                 }
             }
 
-            if (this.controlListEntryMouseButtonDown[control] == i) {
-                if (this.controlUseAlternativeColour[control]) {
+            if (unchecked(this.controlListEntryMouseButtonDown[control]) == i) {
+                if (unchecked(this.controlUseAlternativeColour[control])) {
                     textColour = 0xff0000;
                 } else {
                     textColour = 0xc00000;
@@ -859,14 +921,17 @@ export default class Panel {
             }
 
             this.surface.drawString(
-                listEntries[i]!,
+                unchecked(listEntries[i]!),
                 left,
                 bottom,
                 textSize,
                 textColour
             );
 
-            left += this.surface.textWidth(listEntries[i] + '  ', textSize);
+            left += this.surface.textWidth(
+                unchecked(listEntries[i]) + '  ',
+                textSize
+            );
         }
     }
 
@@ -875,7 +940,7 @@ export default class Panel {
         x: i32,
         y: i32,
         textSize: i32,
-        listEntries: StaticArray<string|null>
+        listEntries: StaticArray<string | null>
     ): void {
         const listEntryCount = listEntries.length;
 
@@ -887,14 +952,14 @@ export default class Panel {
         for (let i = 0; i < listEntryCount; i++) {
             let textColour: i32;
 
-            if (this.controlUseAlternativeColour[control]) {
+            if (unchecked(this.controlUseAlternativeColour[control])) {
                 textColour = 0xffffff;
             } else {
                 textColour = 0;
             }
 
             const entryTextWidth = this.surface.textWidth(
-                listEntries[i]!,
+                unchecked(listEntries[i]!),
                 textSize
             );
 
@@ -905,20 +970,23 @@ export default class Panel {
                 this.mouseY - 2 >
                     listTotalTextHeightMid - this.surface.textHeight(textSize)
             ) {
-                if (this.controlUseAlternativeColour[control]) {
+                if (unchecked(this.controlUseAlternativeColour[control])) {
                     textColour = 0x808080;
                 } else {
                     textColour = 0xffffff;
                 }
 
                 if (this.mouseLastButtonDown == 1) {
-                    this.controlListEntryMouseButtonDown[control] = i;
-                    this.controlClicked[control] = true;
+                    unchecked(
+                        (this.controlListEntryMouseButtonDown[control] = i)
+                    );
+
+                    unchecked((this.controlClicked[control] = true));
                 }
             }
 
-            if (this.controlListEntryMouseButtonDown[control] == i) {
-                if (this.controlUseAlternativeColour[control]) {
+            if (unchecked(this.controlListEntryMouseButtonDown[control]) == i) {
+                if (unchecked(this.controlUseAlternativeColour[control])) {
                     textColour = 0xff0000;
                 } else {
                     textColour = 0xc00000;
@@ -926,7 +994,7 @@ export default class Panel {
             }
 
             this.surface.drawString(
-                listEntries[i]!,
+                unchecked(listEntries[i]!),
                 x - ((entryTextWidth / 2) as i32),
                 listTotalTextHeightMid,
                 textSize,
@@ -944,7 +1012,7 @@ export default class Panel {
         width: i32,
         height: i32,
         textSize: i32,
-        listEntries: StaticArray<string|null>,
+        listEntries: StaticArray<string | null>,
         listEntryCount: i32,
         listEntryPosition: i32
     ): void {
@@ -981,7 +1049,7 @@ export default class Panel {
                     listEntryPosition = maxEntries;
                 }
 
-                this.controlFlashText[control] = listEntryPosition;
+                unchecked((this.controlFlashText[control] = listEntryPosition));
             }
 
             // the up and down arrow buttons on the scrollbar
@@ -1006,7 +1074,7 @@ export default class Panel {
                     listEntryPosition++;
                 }
 
-                this.controlFlashText[control] = listEntryPosition;
+                unchecked((this.controlFlashText[control] = listEntryPosition));
             }
 
             // handle the thumb/middle section dragging of the scrollbar
@@ -1016,10 +1084,14 @@ export default class Panel {
                     this.mouseX <= cornerTopRight + 12) ||
                     (this.mouseX >= cornerTopRight - 12 &&
                         this.mouseX <= cornerTopRight + 24 &&
-                        this.controlListScrollbarHandleDragged[control]))
+                        unchecked(
+                            this.controlListScrollbarHandleDragged[control]
+                        )))
             ) {
                 if (this.mouseY > y + 12 && this.mouseY < y + height - 12) {
-                    this.controlListScrollbarHandleDragged[control] = true;
+                    unchecked(
+                        (this.controlListScrollbarHandleDragged[control] = true)
+                    );
 
                     const l3 =
                         this.mouseY - y - 12 - ((cornerBottomLeft / 2) as i32);
@@ -1035,10 +1107,14 @@ export default class Panel {
                         listEntryPosition = maxEntries;
                     }
 
-                    this.controlFlashText[control] = listEntryPosition;
+                    unchecked(
+                        (this.controlFlashText[control] = listEntryPosition)
+                    );
                 }
             } else {
-                this.controlListScrollbarHandleDragged[control] = false;
+                unchecked(
+                    (this.controlListScrollbarHandleDragged[control] = false)
+                );
             }
 
             j3 = (((height - 27 - cornerBottomLeft) * listEntryPosition) /
@@ -1047,10 +1123,10 @@ export default class Panel {
             this.drawListContainer(x, y, width, height, j3, cornerBottomLeft);
         } else {
             listEntryPosition = 0;
-            this.controlFlashText[control] = 0;
+            unchecked((this.controlFlashText[control] = 0));
         }
 
-        this.controlListEntryMouseOver[control] = -1;
+        unchecked((this.controlListEntryMouseOver[control] = -1));
 
         const listStartY =
             height - displayedEntryCount * this.surface.textHeight(textSize);
@@ -1063,7 +1139,7 @@ export default class Panel {
         for (let k3 = listEntryPosition; k3 < listEntryCount; k3++) {
             let textColour: i32;
 
-            if (this.controlUseAlternativeColour[control]) {
+            if (unchecked(this.controlUseAlternativeColour[control])) {
                 textColour = 0xffffff;
             } else {
                 textColour = 0;
@@ -1077,29 +1153,33 @@ export default class Panel {
                 this.mouseY - 2 <= listY &&
                 this.mouseY - 2 > listY - this.surface.textHeight(textSize)
             ) {
-                if (this.controlUseAlternativeColour[control]) {
+                if (unchecked(this.controlUseAlternativeColour[control])) {
                     textColour = 0x808080;
                 } else {
                     textColour = 0xffffff;
                 }
 
-                this.controlListEntryMouseOver[control] = k3;
+                unchecked((this.controlListEntryMouseOver[control] = k3));
 
                 if (this.mouseLastButtonDown == 1) {
-                    this.controlListEntryMouseButtonDown[control] = k3;
-                    this.controlClicked[control] = true;
+                    unchecked(
+                        (this.controlListEntryMouseButtonDown[control] = k3)
+                    );
+
+                    unchecked((this.controlClicked[control] = true));
                 }
             }
 
             if (
-                this.controlListEntryMouseButtonDown[control] == k3 &&
+                unchecked(this.controlListEntryMouseButtonDown[control]) ==
+                    k3 &&
                 this.aBoolean219
             ) {
                 textColour = 0xff0000;
             }
 
             this.surface.drawString(
-                listEntries[k3]!,
+                unchecked(listEntries[k3]!),
                 x + 2,
                 listY,
                 textSize,
@@ -1115,66 +1195,97 @@ export default class Panel {
     }
 
     addText(x: i32, y: i32, text: string, size: i32, flag: i32): i32 {
-        this.controlShown[this.controlCount] = true;
-        this.controlClicked[this.controlCount] = false;
-        this.controlTextSize[this.controlCount] = size;
-        this.controlUseAlternativeColour[this.controlCount] = flag;
-        this.controlX[this.controlCount] = x;
-        this.controlY[this.controlCount] = y;
-        this.controlText[this.controlCount] = text;
+        unchecked((this.controlShown[this.controlCount] = true));
+        unchecked((this.controlClicked[this.controlCount] = false));
+        unchecked((this.controlTextSize[this.controlCount] = size));
+        unchecked((this.controlUseAlternativeColour[this.controlCount] = flag));
+        unchecked((this.controlX[this.controlCount] = x));
+        unchecked((this.controlY[this.controlCount] = y));
+        unchecked((this.controlText[this.controlCount] = text));
 
         return this.controlCount++;
     }
 
     addTextCentre(x: i32, y: i32, text: string, size: i32, flag: i32): i32 {
-        this.controlType[this.controlCount] = ControlTypes.CentreText;
-        this.controlShown[this.controlCount] = true;
-        this.controlClicked[this.controlCount] = false;
-        this.controlTextSize[this.controlCount] = size;
-        this.controlUseAlternativeColour[this.controlCount] = flag;
-        this.controlX[this.controlCount] = x;
-        this.controlY[this.controlCount] = y;
-        this.controlText[this.controlCount] = text;
+        unchecked(
+            (this.controlType[this.controlCount] = ControlTypes.CentreText)
+        );
+
+        unchecked((this.controlShown[this.controlCount] = true));
+        unchecked((this.controlClicked[this.controlCount] = false));
+        unchecked((this.controlTextSize[this.controlCount] = size));
+        unchecked((this.controlUseAlternativeColour[this.controlCount] = flag));
+        unchecked((this.controlX[this.controlCount] = x));
+        unchecked((this.controlY[this.controlCount] = y));
+        unchecked((this.controlText[this.controlCount] = text));
 
         return this.controlCount++;
     }
 
     addButtonBackground(x: i32, y: i32, width: i32, height: i32): i32 {
-        this.controlType[this.controlCount] = ControlTypes.GradientBackground;
-        this.controlShown[this.controlCount] = true;
-        this.controlClicked[this.controlCount] = false;
-        this.controlX[this.controlCount] = x - ((width / 2) as i32);
-        this.controlY[this.controlCount] = y - ((height / 2) as i32);
-        this.controlWidth[this.controlCount] = width;
-        this.controlHeight[this.controlCount] = height;
+        unchecked(
+            (this.controlType[this.controlCount] =
+                ControlTypes.GradientBackground)
+        );
+
+        unchecked((this.controlShown[this.controlCount] = true));
+        unchecked((this.controlClicked[this.controlCount] = false));
+
+        unchecked(
+            (this.controlX[this.controlCount] = x - ((width / 2) as i32))
+        );
+
+        unchecked(
+            (this.controlY[this.controlCount] = y - ((height / 2) as i32))
+        );
+
+        unchecked((this.controlWidth[this.controlCount] = width));
+        unchecked((this.controlHeight[this.controlCount] = height));
 
         return this.controlCount++;
     }
 
     addBoxRounded(x: i32, y: i32, width: i32, height: i32): i32 {
-        this.controlType[this.controlCount] = ControlTypes.RoundBox;
-        this.controlShown[this.controlCount] = true;
-        this.controlClicked[this.controlCount] = false;
-        this.controlX[this.controlCount] = x - ((width / 2) as i32);
-        this.controlY[this.controlCount] = y - ((height / 2) as i32);
-        this.controlWidth[this.controlCount] = width;
-        this.controlHeight[this.controlCount] = height;
+        unchecked(
+            (this.controlType[this.controlCount] = ControlTypes.RoundBox)
+        );
+
+        unchecked((this.controlShown[this.controlCount] = true));
+        unchecked((this.controlClicked[this.controlCount] = false));
+
+        unchecked(
+            (this.controlX[this.controlCount] = x - ((width / 2) as i32))
+        );
+
+        unchecked(
+            (this.controlY[this.controlCount] = y - ((height / 2) as i32))
+        );
+
+        unchecked((this.controlWidth[this.controlCount] = width));
+        unchecked((this.controlHeight[this.controlCount] = height));
 
         return this.controlCount++;
     }
 
     addSprite(x: i32, y: i32, spriteID: i32): i32 {
-        const width = this.surface.spriteWidth[spriteID];
-        const height = this.surface.spriteHeight[spriteID];
+        const width = unchecked(this.surface.spriteWidth[spriteID]);
+        const height = unchecked(this.surface.spriteHeight[spriteID]);
 
-        this.controlType[this.controlCount] = ControlTypes.Image;
-        this.controlShown[this.controlCount] = true;
-        this.controlClicked[this.controlCount] = false;
-        this.controlX[this.controlCount] = x - ((width / 2) as i32);
-        this.controlY[this.controlCount] = y - ((height / 2) as i32);
-        this.controlWidth[this.controlCount] = width;
-        this.controlHeight[this.controlCount] = height;
-        this.controlTextSize[this.controlCount] = spriteID;
+        unchecked((this.controlType[this.controlCount] = ControlTypes.Image));
+        unchecked((this.controlShown[this.controlCount] = true));
+        unchecked((this.controlClicked[this.controlCount] = false));
+
+        unchecked(
+            (this.controlX[this.controlCount] = x - ((width / 2) as i32))
+        );
+
+        unchecked(
+            (this.controlY[this.controlCount] = y - ((height / 2) as i32))
+        );
+
+        unchecked((this.controlWidth[this.controlCount] = width));
+        unchecked((this.controlHeight[this.controlCount] = height));
+        unchecked((this.controlTextSize[this.controlCount] = spriteID));
 
         return this.controlCount++;
     }
@@ -1188,22 +1299,27 @@ export default class Panel {
         maxLength: i32,
         flag: bool
     ): i32 {
-        this.controlType[this.controlCount] = ControlTypes.TextList;
-        this.controlShown[this.controlCount] = true;
-        this.controlClicked[this.controlCount] = false;
-        this.controlX[this.controlCount] = x;
-        this.controlY[this.controlCount] = y;
-        this.controlWidth[this.controlCount] = width;
-        this.controlHeight[this.controlCount] = height;
-        this.controlUseAlternativeColour[this.controlCount] = flag;
-        this.controlTextSize[this.controlCount] = size;
-        this.controlInputMaxLen[this.controlCount] = maxLength;
-        this.controlListEntryCount[this.controlCount] = 0;
-        this.controlFlashText[this.controlCount] = 0;
+        unchecked(
+            (this.controlType[this.controlCount] = ControlTypes.TextList)
+        );
 
-        this.controlListEntries[this.controlCount] = new StaticArray<
-            string | null
-        >(maxLength);
+        unchecked((this.controlShown[this.controlCount] = true));
+        unchecked((this.controlClicked[this.controlCount] = false));
+        unchecked((this.controlX[this.controlCount] = x));
+        unchecked((this.controlY[this.controlCount] = y));
+        unchecked((this.controlWidth[this.controlCount] = width));
+        unchecked((this.controlHeight[this.controlCount] = height));
+        unchecked((this.controlUseAlternativeColour[this.controlCount] = flag));
+        unchecked((this.controlTextSize[this.controlCount] = size));
+        unchecked((this.controlInputMaxLen[this.controlCount] = maxLength));
+        unchecked((this.controlListEntryCount[this.controlCount] = 0));
+        unchecked((this.controlFlashText[this.controlCount] = 0));
+
+        unchecked(
+            (this.controlListEntries[this.controlCount] = new StaticArray<
+                string | null
+            >(maxLength))
+        );
 
         return this.controlCount++;
     }
@@ -1218,18 +1334,24 @@ export default class Panel {
         flag: bool,
         flag1: bool
     ): i32 {
-        this.controlType[this.controlCount] = ControlTypes.ListInput;
-        this.controlShown[this.controlCount] = true;
-        this.controlMaskText[this.controlCount] = flag;
-        this.controlClicked[this.controlCount] = false;
-        this.controlTextSize[this.controlCount] = size;
-        this.controlUseAlternativeColour[this.controlCount] = flag1;
-        this.controlX[this.controlCount] = x;
-        this.controlY[this.controlCount] = y;
-        this.controlWidth[this.controlCount] = width;
-        this.controlHeight[this.controlCount] = height;
-        this.controlInputMaxLen[this.controlCount] = maxLength;
-        this.controlText[this.controlCount] = '';
+        unchecked(
+            (this.controlType[this.controlCount] = ControlTypes.ListInput)
+        );
+        unchecked((this.controlShown[this.controlCount] = true));
+        unchecked((this.controlMaskText[this.controlCount] = flag));
+        unchecked((this.controlClicked[this.controlCount] = false));
+        unchecked((this.controlTextSize[this.controlCount] = size));
+
+        unchecked(
+            (this.controlUseAlternativeColour[this.controlCount] = flag1)
+        );
+
+        unchecked((this.controlX[this.controlCount] = x));
+        unchecked((this.controlY[this.controlCount] = y));
+        unchecked((this.controlWidth[this.controlCount] = width));
+        unchecked((this.controlHeight[this.controlCount] = height));
+        unchecked((this.controlInputMaxLen[this.controlCount] = maxLength));
+        unchecked((this.controlText[this.controlCount] = ''));
 
         return this.controlCount++;
     }
@@ -1244,18 +1366,25 @@ export default class Panel {
         isPassword: i32,
         flag1: bool
     ): i32 {
-        this.controlType[this.controlCount] = ControlTypes.TextInput;
-        this.controlShown[this.controlCount] = true;
-        this.controlMaskText[this.controlCount] = isPassword;
-        this.controlClicked[this.controlCount] = false;
-        this.controlTextSize[this.controlCount] = size;
-        this.controlUseAlternativeColour[this.controlCount] = flag1;
-        this.controlX[this.controlCount] = x;
-        this.controlY[this.controlCount] = y;
-        this.controlWidth[this.controlCount] = width;
-        this.controlHeight[this.controlCount] = height;
-        this.controlInputMaxLen[this.controlCount] = maxLength;
-        this.controlText[this.controlCount] = '';
+        unchecked(
+            (this.controlType[this.controlCount] = ControlTypes.TextInput)
+        );
+
+        unchecked((this.controlShown[this.controlCount] = true));
+        unchecked((this.controlMaskText[this.controlCount] = isPassword));
+        unchecked((this.controlClicked[this.controlCount] = false));
+        unchecked((this.controlTextSize[this.controlCount] = size));
+
+        unchecked(
+            (this.controlUseAlternativeColour[this.controlCount] = flag1)
+        );
+
+        unchecked((this.controlX[this.controlCount] = x));
+        unchecked((this.controlY[this.controlCount] = y));
+        unchecked((this.controlWidth[this.controlCount] = width));
+        unchecked((this.controlHeight[this.controlCount] = height));
+        unchecked((this.controlInputMaxLen[this.controlCount] = maxLength));
+        unchecked((this.controlText[this.controlCount] = ''));
 
         return this.controlCount++;
     }
@@ -1269,47 +1398,67 @@ export default class Panel {
         maxLength: i32,
         flag: bool
     ): i32 {
-        this.controlType[this.controlCount] = ControlTypes.InteractiveTextList;
-        this.controlShown[this.controlCount] = true;
-        this.controlClicked[this.controlCount] = false;
-        this.controlTextSize[this.controlCount] = textSize;
-        this.controlUseAlternativeColour[this.controlCount] = flag;
-        this.controlX[this.controlCount] = x;
-        this.controlY[this.controlCount] = y;
-        this.controlWidth[this.controlCount] = width;
-        this.controlHeight[this.controlCount] = height;
-        this.controlInputMaxLen[this.controlCount] = maxLength;
+        unchecked(
+            (this.controlType[this.controlCount] =
+                ControlTypes.InteractiveTextList)
+        );
 
-        this.controlListEntries[this.controlCount] = new StaticArray<
-            string | null
-        >(maxLength);
+        unchecked((this.controlShown[this.controlCount] = true));
+        unchecked((this.controlClicked[this.controlCount] = false));
+        unchecked((this.controlTextSize[this.controlCount] = textSize));
+        unchecked((this.controlUseAlternativeColour[this.controlCount] = flag));
+        unchecked((this.controlX[this.controlCount] = x));
+        unchecked((this.controlY[this.controlCount] = y));
+        unchecked((this.controlWidth[this.controlCount] = width));
+        unchecked((this.controlHeight[this.controlCount] = height));
+        unchecked((this.controlInputMaxLen[this.controlCount] = maxLength));
 
-        this.controlListEntryCount[this.controlCount] = 0;
-        this.controlFlashText[this.controlCount] = 0;
-        this.controlListEntryMouseButtonDown[this.controlCount] = -1;
-        this.controlListEntryMouseOver[this.controlCount] = -1;
+        unchecked(
+            (this.controlListEntries[this.controlCount] = new StaticArray<
+                string | null
+            >(maxLength))
+        );
+
+        unchecked((this.controlListEntryCount[this.controlCount] = 0));
+        unchecked((this.controlFlashText[this.controlCount] = 0));
+
+        unchecked(
+            (this.controlListEntryMouseButtonDown[this.controlCount] = -1)
+        );
+
+        unchecked((this.controlListEntryMouseOver[this.controlCount] = -1));
 
         return this.controlCount++;
     }
 
     addButton(x: i32, y: i32, width: i32, height: i32): i32 {
-        this.controlType[this.controlCount] = ControlTypes.Button;
-        this.controlShown[this.controlCount] = true;
-        this.controlClicked[this.controlCount] = false;
-        this.controlX[this.controlCount] = x - ((width / 2) as i32);
-        this.controlY[this.controlCount] = y - ((height / 2) as i32);
-        this.controlWidth[this.controlCount] = width;
-        this.controlHeight[this.controlCount] = height;
+        unchecked((this.controlType[this.controlCount] = ControlTypes.Button));
+        unchecked((this.controlShown[this.controlCount] = true));
+        unchecked((this.controlClicked[this.controlCount] = false));
+
+        unchecked(
+            (this.controlX[this.controlCount] = x - ((width / 2) as i32))
+        );
+
+        unchecked(
+            (this.controlY[this.controlCount] = y - ((height / 2) as i32))
+        );
+
+        unchecked((this.controlWidth[this.controlCount] = width));
+        unchecked((this.controlHeight[this.controlCount] = height));
 
         return this.controlCount++;
     }
 
     addLineHoriz(x: i32, y: i32, width: i32): i32 {
-        this.controlType[this.controlCount] = ControlTypes.HorizontalLine;
-        this.controlShown[this.controlCount] = true;
-        this.controlX[this.controlCount] = x;
-        this.controlY[this.controlCount] = y;
-        this.controlWidth[this.controlCount] = width;
+        unchecked(
+            (this.controlType[this.controlCount] = ControlTypes.HorizontalLine)
+        );
+
+        unchecked((this.controlShown[this.controlCount] = true));
+        unchecked((this.controlX[this.controlCount] = x));
+        unchecked((this.controlY[this.controlCount] = y));
+        unchecked((this.controlWidth[this.controlCount] = width));
 
         return this.controlCount++;
     }
@@ -1321,19 +1470,29 @@ export default class Panel {
         maxListCount: i32,
         useAltColour: bool
     ): i32 {
-        this.controlType[this.controlCount] = ControlTypes.HorizontalOption;
-        this.controlShown[this.controlCount] = true;
-        this.controlX[this.controlCount] = x;
-        this.controlY[this.controlCount] = y;
-        this.controlTextSize[this.controlCount] = textSize;
+        unchecked(
+            (this.controlType[this.controlCount] =
+                ControlTypes.HorizontalOption)
+        );
 
-        this.controlListEntries[this.controlCount] = new StaticArray<
-            string | null
-        >(maxListCount);
+        unchecked((this.controlShown[this.controlCount] = true));
+        unchecked((this.controlX[this.controlCount] = x));
+        unchecked((this.controlY[this.controlCount] = y));
+        unchecked((this.controlTextSize[this.controlCount] = textSize));
 
-        this.controlListEntryCount[this.controlCount] = 0;
-        this.controlUseAlternativeColour[this.controlCount] = useAltColour;
-        this.controlClicked[this.controlCount] = false;
+        unchecked(
+            (this.controlListEntries[this.controlCount] = new StaticArray<
+                string | null
+            >(maxListCount))
+        );
+
+        unchecked((this.controlListEntryCount[this.controlCount] = 0));
+
+        unchecked(
+            (this.controlUseAlternativeColour[this.controlCount] = useAltColour)
+        );
+
+        unchecked((this.controlClicked[this.controlCount] = false));
 
         return this.controlCount++;
     }
@@ -1345,109 +1504,126 @@ export default class Panel {
         maxListCount: i32,
         useAltColour: bool
     ): i32 {
-        this.controlType[this.controlCount] = ControlTypes.VerticalOption;
-        this.controlShown[this.controlCount] = true;
-        this.controlX[this.controlCount] = x;
-        this.controlY[this.controlCount] = y;
-        this.controlTextSize[this.controlCount] = textSize;
+        unchecked(
+            (this.controlType[this.controlCount] = ControlTypes.VerticalOption)
+        );
 
-        this.controlListEntries[this.controlCount] = new StaticArray<
-            string | null
-        >(maxListCount);
+        unchecked((this.controlShown[this.controlCount] = true));
+        unchecked((this.controlX[this.controlCount] = x));
+        unchecked((this.controlY[this.controlCount] = y));
+        unchecked((this.controlTextSize[this.controlCount] = textSize));
 
-        this.controlListEntryCount[this.controlCount] = 0;
-        this.controlUseAlternativeColour[this.controlCount] = useAltColour;
-        this.controlClicked[this.controlCount] = false;
+        unchecked(
+            (this.controlListEntries[this.controlCount] = new StaticArray<
+                string | null
+            >(maxListCount))
+        );
+
+        unchecked((this.controlListEntryCount[this.controlCount] = 0));
+
+        unchecked(
+            (this.controlUseAlternativeColour[this.controlCount] = useAltColour)
+        );
+
+        unchecked((this.controlClicked[this.controlCount] = false));
 
         return this.controlCount++;
     }
 
     addCheckbox(x: i32, y: i32, width: i32, height: i32): i32 {
-        this.controlType[this.controlCount] = ControlTypes.Checkbox;
-        this.controlShown[this.controlCount] = true;
-        this.controlX[this.controlCount] = x;
-        this.controlY[this.controlCount] = y;
-        this.controlWidth[this.controlCount] = width;
-        this.controlHeight[this.controlCount] = height;
-        this.controlListEntryMouseButtonDown[this.controlCount] = 0;
+        unchecked(
+            (this.controlType[this.controlCount] = ControlTypes.Checkbox)
+        );
+
+        unchecked((this.controlShown[this.controlCount] = true));
+        unchecked((this.controlX[this.controlCount] = x));
+        unchecked((this.controlY[this.controlCount] = y));
+        unchecked((this.controlWidth[this.controlCount] = width));
+        unchecked((this.controlHeight[this.controlCount] = height));
+
+        unchecked(
+            (this.controlListEntryMouseButtonDown[this.controlCount] = 0)
+        );
 
         return this.controlCount++;
     }
 
     toggleCheckbox(control: i32, activated: bool): void {
-        this.controlListEntryMouseButtonDown[control] = activated;
+        unchecked((this.controlListEntryMouseButtonDown[control] = activated));
     }
 
     isActivated(control: i32): bool {
-        return this.controlListEntryMouseButtonDown[control] != 0;
+        return unchecked(this.controlListEntryMouseButtonDown[control]) != 0;
     }
 
     clearList(control: i32): void {
-        this.controlListEntryCount[control] = 0;
+        unchecked((this.controlListEntryCount[control] = 0));
     }
 
     resetListProps(control: i32): void {
-        this.controlFlashText[control] = 0;
-        this.controlListEntryMouseOver[control] = -1;
+        unchecked((this.controlFlashText[control] = 0));
+        unchecked((this.controlListEntryMouseOver[control] = -1));
     }
 
     addListEntry(control: i32, index: i32, text: string): void {
-        this.controlListEntries[control]![index] = text;
+        unchecked((this.controlListEntries[control]![index] = text));
 
-        if (index + 1 > this.controlListEntryCount[control]) {
-            this.controlListEntryCount[control] = index + 1;
+        if (index + 1 > unchecked(this.controlListEntryCount[control])) {
+            unchecked((this.controlListEntryCount[control] = index + 1));
         }
     }
 
     removeListEntry(control: i32, text: string, flag: bool): void {
-        let index = this.controlListEntryCount[control]++;
+        let index = unchecked(this.controlListEntryCount[control]++);
 
-        if (index >= this.controlInputMaxLen[control]) {
+        if (index >= unchecked(this.controlInputMaxLen[control])) {
             index--;
 
-            this.controlListEntryCount[control]--;
+            unchecked(this.controlListEntryCount[control]--);
 
             for (let i = 0; i < index; i++) {
-                this.controlListEntries[control]![i] = this.controlListEntries[
-                    control
-                ]![i + 1];
+                unchecked(
+                    (this.controlListEntries[control]![
+                        i
+                    ] = this.controlListEntries[control]![i + 1])
+                );
             }
         }
 
-        this.controlListEntries[control]![index] = text;
+        unchecked((this.controlListEntries[control]![index] = text));
 
         if (flag) {
-            this.controlFlashText[control] = 999999;
+            unchecked((this.controlFlashText[control] = 999999));
         }
     }
 
     updateText(control: i32, text: string): void {
-        this.controlText[control] = text;
+        unchecked((this.controlText[control] = text));
     }
 
     getText(control: i32): string {
-        if (!this.controlText[control]) {
+        if (!unchecked(this.controlText[control])) {
             return 'null';
         } else {
-            return this.controlText[control]!;
+            return unchecked(this.controlText[control])!;
         }
     }
 
     show(control: i32): void {
-        this.controlShown[control] = true;
+        unchecked((this.controlShown[control] = true));
     }
 
     hide(control: i32): void {
-        this.controlShown[control] = false;
+        unchecked((this.controlShown[control] = false));
     }
 
     setFocus(control: i32): void {
         this.focusControlIndex = control;
-        this.setMobileFocus(control, this.controlText[control]!);
+        this.setMobileFocus(control, unchecked(this.controlText[control]!));
     }
 
     getListEntryIndex(control: i32): i32 {
-        return this.controlListEntryMouseOver[control];
+        return unchecked(this.controlListEntryMouseOver[control]);
     }
 
     setMobileFocus(control: i32, text: string): void {
@@ -1457,17 +1633,17 @@ export default class Panel {
             return;
         }
 
-        const isPassword = this.controlMaskText[control];
+        const isPassword = unchecked(this.controlMaskText[control]);
 
         const isListInput =
-            this.controlType[control] === ControlTypes.ListInput;
+            unchecked(this.controlType[control]) == ControlTypes.ListInput;
 
-        const width = this.controlWidth[control];
-        const height = this.controlHeight[control];
+        const width = unchecked(this.controlWidth[control]);
+        const height = unchecked(this.controlHeight[control]);
 
         const left = isListInput
-            ? this.controlX[control]
-            : this.controlX[control] - Math.floor(width / 2);
+            ? unchecked(this.controlX[control])
+            : unchecked(this.controlX[control]) - Math.floor(width / 2);
 
         /*mudclient.openKeyboard(
             isPassword ? 'password' : 'text',
