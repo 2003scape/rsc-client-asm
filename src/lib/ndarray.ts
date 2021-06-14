@@ -10,11 +10,11 @@ export class Int82DArray {
     }
 
     get(row: i32, column: i32): i8 {
-        return this.array[this.width * row + column];
+        return unchecked(this.array[this.width * row + column]);
     }
 
     set(row: i32, column: i32, value: i32): void {
-        this.array[this.width * row + column] = value;
+        unchecked((this.array[this.width * row + column] = value));
     }
 }
 
@@ -30,10 +30,22 @@ export class Int322DArray {
     }
 
     get(row: i32, column: i32): i32 {
-        return this.array[this.width * row + column];
+        return unchecked(this.array[this.width * row + column]);
     }
 
     set(row: i32, column: i32, value: i32): void {
-        this.array[this.width * row + column] = value;
+        unchecked((this.array[this.width * row + column] = value));
+    }
+
+    static fromArray(array: Array<Array<i32>>): Int322DArray {
+        const wrap = new Int322DArray(array[0].length, array.length);
+
+        for (let i = 0; i < wrap.width; i += 1) {
+            for (let j = 0; j < wrap.height; j += 1) {
+                wrap.set(j, i, array[i][j]);
+            }
+        }
+
+        return wrap;
     }
 }

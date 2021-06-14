@@ -15,6 +15,10 @@ const BLACK = 0;
 const DARK_GREY = 0xa0a0a0;
 const LIGHT_GREY = 0xdcdcdc;
 
+const CHAR_SET =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!"£$%^&*()' +
+    "-_=+[{]};:'@#~,<.>/?\\| ";
+
 export default class Surface {
     static anInt346: i32 = 0;
     static anInt347: i32 = 0;
@@ -59,7 +63,7 @@ export default class Surface {
     }
 
     static createFont(buffer: Int8Array, id: i32): void {
-        Surface.gameFonts[id] = buffer;
+        unchecked((Surface.gameFonts[id] = buffer));
     }
 
     constructor(width: i32, height: i32, limit: i32, mudclient: mudclient) {
@@ -88,11 +92,10 @@ export default class Surface {
     setComplete(): void {
         for (let i = 0; i < this.area * 4; i += 4) {
             // TODO see if bit reverse works here?
-            const blue = this.rgbPixels[i];
-
-            this.rgbPixels[i] = this.rgbPixels[i + 2];
-            this.rgbPixels[i + 2] = blue;
-            this.rgbPixels[i + 3] = 255;
+            const blue = unchecked(this.rgbPixels[i]);
+            unchecked((this.rgbPixels[i] = this.rgbPixels[i + 2]));
+            unchecked((this.rgbPixels[i + 2] = blue));
+            unchecked((this.rgbPixels[i + 3] = 255));
         }
     }
 
@@ -136,20 +139,20 @@ export default class Surface {
 
         if (!this.interlace) {
             for (let i = 0; i < area; i++) {
-                this.pixels[i] = 0;
+                unchecked((this.pixels[i] = 0));
             }
 
             return;
         }
 
-        let pixelidx = 0;
+        let pixelIdx = 0;
 
         for (let y = -this.height2; y < 0; y += 2) {
             for (let x = -this.width2; x < 0; x++) {
-                this.pixels[pixelidx++] = 0;
+                unchecked((this.pixels[pixelIdx++] = 0));
             }
 
-            pixelidx += this.width2;
+            pixelIdx += this.width2;
         }
     }
 
@@ -196,19 +199,20 @@ export default class Surface {
                 k4 = this.width2 - 1;
             }
 
-            let index = j4 + yy * this.width2;
+            let pixelIdx = j4 + yy * this.width2;
 
             for (let i = j4; i <= k4; i++) {
-                const bgRed = ((this.pixels[index] >> 16) & 0xff) * bgAlpha;
-                const bgGreen = ((this.pixels[index] >> 8) & 0xff) * bgAlpha;
-                const bgBlue = (this.pixels[index] & 0xff) * bgAlpha;
+                const pixel = unchecked(this.pixels[pixelIdx]);
+                const bgRed = ((pixel >> 16) & 0xff) * bgAlpha;
+                const bgGreen = ((pixel >> 8) & 0xff) * bgAlpha;
+                const bgBlue = (pixel & 0xff) * bgAlpha;
 
                 const newColour =
                     (((red + bgRed) >> 8) << 16) +
                     (((green + bgGreen) >> 8) << 8) +
                     ((blue + bgBlue) >> 8);
 
-                this.pixels[index++] = newColour;
+                unchecked((this.pixels[pixelIdx++] = newColour));
             }
         }
     }
@@ -261,21 +265,17 @@ export default class Surface {
 
         for (let i = 0; i < height; i += vertInc) {
             for (let j = -width; j < 0; j++) {
-                const backgroundRed =
-                    ((this.pixels[pixelIdx] >> 16) & 0xff) * backgroundAlpha;
-
-                const backgroundGreen =
-                    ((this.pixels[pixelIdx] >> 8) & 0xff) * backgroundAlpha;
-
-                const backgroundBlue =
-                    (this.pixels[pixelIdx] & 0xff) * backgroundAlpha;
+                const pixel = unchecked(this.pixels[pixelIdx]);
+                const backgroundRed = ((pixel >> 16) & 0xff) * backgroundAlpha;
+                const backgroundGreen = ((pixel >> 8) & 0xff) * backgroundAlpha;
+                const backgroundBlue = (pixel & 0xff) * backgroundAlpha;
 
                 const newColour =
                     (((red + backgroundRed) >> 8) << 16) +
                     (((green + backgroundGreen) >> 8) << 8) +
                     ((blue + backgroundBlue) >> 8);
 
-                this.pixels[pixelIdx++] = newColour;
+                unchecked((this.pixels[pixelIdx++] = newColour));
             }
 
             pixelIdx += j3;
@@ -331,7 +331,7 @@ export default class Surface {
                         height) as i32);
 
                 for (let j = -width; j < 0; j++) {
-                    this.pixels[pixelIdx++] = newColour;
+                    unchecked((this.pixels[pixelIdx++] = newColour));
                 }
 
                 pixelIdx += i3;
@@ -377,7 +377,7 @@ export default class Surface {
 
         for (let i = -height; i < 0; i += vertInc) {
             for (let j = -width; j < 0; j++) {
-                this.pixels[pixelIdx++] = colour;
+                unchecked((this.pixels[pixelIdx++] = colour));
             }
 
             pixelIdx += j1;
@@ -401,7 +401,7 @@ export default class Surface {
         const start = x + y * this.width2;
 
         for (let i = 0; i < width; i++) {
-            this.pixels[start + i] = colour;
+            unchecked((this.pixels[start + i] = colour));
         }
     }
 
@@ -422,7 +422,7 @@ export default class Surface {
         const start = x + y * this.width2;
 
         for (let i = 0; i < height; i++) {
-            this.pixels[start + i * this.width2] = colour;
+            unchecked((this.pixels[start + i * this.width2] = colour));
         }
     }
 
@@ -443,20 +443,22 @@ export default class Surface {
             return;
         }
 
-        this.pixels[x + y * this.width2] = colour;
+        unchecked((this.pixels[x + y * this.width2] = colour));
     }
 
     fadeToBlack(): void {
         const area = this.width2 * this.height2;
 
         for (let j = 0; j < area; j++) {
-            let i = this.pixels[j] & 0xffffff;
+            let i = unchecked(this.pixels[j]) & 0xffffff;
 
-            this.pixels[j] =
-                ((i >>> 1) & 0x7f7f7f) +
-                ((i >>> 2) & 0x3f3f3f) +
-                ((i >>> 3) & 0x1f1f1f) +
-                ((i >>> 4) & 0xf0f0f);
+            unchecked(
+                (this.pixels[j] =
+                    ((i >>> 1) & 0x7f7f7f) +
+                    ((i >>> 2) & 0x3f3f3f) +
+                    ((i >>> 3) & 0x1f1f1f) +
+                    ((i >>> 4) & 0xf0f0f))
+            );
         }
     }
 
@@ -479,7 +481,10 @@ export default class Surface {
                     if (i3 >= 0 && i3 < this.width2) {
                         for (let j3 = yy - j; j3 <= yy + j; j3++) {
                             if (j3 >= 0 && j3 < this.height2) {
-                                let k3 = this.pixels[i3 + this.width2 * j3];
+                                let k3 = unchecked(
+                                    this.pixels[i3 + this.width2 * j3]
+                                );
+
                                 i2 += (k3 >> 16) & 0xff;
                                 j2 += (k3 >> 8) & 0xff;
                                 k2 += k3 & 0xff;
@@ -488,19 +493,23 @@ export default class Surface {
                         }
                     }
 
-                this.pixels[xx + this.width2 * yy] =
-                    ((i2 / l2) << 16) + ((j2 / l2) << 8) + ((k2 / l2) as i32);
+                unchecked(
+                    (this.pixels[xx + this.width2 * yy] =
+                        ((i2 / l2) << 16) +
+                        ((j2 / l2) << 8) +
+                        ((k2 / l2) as i32))
+                );
             }
         }
     }
 
     clear(): void {
         for (let i = 0; i < this.surfacePixels.length; i++) {
-            this.surfacePixels[i] = null;
-            this.spriteWidth[i] = 0;
-            this.spriteHeight[i] = 0;
-            this.spriteColoursUsed[i] = null;
-            this.spriteColourList[i] = null;
+            unchecked((this.surfacePixels[i] = null));
+            unchecked((this.spriteWidth[i] = 0));
+            unchecked((this.spriteHeight[i] = 0));
+            unchecked((this.spriteColoursUsed[i] = null));
+            unchecked((this.spriteColourList[i] = null));
         }
     }
 
@@ -518,16 +527,18 @@ export default class Surface {
         const fullHeight = getUnsignedShort(indexData, indexOffset);
         indexOffset += 2;
 
-        const colourCount = indexData[indexOffset++] & 0xff;
+        const colourCount = unchecked(indexData[indexOffset++]) & 0xff;
 
         const colours = new Int32Array(colourCount);
-        colours[0] = 0xff00ff;
+        unchecked((colours[0] = 0xff00ff));
 
         for (let i = 0; i < colourCount - 1; i++) {
-            colours[i + 1] =
-                ((indexData[indexOffset] & 0xff) << 16) +
-                ((indexData[indexOffset + 1] & 0xff) << 8) +
-                (indexData[indexOffset + 2] & 0xff);
+            unchecked(
+                (colours[i + 1] =
+                    ((indexData[indexOffset] & 0xff) << 16) +
+                    ((indexData[indexOffset + 1] & 0xff) << 8) +
+                    (indexData[indexOffset + 2] & 0xff))
+            );
 
             indexOffset += 3;
         }
@@ -535,54 +546,75 @@ export default class Surface {
         let spriteOffset = 2;
 
         for (let i = spriteID; i < spriteID + frameCount; i++) {
-            this.spriteTranslateX[i] = indexData[indexOffset++] & 0xff;
-            this.spriteTranslateY[i] = indexData[indexOffset++] & 0xff;
+            unchecked(
+                (this.spriteTranslateX[i] = indexData[indexOffset++] & 0xff)
+            );
 
-            this.spriteWidth[i] = getUnsignedShort(indexData, indexOffset);
+            unchecked(
+                (this.spriteTranslateY[i] = indexData[indexOffset++] & 0xff)
+            );
+
+            unchecked(
+                (this.spriteWidth[i] = getUnsignedShort(indexData, indexOffset))
+            );
             indexOffset += 2;
 
-            this.spriteHeight[i] = getUnsignedShort(indexData, indexOffset);
+            unchecked(
+                (this.spriteHeight[i] = getUnsignedShort(
+                    indexData,
+                    indexOffset
+                ))
+            );
             indexOffset += 2;
 
-            const unknown = indexData[indexOffset++] & 0xff;
-            const area = this.spriteWidth[i] * this.spriteHeight[i];
+            const unknown = unchecked(indexData[indexOffset++]) & 0xff;
 
-            this.spriteColoursUsed[i] = new Int8Array(area);
-            this.spriteColourList[i] = colours;
-            this.spriteWidthFull[i] = fullWidth;
-            this.spriteHeightFull[i] = fullHeight;
-            this.surfacePixels[i] = null;
-            this.spriteTranslate[i] = false;
+            const area =
+                unchecked(this.spriteWidth[i]) *
+                unchecked(this.spriteHeight[i]);
+
+            unchecked((this.spriteColoursUsed[i] = new Int8Array(area)));
+            unchecked((this.spriteColourList[i] = colours));
+            unchecked((this.spriteWidthFull[i] = fullWidth));
+            unchecked((this.spriteHeightFull[i] = fullHeight));
+            unchecked((this.surfacePixels[i] = null));
+            unchecked((this.spriteTranslate[i] = false));
 
             if (
-                this.spriteTranslateX[i] != 0 ||
-                this.spriteTranslateY[i] != 0
+                unchecked(this.spriteTranslateX[i]) != 0 ||
+                unchecked(this.spriteTranslateY[i]) != 0
             ) {
-                this.spriteTranslate[i] = true;
+                unchecked((this.spriteTranslate[i] = true));
             }
 
             if (unknown == 0) {
                 for (let pixel = 0; pixel < area; pixel++) {
-                    this.spriteColoursUsed[i]![pixel] =
-                        spriteData[spriteOffset++];
+                    unchecked(
+                        (this.spriteColoursUsed[i]![pixel] =
+                            spriteData[spriteOffset++])
+                    );
 
-                    if (this.spriteColoursUsed[i]![pixel] == 0) {
-                        this.spriteTranslate[i] = true;
+                    if (unchecked(this.spriteColoursUsed[i]![pixel]) == 0) {
+                        unchecked((this.spriteTranslate[i] = true));
                     }
                 }
             } else if (unknown == 1) {
-                for (let x = 0; x < this.spriteWidth[i]; x++) {
-                    for (let y = 0; y < this.spriteHeight[i]; y++) {
-                        this.spriteColoursUsed[i]![
-                            x + y * this.spriteWidth[i]
-                        ] = spriteData[spriteOffset++];
+                for (let x = 0; x < unchecked(this.spriteWidth[i]); x++) {
+                    for (let y = 0; y < unchecked(this.spriteHeight[i]); y++) {
+                        unchecked(
+                            (this.spriteColoursUsed[i]![
+                                x + y * this.spriteWidth[i]
+                            ] = spriteData[spriteOffset++])
+                        );
 
                         if (
-                            this.spriteColoursUsed[i]![
-                                x + y * this.spriteWidth[i]
-                            ] == 0
+                            unchecked(
+                                this.spriteColoursUsed[i]![
+                                    x + y * this.spriteWidth[i]
+                                ]
+                            ) == 0
                         ) {
-                            this.spriteTranslate[i] = true;
+                            unchecked((this.spriteTranslate[i] = true));
                         }
                     }
                 }
@@ -593,24 +625,24 @@ export default class Surface {
     readSleepWord(spriteID: i32, spriteData: Int8Array): void {
         const pixels = new Int32Array(SLEEP_WIDTH * SLEEP_HEIGHT);
 
-        this.surfacePixels[spriteID] = pixels;
-        this.spriteWidth[spriteID] = SLEEP_WIDTH;
-        this.spriteHeight[spriteID] = SLEEP_HEIGHT;
-        this.spriteTranslateX[spriteID] = 0;
-        this.spriteTranslateY[spriteID] = 0;
-        this.spriteWidthFull[spriteID] = SLEEP_WIDTH;
-        this.spriteHeightFull[spriteID] = SLEEP_HEIGHT;
-        this.spriteTranslate[spriteID] = false;
+        unchecked((this.surfacePixels[spriteID] = pixels));
+        unchecked((this.spriteWidth[spriteID] = SLEEP_WIDTH));
+        unchecked((this.spriteHeight[spriteID] = SLEEP_HEIGHT));
+        unchecked((this.spriteTranslateX[spriteID] = 0));
+        unchecked((this.spriteTranslateY[spriteID] = 0));
+        unchecked((this.spriteWidthFull[spriteID] = SLEEP_WIDTH));
+        unchecked((this.spriteHeightFull[spriteID] = SLEEP_HEIGHT));
+        unchecked((this.spriteTranslate[spriteID] = false));
 
         let colour = 0;
         let packetOffset = 1;
         let pixelOffset = 0;
 
         for (pixelOffset = 0; pixelOffset < 255; ) {
-            const length = spriteData[packetOffset++] & 0xff;
+            const length = unchecked(spriteData[packetOffset++]) & 0xff;
 
             for (let i = 0; i < length; i++) {
-                pixels[pixelOffset++] = colour;
+                unchecked((pixels[pixelOffset++] = colour));
             }
 
             // alternate between black and white
@@ -619,16 +651,23 @@ export default class Surface {
 
         for (let y = 1; y < 40; y++) {
             for (let x = 0; x < 255; ) {
-                const length = spriteData[packetOffset++] & 0xff;
+                const length = unchecked(spriteData[packetOffset++]) & 0xff;
 
                 for (let i = 0; i < length; i++) {
-                    pixels[pixelOffset] = pixels[pixelOffset - 255];
+                    unchecked(
+                        (pixels[pixelOffset] = pixels[pixelOffset - 255])
+                    );
+
                     pixelOffset++;
                     x++;
                 }
 
                 if (x < 255) {
-                    pixels[pixelOffset] = 0xffffff - pixels[pixelOffset - 255];
+                    unchecked(
+                        (pixels[pixelOffset] =
+                            0xffffff - pixels[pixelOffset - 255])
+                    );
+
                     pixelOffset++;
                     x++;
                 }
@@ -637,59 +676,71 @@ export default class Surface {
     }
 
     drawWorld(spriteID: i32): void {
-        const area = this.spriteWidth[spriteID] * this.spriteHeight[spriteID];
-        const spritePixels = this.surfacePixels[spriteID]!;
+        const area = unchecked(
+            this.spriteWidth[spriteID] * this.spriteHeight[spriteID]
+        );
+
+        const spritePixels = unchecked(this.surfacePixels[spriteID])!;
         const ai1 = new Int32Array(32768);
 
         for (let i = 0; i < area; i++) {
-            let l = spritePixels[i];
+            let l = unchecked(spritePixels[i]);
 
-            ai1[
-                ((l & 0xf80000) >> 9) + ((l & 0xf800) >> 6) + ((l & 0xf8) >> 3)
-            ]++;
+            unchecked(
+                ai1[
+                    ((l & 0xf80000) >> 9) +
+                        ((l & 0xf800) >> 6) +
+                        ((l & 0xf8) >> 3)
+                ]++
+            );
         }
 
         const ai2 = new Int32Array(256);
-        ai2[0] = 0xff00ff;
+        unchecked((ai2[0] = 0xff00ff));
 
         const ai3 = new Int32Array(256);
 
         for (let i1 = 0; i1 < 32768; i1++) {
-            let j1 = ai1[i1];
+            let j1 = unchecked(ai1[i1]);
 
-            if (j1 > ai3[255]) {
+            if (j1 > unchecked(ai3[255])) {
                 for (let k1 = 1; k1 < 256; k1++) {
-                    if (j1 <= ai3[k1]) {
+                    if (j1 <= unchecked(ai3[k1])) {
                         continue;
                     }
 
                     for (let i2 = 255; i2 > k1; i2--) {
-                        ai2[i2] = ai2[i2 - 1];
-                        ai3[i2] = ai3[i2 - 1];
+                        unchecked((ai2[i2] = ai2[i2 - 1]));
+                        unchecked((ai3[i2] = ai3[i2 - 1]));
                     }
 
-                    ai2[k1] =
-                        ((i1 & 0x7c00) << 9) +
-                        ((i1 & 0x3e0) << 6) +
-                        ((i1 & 0x1f) << 3) +
-                        0x40404;
-                    ai3[k1] = j1;
+                    unchecked(
+                        (ai2[k1] =
+                            ((i1 & 0x7c00) << 9) +
+                            ((i1 & 0x3e0) << 6) +
+                            ((i1 & 0x1f) << 3) +
+                            0x40404)
+                    );
+
+                    unchecked((ai3[k1] = j1));
                     break;
                 }
             }
 
-            ai1[i1] = -1;
+            unchecked((ai1[i1] = -1));
         }
 
         const abyte0 = new Int8Array(area);
 
         for (let l1 = 0; l1 < area; l1++) {
-            let j2 = spritePixels[l1];
+            let j2 = unchecked(spritePixels[l1]);
+
             let k2 =
                 ((j2 & 0xf80000) >> 9) +
                 ((j2 & 0xf800) >> 6) +
                 ((j2 & 0xf8) >> 3);
-            let l2 = ai1[k2];
+
+            let l2 = unchecked(ai1[k2]);
 
             if (l2 == -1) {
                 let i3 = 999999999;
@@ -698,10 +749,11 @@ export default class Surface {
                 let l3 = j2 & 0xff;
 
                 for (let i4 = 0; i4 < 256; i4++) {
-                    let j4 = ai2[i4];
+                    let j4 = unchecked(ai2[i4]);
                     let k4 = (j4 >> 16) & 0xff;
                     let l4 = (j4 >> 8) & 0xff;
                     let i5 = j4 & 0xff;
+
                     let j5 =
                         (j3 - k4) * (j3 - k4) +
                         (k3 - l4) * (k3 - l4) +
@@ -713,29 +765,33 @@ export default class Surface {
                     }
                 }
 
-                ai1[k2] = l2;
+                unchecked((ai1[k2] = l2));
             }
 
-            abyte0[l1] = l2 & 0xff; // << 24 >> 24
+            unchecked((abyte0[l1] = l2 & 0xff));
         }
 
-        this.spriteColoursUsed[spriteID] = abyte0;
-        this.spriteColourList[spriteID] = ai2;
-        this.surfacePixels[spriteID] = null;
+        unchecked((this.spriteColoursUsed[spriteID] = abyte0));
+        unchecked((this.spriteColourList[spriteID] = ai2));
+        unchecked((this.surfacePixels[spriteID] = null));
     }
 
     loadSprite(spriteID: i32): void {
-        if (!this.spriteColoursUsed[spriteID]) {
+        if (!unchecked(this.spriteColoursUsed[spriteID])) {
             return;
         }
 
-        const area = this.spriteWidth[spriteID] * this.spriteHeight[spriteID];
-        const idx = this.spriteColoursUsed[spriteID]!;
-        const cols = this.spriteColourList[spriteID]!;
+        const area =
+            unchecked(this.spriteWidth[spriteID]) *
+            unchecked(this.spriteHeight[spriteID]);
+
+        const idx = unchecked(this.spriteColoursUsed[spriteID])!;
+        const cols = unchecked(this.spriteColourList[spriteID])!;
+
         const pixels = new Int32Array(area);
 
         for (let i = 0; i < area; i++) {
-            let colour = cols[idx[i] & 0xff];
+            let colour = unchecked(cols[idx[i]]) & 0xff;
 
             if (colour == 0) {
                 colour = 1;
@@ -743,12 +799,12 @@ export default class Surface {
                 colour = 0;
             }
 
-            pixels[i] = colour;
+            unchecked((pixels[i] = colour));
         }
 
-        this.surfacePixels[spriteID] = pixels;
-        this.spriteColoursUsed[spriteID] = null;
-        this.spriteColourList[spriteID] = null;
+        unchecked((this.surfacePixels[spriteID] = pixels));
+        unchecked((this.spriteColoursUsed[spriteID] = null));
+        unchecked((this.spriteColourList[spriteID] = null));
     }
 
     drawSpriteMinimap(
@@ -758,22 +814,27 @@ export default class Surface {
         width: i32,
         height: i32
     ): void {
-        this.spriteWidth[spriteID] = width;
-        this.spriteHeight[spriteID] = height;
-        this.spriteTranslate[spriteID] = false;
-        this.spriteTranslateX[spriteID] = 0;
-        this.spriteTranslateY[spriteID] = 0;
-        this.spriteWidthFull[spriteID] = width;
-        this.spriteHeightFull[spriteID] = height;
-        this.surfacePixels[spriteID] = new Int32Array(width * height);
+        unchecked((this.spriteWidth[spriteID] = width));
+        unchecked((this.spriteHeight[spriteID] = height));
+        unchecked((this.spriteTranslate[spriteID] = false));
+        unchecked((this.spriteTranslateX[spriteID] = 0));
+        unchecked((this.spriteTranslateY[spriteID] = 0));
+        unchecked((this.spriteWidthFull[spriteID] = width));
+        unchecked((this.spriteHeightFull[spriteID] = height));
+
+        unchecked(
+            (this.surfacePixels[spriteID] = new Int32Array(width * height))
+        );
 
         let pixel = 0;
 
         for (let xx = x; xx < x + width; xx++) {
             for (let yy = y; yy < y + height; yy++) {
-                this.surfacePixels[spriteID]![pixel++] = this.pixels[
-                    xx + yy * this.width2
-                ];
+                unchecked(
+                    (this.surfacePixels[spriteID]![pixel++] = this.pixels[
+                        xx + yy * this.width2
+                    ])
+                );
             }
         }
     }
@@ -785,36 +846,41 @@ export default class Surface {
         width: i32,
         height: i32
     ): void {
-        this.spriteWidth[spriteID] = width;
-        this.spriteHeight[spriteID] = height;
-        this.spriteTranslate[spriteID] = false;
-        this.spriteTranslateX[spriteID] = 0;
-        this.spriteTranslateY[spriteID] = 0;
-        this.spriteWidthFull[spriteID] = width;
-        this.spriteHeightFull[spriteID] = height;
-        this.surfacePixels[spriteID] = new Int32Array(width * height);
+        unchecked((this.spriteWidth[spriteID] = width));
+        unchecked((this.spriteHeight[spriteID] = height));
+        unchecked((this.spriteTranslate[spriteID] = false));
+        unchecked((this.spriteTranslateX[spriteID] = 0));
+        unchecked((this.spriteTranslateY[spriteID] = 0));
+        unchecked((this.spriteWidthFull[spriteID] = width));
+        unchecked((this.spriteHeightFull[spriteID] = height));
+
+        unchecked(
+            (this.surfacePixels[spriteID] = new Int32Array(width * height))
+        );
 
         let pixel = 0;
 
         for (let yy = y; yy < y + height; yy++) {
             for (let xx = x; xx < x + width; xx++) {
-                this.surfacePixels[spriteID]![pixel++] = this.pixels[
-                    xx + yy * this.width2
-                ];
+                unchecked(
+                    (this.surfacePixels[spriteID]![pixel++] = this.pixels[
+                        xx + yy * this.width2
+                    ])
+                );
             }
         }
     }
 
     _drawSprite_from3(x: i32, y: i32, spriteID: i32): void {
-        if (this.spriteTranslate[spriteID]) {
-            x += this.spriteTranslateX[spriteID];
-            y += this.spriteTranslateY[spriteID];
+        if (unchecked(this.spriteTranslate[spriteID])) {
+            x += unchecked(this.spriteTranslateX[spriteID]);
+            y += unchecked(this.spriteTranslateY[spriteID]);
         }
 
         let rY = x + y * this.width2;
         let rX = 0;
-        let height = this.spriteHeight[spriteID];
-        let width = this.spriteWidth[spriteID];
+        let height = unchecked(this.spriteHeight[spriteID]);
+        let width = unchecked(this.spriteWidth[spriteID]);
         let w2 = this.width2 - width;
         let h2 = 0;
 
@@ -856,7 +922,7 @@ export default class Surface {
         if (this.interlace) {
             inc = 2;
             w2 += this.width2;
-            h2 += this.spriteWidth[spriteID];
+            h2 += unchecked(this.spriteWidth[spriteID]);
 
             if ((y & 1) != 0) {
                 rY += this.width2;
@@ -864,11 +930,11 @@ export default class Surface {
             }
         }
 
-        if (!this.surfacePixels[spriteID]) {
+        if (!unchecked(this.surfacePixels[spriteID])) {
             this._drawSprite_from10A(
                 this.pixels,
-                this.spriteColoursUsed[spriteID],
-                this.spriteColourList[spriteID],
+                unchecked(this.spriteColoursUsed[spriteID])!,
+                unchecked(this.spriteColourList[spriteID])!,
                 rX,
                 rY,
                 width,
@@ -880,7 +946,7 @@ export default class Surface {
         } else {
             this._drawSprite_from10(
                 this.pixels,
-                this.surfacePixels[spriteID],
+                unchecked(this.surfacePixels[spriteID])!,
                 0,
                 rX,
                 rY,
@@ -900,45 +966,60 @@ export default class Surface {
         height: i32,
         spriteID: i32
     ): void {
-        const spriteWidth = this.spriteWidth[spriteID];
-        const spriteHeight = this.spriteHeight[spriteID];
+        const spriteWidth = unchecked(this.spriteWidth[spriteID]);
+        const spriteHeight = unchecked(this.spriteHeight[spriteID]);
         let l1 = 0;
         let i2 = 0;
         let j2 = ((spriteWidth << 16) / width) as i32;
         let k2 = ((spriteHeight << 16) / height) as i32;
 
-        if (this.spriteTranslate[spriteID]) {
-            const widthFull = this.spriteWidthFull[spriteID];
-            const heightFull = this.spriteHeightFull[spriteID];
+        if (unchecked(this.spriteTranslate[spriteID])) {
+            const widthFull = unchecked(this.spriteWidthFull[spriteID]);
+            const heightFull = unchecked(this.spriteHeightFull[spriteID]);
 
             j2 = ((widthFull << 16) / width) as i32;
             k2 = ((heightFull << 16) / height) as i32;
 
-            x += ((this.spriteTranslateX[spriteID] * width + widthFull - 1) /
+            x += ((unchecked(this.spriteTranslateX[spriteID]) * width +
+                widthFull -
+                1) /
                 widthFull) as i32;
 
-            y += ((this.spriteTranslateY[spriteID] * height + heightFull - 1) /
+            y += ((unchecked(this.spriteTranslateY[spriteID]) * height +
+                heightFull -
+                1) /
                 heightFull) as i32;
 
-            if ((this.spriteTranslateX[spriteID] * width) % widthFull != 0) {
+            if (
+                (unchecked(this.spriteTranslateX[spriteID]) * width) %
+                    widthFull !=
+                0
+            ) {
                 l1 = (((widthFull -
-                    ((this.spriteTranslateX[spriteID] * width) % widthFull)) <<
+                    ((unchecked(this.spriteTranslateX[spriteID]) * width) %
+                        widthFull)) <<
                     16) /
                     width) as i32;
             }
 
-            if ((this.spriteTranslateY[spriteID] * height) % heightFull != 0) {
+            if (
+                (unchecked(this.spriteTranslateY[spriteID]) * height) %
+                    heightFull !=
+                0
+            ) {
                 i2 = (((heightFull -
-                    ((this.spriteTranslateY[spriteID] * height) %
+                    ((unchecked(this.spriteTranslateY[spriteID]) * height) %
                         heightFull)) <<
                     16) /
                     height) as i32;
             }
 
-            width = ((width * (this.spriteWidth[spriteID] - (l1 >> 16))) /
+            width = ((width *
+                (unchecked(this.spriteWidth[spriteID]) - (l1 >> 16))) /
                 widthFull) as i32;
 
-            height = ((height * (this.spriteHeight[spriteID] - (i2 >> 16))) /
+            height = ((height *
+                (unchecked(this.spriteHeight[spriteID]) - (i2 >> 16))) /
                 heightFull) as i32;
         }
 
@@ -987,7 +1068,7 @@ export default class Surface {
 
         this._plotScale_from13(
             this.pixels,
-            this.surfacePixels[spriteID],
+            unchecked(this.surfacePixels[spriteID]),
             0,
             l1,
             i2,
@@ -1035,15 +1116,15 @@ export default class Surface {
     }
 
     _drawSpriteAlpha_from4(x: i32, y: i32, spriteID: i32, alpha: i32): void {
-        if (this.spriteTranslate[spriteID]) {
-            x += this.spriteTranslateX[spriteID];
-            y += this.spriteTranslateY[spriteID];
+        if (unchecked(this.spriteTranslate[spriteID])) {
+            x += unchecked(this.spriteTranslateX[spriteID]);
+            y += unchecked(this.spriteTranslateY[spriteID]);
         }
 
         let size = x + y * this.width2;
         let j1 = 0;
-        let height = this.spriteHeight[spriteID];
-        let width = this.spriteWidth[spriteID];
+        let height = unchecked(this.spriteHeight[spriteID]);
+        let width = unchecked(this.spriteWidth[spriteID]);
         let extraXSpace = this.width2 - width;
         let j2 = 0;
 
@@ -1085,7 +1166,7 @@ export default class Surface {
         if (this.interlace) {
             yInc = 2;
             extraXSpace += this.width2;
-            j2 += this.spriteWidth[spriteID];
+            j2 += unchecked(this.spriteWidth[spriteID]);
 
             if ((y & 1) != 0) {
                 size += this.width2;
@@ -1093,11 +1174,11 @@ export default class Surface {
             }
         }
 
-        if (!this.surfacePixels[spriteID]) {
+        if (!unchecked(this.surfacePixels[spriteID])) {
             this._drawSpriteAlpha_from11A(
                 this.pixels,
-                this.spriteColoursUsed[spriteID],
-                this.spriteColourList[spriteID],
+                unchecked(this.spriteColoursUsed[spriteID]),
+                unchecked(this.spriteColourList[spriteID]),
                 j1,
                 size,
                 width,
@@ -1110,7 +1191,7 @@ export default class Surface {
         } else {
             this._drawSpriteAlpha_from11(
                 this.pixels,
-                this.surfacePixels[spriteID],
+                unchecked(this.surfacePixels[spriteID]),
                 0,
                 j1,
                 size,
@@ -1132,45 +1213,60 @@ export default class Surface {
         spriteID: i32,
         alpha: i32
     ): void {
-        const spriteWidth = this.spriteWidth[spriteID];
-        const spriteHeight = this.spriteHeight[spriteID];
+        const spriteWidth = unchecked(this.spriteWidth[spriteID]);
+        const spriteHeight = unchecked(this.spriteHeight[spriteID]);
         let i2 = 0;
         let j2 = 0;
         let k2 = ((spriteWidth << 16) / scaleX) as i32;
         let l2 = ((spriteHeight << 16) / scaleY) as i32;
 
-        if (this.spriteTranslate[spriteID]) {
-            const widthFull = this.spriteWidthFull[spriteID];
-            const heightFull = this.spriteHeightFull[spriteID];
+        if (unchecked(this.spriteTranslate[spriteID])) {
+            const widthFull = unchecked(this.spriteWidthFull[spriteID]);
+            const heightFull = unchecked(this.spriteHeightFull[spriteID]);
 
             k2 = ((widthFull << 16) / scaleX) as i32;
             l2 = ((heightFull << 16) / scaleY) as i32;
 
-            x += ((this.spriteTranslateX[spriteID] * scaleX + widthFull - 1) /
+            x += ((unchecked(this.spriteTranslateX[spriteID]) * scaleX +
+                widthFull -
+                1) /
                 widthFull) as i32;
 
-            y += ((this.spriteTranslateY[spriteID] * scaleY + heightFull - 1) /
+            y += ((unchecked(this.spriteTranslateY[spriteID]) * scaleY +
+                heightFull -
+                1) /
                 heightFull) as i32;
 
-            if ((this.spriteTranslateX[spriteID] * scaleX) % widthFull != 0) {
+            if (
+                (unchecked(this.spriteTranslateX[spriteID]) * scaleX) %
+                    widthFull !=
+                0
+            ) {
                 i2 = (((widthFull -
-                    ((this.spriteTranslateX[spriteID] * scaleX) % widthFull)) <<
+                    ((unchecked(this.spriteTranslateX[spriteID]) * scaleX) %
+                        widthFull)) <<
                     16) /
                     scaleX) as i32;
             }
 
-            if ((this.spriteTranslateY[spriteID] * scaleY) % heightFull != 0) {
+            if (
+                (unchecked(this.spriteTranslateY[spriteID]) * scaleY) %
+                    heightFull !=
+                0
+            ) {
                 j2 = (((heightFull -
-                    ((this.spriteTranslateY[spriteID] * scaleY) %
+                    ((unchecked(this.spriteTranslateY[spriteID]) * scaleY) %
                         heightFull)) <<
                     16) /
                     scaleY) as i32;
             }
 
-            scaleX = ((scaleX * (this.spriteWidth[spriteID] - (i2 >> 16))) /
+            scaleX = ((scaleX *
+                (unchecked(this.spriteWidth[spriteID]) - (i2 >> 16))) /
                 widthFull) as i32;
 
-            scaleY = ((scaleY * (this.spriteHeight[spriteID] - (j2 >> 16))) /
+            scaleY = ((scaleY *
+                (unchecked(this.spriteHeight[spriteID]) - (j2 >> 16))) /
                 heightFull) as i32;
         }
 
@@ -1218,7 +1314,7 @@ export default class Surface {
 
         this.transparentScale(
             this.pixels,
-            this.surfacePixels[spriteID],
+            unchecked(this.surfacePixels[spriteID]!),
             0,
             i2,
             j2,
@@ -1242,45 +1338,60 @@ export default class Surface {
         spriteID: i32,
         colour: i32
     ): void {
-        let k1 = this.spriteWidth[spriteID];
-        let l1 = this.spriteHeight[spriteID];
+        let k1 = unchecked(this.spriteWidth[spriteID]);
+        let l1 = unchecked(this.spriteHeight[spriteID]);
         let i2 = 0;
         let j2 = 0;
         let k2 = ((k1 << 16) / width) as i32;
         let l2 = ((l1 << 16) / height) as i32;
 
-        if (this.spriteTranslate[spriteID]) {
-            const widthFull = this.spriteWidthFull[spriteID];
-            const heightFull = this.spriteHeightFull[spriteID];
+        if (unchecked(this.spriteTranslate[spriteID])) {
+            const widthFull = unchecked(this.spriteWidthFull[spriteID]);
+            const heightFull = unchecked(this.spriteHeightFull[spriteID]);
 
             k2 = ((widthFull << 16) / width) as i32;
             l2 = ((heightFull << 16) / height) as i32;
 
-            x += ((this.spriteTranslateX[spriteID] * width + widthFull - 1) /
+            x += ((unchecked(this.spriteTranslateX[spriteID]) * width +
+                widthFull -
+                1) /
                 widthFull) as i32;
 
-            y += ((this.spriteTranslateY[spriteID] * height + heightFull - 1) /
+            y += ((unchecked(this.spriteTranslateY[spriteID]) * height +
+                heightFull -
+                1) /
                 heightFull) as i32;
 
-            if ((this.spriteTranslateX[spriteID] * width) % widthFull != 0) {
+            if (
+                (unchecked(this.spriteTranslateX[spriteID]) * width) %
+                    widthFull !=
+                0
+            ) {
                 i2 = (((widthFull -
-                    ((this.spriteTranslateX[spriteID] * width) % widthFull)) <<
+                    ((unchecked(this.spriteTranslateX[spriteID]) * width) %
+                        widthFull)) <<
                     16) /
                     width) as i32;
             }
 
-            if ((this.spriteTranslateY[spriteID] * height) % heightFull != 0) {
+            if (
+                (unchecked(this.spriteTranslateY[spriteID]) * height) %
+                    heightFull !=
+                0
+            ) {
                 j2 = (((heightFull -
-                    ((this.spriteTranslateY[spriteID] * height) %
+                    ((unchecked(this.spriteTranslateY[spriteID]) * height) %
                         heightFull)) <<
                     16) /
                     height) as i32;
             }
 
-            width = ((width * (this.spriteWidth[spriteID] - (i2 >> 16))) /
+            width = ((width *
+                (unchecked(this.spriteWidth[spriteID]) - (i2 >> 16))) /
                 widthFull) as i32;
 
-            height = ((height * (this.spriteHeight[spriteID] - (j2 >> 16))) /
+            height = ((height *
+                (unchecked(this.spriteHeight[spriteID]) - (j2 >> 16))) /
                 heightFull) as i32;
         }
 
@@ -1329,7 +1440,7 @@ export default class Surface {
 
         this._plotScale_from14(
             this.pixels,
-            this.surfacePixels[spriteID],
+            unchecked(this.surfacePixels[spriteID]!),
             0,
             i2,
             j2,
@@ -1347,7 +1458,7 @@ export default class Surface {
 
     _drawSprite_from10(
         dest: Int32Array,
-        src: Int32Array | null,
+        src: Int32Array,
         i: i32,
         srcPos: i32,
         destPos: i32,
@@ -1362,44 +1473,44 @@ export default class Surface {
 
         for (let j2 = -height; j2 < 0; j2 += yInc) {
             for (let k2 = i2; k2 < 0; k2++) {
-                i = src![srcPos++];
+                i = unchecked(src[srcPos++]);
 
                 if (i != 0) {
-                    dest[destPos++] = i;
+                    unchecked((dest[destPos++] = i));
                 } else {
                     destPos++;
                 }
 
-                i = src![srcPos++];
+                i = unchecked(src[srcPos++]);
 
                 if (i != 0) {
-                    dest[destPos++] = i;
+                    unchecked((dest[destPos++] = i));
                 } else {
                     destPos++;
                 }
 
-                i = src![srcPos++];
+                i = unchecked(unchecked(src[srcPos++]));
 
                 if (i != 0) {
-                    dest[destPos++] = i;
+                    unchecked((dest[destPos++] = i));
                 } else {
                     destPos++;
                 }
 
-                i = src![srcPos++];
+                i = unchecked(src[srcPos++]);
 
                 if (i != 0) {
-                    dest[destPos++] = i;
+                    unchecked((dest[destPos++] = i));
                 } else {
                     destPos++;
                 }
             }
 
             for (let l2 = width; l2 < 0; l2++) {
-                i = src![srcPos++];
+                unchecked((i = src[srcPos++]));
 
                 if (i != 0) {
-                    dest[destPos++] = i;
+                    unchecked((dest[destPos++] = i));
                 } else {
                     destPos++;
                 }
@@ -1412,8 +1523,8 @@ export default class Surface {
 
     _drawSprite_from10A(
         target: Int32Array,
-        colourIdx: Int8Array | null,
-        colours: Int32Array | null,
+        colourIdx: Int8Array,
+        colours: Int32Array,
         srcPos: i32,
         destPos: i32,
         width: i32,
@@ -1427,44 +1538,44 @@ export default class Surface {
 
         for (let i2 = -height; i2 < 0; i2 += rowInc) {
             for (let j2 = l1; j2 < 0; j2++) {
-                let byte0 = colourIdx![srcPos++];
+                let byte0 = unchecked(colourIdx[srcPos++]);
 
                 if (byte0 != 0) {
-                    target[destPos++] = colours![byte0 & 0xff];
+                    unchecked((target[destPos++] = colours[byte0 & 0xff]));
                 } else {
                     destPos++;
                 }
 
-                byte0 = colourIdx![srcPos++];
+                byte0 = unchecked(colourIdx[srcPos++]);
 
                 if (byte0 != 0) {
-                    target[destPos++] = colours![byte0 & 0xff];
+                    unchecked((target[destPos++] = colours[byte0 & 0xff]));
                 } else {
                     destPos++;
                 }
 
-                byte0 = colourIdx![srcPos++];
+                byte0 = unchecked(colourIdx[srcPos++]);
 
                 if (byte0 != 0) {
-                    target[destPos++] = colours![byte0 & 0xff];
+                    unchecked((target[destPos++] = colours[byte0 & 0xff]));
                 } else {
                     destPos++;
                 }
 
-                byte0 = colourIdx![srcPos++];
+                byte0 = unchecked(colourIdx[srcPos++]);
 
                 if (byte0 != 0) {
-                    target[destPos++] = colours![byte0 & 0xff];
+                    unchecked((target[destPos++] = colours[byte0 & 0xff]));
                 } else {
                     destPos++;
                 }
             }
 
             for (let k2 = width; k2 < 0; k2++) {
-                let byte1 = colourIdx![srcPos++];
+                let byte1 = unchecked(colourIdx[srcPos++]);
 
                 if (byte1 != 0) {
-                    target[destPos++] = colours![byte1 & 0xff];
+                    unchecked((target[destPos++] = colours[byte1 & 0xff]));
                 } else {
                     destPos++;
                 }
@@ -1496,10 +1607,10 @@ export default class Surface {
             let j3 = (k >> 16) * j2;
 
             for (let k3 = -j1; k3 < 0; k3++) {
-                i = src![(j >> 16) + j3];
+                i = unchecked(src![(j >> 16) + j3]);
 
                 if (i != 0) {
-                    dest[destPos++] = i;
+                    unchecked((dest[destPos++] = i));
                 } else {
                     destPos++;
                 }
@@ -1530,17 +1641,19 @@ export default class Surface {
 
         for (let k2 = -height; k2 < 0; k2 += yInc) {
             for (let l2 = -width; l2 < 0; l2++) {
-                i = src![srcPos++];
+                i = unchecked(src![srcPos++]);
 
                 if (i != 0) {
-                    const i3 = dest[size];
+                    const i3 = unchecked(dest[size]);
 
-                    dest[size++] =
-                        ((((i & 0xff00ff) * alpha + (i3 & 0xff00ff) * j2) &
-                            -16711936) +
-                            (((i & 0xff00) * alpha + (i3 & 0xff00) * j2) &
-                                0xff0000)) >>
-                        8;
+                    unchecked(
+                        (dest[size++] =
+                            ((((i & 0xff00ff) * alpha + (i3 & 0xff00ff) * j2) &
+                                -16711936) +
+                                (((i & 0xff00) * alpha + (i3 & 0xff00) * j2) &
+                                    0xff0000)) >>
+                            8)
+                    );
                 } else {
                     size++;
                 }
@@ -1568,18 +1681,21 @@ export default class Surface {
 
         for (let j2 = -height; j2 < 0; j2 += yInc) {
             for (let k2 = -width; k2 < 0; k2++) {
-                let l2: i32 = coloursUsed![listPos++];
+                let l2: i32 = unchecked(coloursUsed![listPos++]);
 
                 if (l2 != 0) {
-                    l2 = colourList![l2 & 0xff];
-                    const i3 = dest[size];
+                    l2 = unchecked(colourList![l2 & 0xff]);
 
-                    dest[size++] =
-                        ((((l2 & 0xff00ff) * alpha + (i3 & 0xff00ff) * i2) &
-                            -0xff0100) +
-                            (((l2 & 0xff00) * alpha + (i3 & 0xff00) * i2) &
-                                0xff0000)) >>
-                        8;
+                    const i3 = unchecked(dest[size]);
+
+                    unchecked(
+                        (dest[size++] =
+                            ((((l2 & 0xff00ff) * alpha + (i3 & 0xff00ff) * i2) &
+                                -0xff0100) +
+                                (((l2 & 0xff00) * alpha + (i3 & 0xff00) * i2) &
+                                    0xff0000)) >>
+                            8)
+                    );
                 } else {
                     size++;
                 }
@@ -1592,7 +1708,7 @@ export default class Surface {
 
     transparentScale(
         dest: Int32Array,
-        src: Int32Array | null,
+        src: Int32Array,
         i: i32,
         j: i32,
         k: i32,
@@ -1613,17 +1729,19 @@ export default class Surface {
             let l3 = (k >> 16) * j2;
 
             for (let i4 = -j1; i4 < 0; i4++) {
-                i = src![(j >> 16) + l3];
+                i = unchecked(src[(j >> 16) + l3]);
 
                 if (i != 0) {
-                    let j4 = dest[destPos];
+                    let j4 = unchecked(dest[destPos]);
 
-                    dest[destPos++] =
-                        ((((i & 0xff00ff) * alpha + (j4 & 0xff00ff) * i3) &
-                            -0xff0100) +
-                            (((i & 0xff00) * alpha + (j4 & 0xff00) * i3) &
-                                0xff0000)) >>
-                        8;
+                    unchecked(
+                        (dest[destPos++] =
+                            ((((i & 0xff00ff) * alpha + (j4 & 0xff00ff) * i3) &
+                                -0xff0100) +
+                                (((i & 0xff00) * alpha + (j4 & 0xff00) * i3) &
+                                    0xff0000)) >>
+                            8)
+                    );
                 } else {
                     destPos++;
                 }
@@ -1639,7 +1757,7 @@ export default class Surface {
 
     _plotScale_from14(
         dest: Int32Array,
-        pixels: Int32Array | null,
+        pixels: Int32Array,
         i: i32,
         j: i32,
         k: i32,
@@ -1663,7 +1781,7 @@ export default class Surface {
             const j4 = (k >> 16) * j2;
 
             for (let k4 = -width; k4 < 0; k4++) {
-                i = pixels![(j >> 16) + j4];
+                unchecked((i = pixels[(j >> 16) + j4]));
 
                 if (i != 0) {
                     const l4 = (i >> 16) & 0xff;
@@ -1671,12 +1789,14 @@ export default class Surface {
                     const j5 = i & 0xff;
 
                     if (l4 == i5 && i5 == j5) {
-                        dest[l++] =
-                            (((l4 * i3) >> 8) << 16) +
-                            (((i5 * j3) >> 8) << 8) +
-                            ((j5 * k3) >> 8);
+                        unchecked(
+                            (dest[l++] =
+                                (((l4 * i3) >> 8) << 16) +
+                                (((i5 * j3) >> 8) << 8) +
+                                ((j5 * k3) >> 8))
+                        );
                     } else {
-                        dest[l++] = i;
+                        unchecked((dest[l++] = i));
                     }
                 } else {
                     l++;
@@ -1705,24 +1825,28 @@ export default class Surface {
             this.sinCosCache = new Int32Array(512);
 
             for (let i = 0; i < 256; i++) {
-                this.sinCosCache![i] = (Math.sin(i * 0.02454369) *
-                    32768) as i32;
+                unchecked(
+                    (this.sinCosCache![i] = (Math.sin(i * 0.02454369) *
+                        32768) as i32)
+                );
 
-                this.sinCosCache![i + 256] = (Math.cos(i * 0.02454369) *
-                    32768) as i32;
+                unchecked(
+                    (this.sinCosCache![i + 256] = (Math.cos(i * 0.02454369) *
+                        32768) as i32)
+                );
             }
         }
 
-        let i2 = -((this.spriteWidthFull[spriteID] / 2) as i32);
-        let j2 = -((this.spriteHeightFull[spriteID] / 2) as i32);
+        let i2 = -((unchecked(this.spriteWidthFull[spriteID]) / 2) as i32);
+        let j2 = -((unchecked(this.spriteHeightFull[spriteID]) / 2) as i32);
 
-        if (this.spriteTranslate[spriteID]) {
-            i2 += this.spriteTranslateX[spriteID];
-            j2 += this.spriteTranslateY[spriteID];
+        if (unchecked(this.spriteTranslate[spriteID])) {
+            i2 += unchecked(this.spriteTranslateX[spriteID]);
+            j2 += unchecked(this.spriteTranslateY[spriteID]);
         }
 
-        let k2 = i2 + this.spriteWidth[spriteID];
-        let l2 = j2 + this.spriteHeight[spriteID];
+        let k2 = i2 + unchecked(this.spriteWidth[spriteID]);
+        let l2 = j2 + unchecked(this.spriteHeight[spriteID]);
         let i3 = k2;
         let j3 = j2;
         let k3 = i2;
@@ -1730,8 +1854,8 @@ export default class Surface {
 
         rotation &= 0xff;
 
-        let i4 = this.sinCosCache![rotation] * scale;
-        let j4 = this.sinCosCache![rotation + 256] * scale;
+        let i4 = unchecked(this.sinCosCache![rotation]) * scale;
+        let j4 = unchecked(this.sinCosCache![rotation + 256]) * scale;
         let k4 = x + ((j2 * i4 + i2 * j4) >> 22);
         let l4 = y + ((j2 * j4 - i2 * i4) >> 22);
         let i5 = x + ((j3 * i4 + i3 * j4) >> 22);
@@ -1788,15 +1912,15 @@ export default class Surface {
         }
 
         for (let i7 = k6; i7 <= l6; i7++) {
-            this.anIntArray340![i7] = 99999999;
-            this.anIntArray341![i7] = -99999999;
+            unchecked((this.anIntArray340![i7] = 99999999));
+            unchecked((this.anIntArray341![i7] = -99999999));
         }
 
         let i8 = 0;
         let k8 = 0;
         let i9 = 0;
-        let j9 = this.spriteWidth[spriteID];
-        let k9 = this.spriteHeight[spriteID];
+        let j9 = unchecked(this.spriteWidth[spriteID]);
+        let k9 = unchecked(this.spriteHeight[spriteID]);
 
         i2 = 0;
         j2 = 0;
@@ -1840,12 +1964,12 @@ export default class Surface {
         }
 
         for (let i = j7; i <= k7; i++) {
-            this.anIntArray340![i] = this.anIntArray341![i] = l7;
+            unchecked((this.anIntArray340![i] = this.anIntArray341![i] = l7));
 
             l7 += i8;
 
-            this.anIntArray342![i] = this.anIntArray343![i] = 0;
-            this.anIntArray344![i] = this.anIntArray345![i] = l8;
+            unchecked((this.anIntArray342![i] = this.anIntArray343![i] = 0));
+            unchecked((this.anIntArray344![i] = this.anIntArray345![i] = l8));
 
             l8 += i9;
         }
@@ -1880,16 +2004,16 @@ export default class Surface {
         }
 
         for (let i = j7; i <= k7; i++) {
-            if (l7 < this.anIntArray340![i]) {
-                this.anIntArray340![i] = l7;
-                this.anIntArray342![i] = j8;
-                this.anIntArray344![i] = 0;
+            if (l7 < unchecked(this.anIntArray340![i])) {
+                unchecked((this.anIntArray340![i] = l7));
+                unchecked((this.anIntArray342![i] = j8));
+                unchecked((this.anIntArray344![i] = 0));
             }
 
-            if (l7 > this.anIntArray341![i]) {
-                this.anIntArray341![i] = l7;
-                this.anIntArray343![i] = j8;
-                this.anIntArray345![i] = 0;
+            if (l7 > unchecked(this.anIntArray341![i])) {
+                unchecked((this.anIntArray341![i] = l7));
+                unchecked((this.anIntArray343![i] = j8));
+                unchecked((this.anIntArray345![i] = 0));
             }
 
             l7 += i8;
@@ -1926,16 +2050,16 @@ export default class Surface {
         }
 
         for (let i = j7; i <= k7; i++) {
-            if (l7 < this.anIntArray340![i]) {
-                this.anIntArray340![i] = l7;
-                this.anIntArray342![i] = j8;
-                this.anIntArray344![i] = l8;
+            if (l7 < unchecked(this.anIntArray340![i])) {
+                unchecked((this.anIntArray340![i] = l7));
+                unchecked((this.anIntArray342![i] = j8));
+                unchecked((this.anIntArray344![i] = l8));
             }
 
-            if (l7 > this.anIntArray341![i]) {
-                this.anIntArray341![i] = l7;
-                this.anIntArray343![i] = j8;
-                this.anIntArray345![i] = l8;
+            if (l7 > unchecked(this.anIntArray341![i])) {
+                unchecked((this.anIntArray341![i] = l7));
+                unchecked((this.anIntArray343![i] = j8));
+                unchecked((this.anIntArray345![i] = l8));
             }
 
             l7 += i8;
@@ -1972,16 +2096,16 @@ export default class Surface {
         }
 
         for (let i = j7; i <= k7; i++) {
-            if (l7 < this.anIntArray340![i]) {
-                this.anIntArray340![i] = l7;
-                this.anIntArray342![i] = j8;
-                this.anIntArray344![i] = l8;
+            if (l7 < unchecked(this.anIntArray340![i])) {
+                unchecked((this.anIntArray340![i] = l7));
+                unchecked((this.anIntArray342![i] = j8));
+                unchecked((this.anIntArray344![i] = l8));
             }
 
-            if (l7 > this.anIntArray341![i]) {
-                this.anIntArray341![i] = l7;
-                this.anIntArray343![i] = j8;
-                this.anIntArray345![i] = l8;
+            if (l7 > unchecked(this.anIntArray341![i])) {
+                unchecked((this.anIntArray341![i] = l7));
+                unchecked((this.anIntArray343![i] = j8));
+                unchecked((this.anIntArray345![i] = l8));
             }
 
             l7 += i8;
@@ -1989,23 +2113,23 @@ export default class Surface {
         }
 
         let l10 = k6 * j1;
-        let ai = this.surfacePixels[spriteID];
+        let ai = unchecked(this.surfacePixels[spriteID]);
 
         for (let i = k6; i < l6; i++) {
-            let j11 = this.anIntArray340![i] >> 8;
-            let k11 = this.anIntArray341![i] >> 8;
+            let j11 = unchecked(this.anIntArray340![i]) >> 8;
+            let k11 = unchecked(this.anIntArray341![i]) >> 8;
 
             if (k11 - j11 <= 0) {
                 l10 += j1;
             } else {
-                let l11 = this.anIntArray342![i] << 9;
+                let l11 = unchecked(this.anIntArray342![i]) << 9;
 
-                let i12 = (((this.anIntArray343![i] << 9) - l11) /
+                let i12 = (((unchecked(this.anIntArray343![i]) << 9) - l11) /
                     (k11 - j11)) as i32;
 
-                let j12 = this.anIntArray344![i] << 9;
+                let j12 = unchecked(this.anIntArray344![i]) << 9;
 
-                let k12 = (((this.anIntArray345![i] << 9) - j12) /
+                let k12 = (((unchecked(this.anIntArray345![i]) << 9) - j12) /
                     (k11 - j11)) as i32;
 
                 if (j11 < this.boundsTopX) {
@@ -2019,10 +2143,10 @@ export default class Surface {
                 }
 
                 if (!this.interlace || (i & 1) == 0) {
-                    if (!this.spriteTranslate[spriteID]) {
+                    if (!unchecked(this.spriteTranslate[spriteID])) {
                         this.drawMinimap(
                             this.pixels,
-                            ai,
+                            ai!,
                             0,
                             l10 + j11,
                             l11,
@@ -2035,7 +2159,7 @@ export default class Surface {
                     } else {
                         this.drawMinimapTranslate(
                             this.pixels,
-                            ai,
+                            ai!,
                             0,
                             l10 + j11,
                             l11,
@@ -2054,8 +2178,8 @@ export default class Surface {
     }
 
     drawMinimap(
-        ai: Int32Array,
-        src: Int32Array | null,
+        _: Int32Array,
+        src: Int32Array,
         i: i32,
         j: i32,
         k: i32,
@@ -2066,15 +2190,15 @@ export default class Surface {
         l1: i32
     ): void {
         for (i = k1; i < 0; i++) {
-            this.pixels[j++] = src![(k >> 17) + (l >> 17) * l1];
+            unchecked((this.pixels[j++] = src[(k >> 17) + (l >> 17) * l1]));
             k += i1;
             l += j1;
         }
     }
 
     drawMinimapTranslate(
-        ai: Int32Array,
-        src: Int32Array | null,
+        _: Int32Array,
+        src: Int32Array,
         i: i32,
         j: i32,
         k: i32,
@@ -2085,10 +2209,10 @@ export default class Surface {
         l1: i32
     ): void {
         for (let i2 = k1; i2 < 0; i2++) {
-            i = src![(k >> 17) + (l >> 17) * l1];
+            i = unchecked(src[(k >> 17) + (l >> 17) * l1]);
 
             if (i != 0) {
-                this.pixels[j++] = i;
+                unchecked((this.pixels[j++] = i));
             } else {
                 j++;
             }
@@ -2103,7 +2227,7 @@ export default class Surface {
         y: i32,
         w: i32,
         h: i32,
-        sprite: i32,
+        spriteID: i32,
         colour1: i32,
         colour2: i32,
         l1: i32,
@@ -2117,8 +2241,8 @@ export default class Surface {
             colour2 = 0xffffff;
         }
 
-        const width = this.spriteWidth[sprite];
-        const height = this.spriteHeight[sprite];
+        const width = unchecked(this.spriteWidth[spriteID]);
+        const height = unchecked(this.spriteHeight[spriteID]);
         let k2 = 0;
         let l2 = 0;
         let i3 = l1 << 16;
@@ -2126,18 +2250,18 @@ export default class Surface {
         let k3 = ((height << 16) / h) as i32;
         let l3 = -(((l1 << 16) / h) as i32);
 
-        if (this.spriteTranslate[sprite]) {
-            const fullWidth = this.spriteWidthFull[sprite];
-            const fullHeight = this.spriteHeightFull[sprite];
+        if (unchecked(this.spriteTranslate[spriteID])) {
+            const fullWidth = unchecked(this.spriteWidthFull[spriteID]);
+            const fullHeight = unchecked(this.spriteHeightFull[spriteID]);
 
             j3 = ((fullWidth << 16) / w) as i32;
             k3 = ((fullHeight << 16) / h) as i32;
 
-            let j5 = this.spriteTranslateX[sprite];
-            let k5 = this.spriteTranslateY[sprite];
+            let j5 = unchecked(this.spriteTranslateX[spriteID]);
+            let k5 = unchecked(this.spriteTranslateY[spriteID]);
 
             if (flag) {
-                j5 = fullWidth - this.spriteWidth[sprite] - j5;
+                j5 = fullWidth - unchecked(this.spriteWidth[spriteID]) - j5;
             }
 
             x += ((j5 * w + fullWidth - 1) / fullWidth) as i32;
@@ -2156,8 +2280,13 @@ export default class Surface {
                     h) as i32;
             }
 
-            w = (((this.spriteWidth[sprite] << 16) - k2 + j3 - 1) / j3) as i32;
-            h = (((this.spriteHeight[sprite] << 16) - l2 + k3 - 1) / k3) as i32;
+            w = (((unchecked(this.spriteWidth[spriteID]) << 16) - k2 + j3 - 1) /
+                j3) as i32;
+            h = (((unchecked(this.spriteHeight[spriteID]) << 16) -
+                l2 +
+                k3 -
+                1) /
+                k3) as i32;
         }
 
         let j4 = y * this.width2;
@@ -2183,11 +2312,11 @@ export default class Surface {
         }
 
         if (colour2 == 0xffffff) {
-            if (this.surfacePixels[sprite] != null) {
+            if (unchecked(this.surfacePixels[spriteID]) != null) {
                 if (!flag) {
                     this._transparentSpritePlot_from15(
                         this.pixels,
-                        this.surfacePixels[sprite],
+                        unchecked(this.surfacePixels[spriteID]!),
                         0,
                         k2,
                         l2,
@@ -2207,9 +2336,9 @@ export default class Surface {
                 } else {
                     this._transparentSpritePlot_from15(
                         this.pixels,
-                        this.surfacePixels[sprite],
+                        unchecked(this.surfacePixels[spriteID]!),
                         0,
-                        (this.spriteWidth[sprite] << 16) - k2 - 1,
+                        (unchecked(this.spriteWidth[spriteID]) << 16) - k2 - 1,
                         l2,
                         j4,
                         w,
@@ -2230,8 +2359,8 @@ export default class Surface {
             if (!flag) {
                 this._transparentSpritePlot_from16A(
                     this.pixels,
-                    this.spriteColoursUsed[sprite],
-                    this.spriteColourList[sprite],
+                    unchecked(this.spriteColoursUsed[spriteID]!),
+                    unchecked(this.spriteColourList[spriteID]!),
                     0,
                     k2,
                     l2,
@@ -2251,10 +2380,10 @@ export default class Surface {
             } else {
                 this._transparentSpritePlot_from16A(
                     this.pixels,
-                    this.spriteColoursUsed[sprite],
-                    this.spriteColourList[sprite],
+                    unchecked(this.spriteColoursUsed[spriteID]!),
+                    unchecked(this.spriteColourList[spriteID]!),
                     0,
-                    (this.spriteWidth[sprite] << 16) - k2 - 1,
+                    (unchecked(this.spriteWidth[spriteID]) << 16) - k2 - 1,
                     l2,
                     j4,
                     w,
@@ -2272,11 +2401,11 @@ export default class Surface {
             }
         }
 
-        if (this.surfacePixels[sprite]) {
+        if (unchecked(this.surfacePixels[spriteID])) {
             if (!flag) {
                 this._transparentSpritePlot_from16(
                     this.pixels,
-                    this.surfacePixels[sprite],
+                    unchecked(this.surfacePixels[spriteID]),
                     0,
                     k2,
                     l2,
@@ -2297,9 +2426,9 @@ export default class Surface {
             } else {
                 this._transparentSpritePlot_from16(
                     this.pixels,
-                    this.surfacePixels[sprite],
+                    unchecked(this.surfacePixels[spriteID]),
                     0,
-                    (this.spriteWidth[sprite] << 16) - k2 - 1,
+                    (unchecked(this.spriteWidth[spriteID]) << 16) - k2 - 1,
                     l2,
                     j4,
                     w,
@@ -2321,8 +2450,8 @@ export default class Surface {
         if (!flag) {
             this._transparentSpritePlot_from17(
                 this.pixels,
-                this.spriteColoursUsed[sprite],
-                this.spriteColourList[sprite],
+                unchecked(this.spriteColoursUsed[spriteID]!),
+                unchecked(this.spriteColourList[spriteID]!),
                 0,
                 k2,
                 l2,
@@ -2341,10 +2470,10 @@ export default class Surface {
         } else {
             this._transparentSpritePlot_from17(
                 this.pixels,
-                this.spriteColoursUsed[sprite],
-                this.spriteColourList[sprite],
+                unchecked(this.spriteColoursUsed[spriteID]!),
+                unchecked(this.spriteColourList[spriteID]!),
                 0,
-                (this.spriteWidth[sprite] << 16) - k2 - 1,
+                (unchecked(this.spriteWidth[spriteID]) << 16) - k2 - 1,
                 l2,
                 j4,
                 w,
@@ -2363,7 +2492,7 @@ export default class Surface {
 
     _transparentSpritePlot_from15(
         dest: Int32Array,
-        src: Int32Array | null,
+        src: Int32Array,
         i: i32,
         j: i32,
         k: i32,
@@ -2406,7 +2535,7 @@ export default class Surface {
 
             if (i3 != 0) {
                 for (let k6 = k5; k6 < k5 + l5; k6++) {
-                    i = src![(j >> 16) + j5];
+                    i = unchecked(src[(j >> 16) + j5]);
 
                     if (i != 0) {
                         let j3 = (i >> 16) & 0xff;
@@ -2414,12 +2543,14 @@ export default class Surface {
                         let l3 = i & 0xff;
 
                         if (j3 == k3 && k3 == l3) {
-                            dest[k6 + destPos] =
-                                (((j3 * i4) >> 8) << 16) +
-                                (((k3 * j4) >> 8) << 8) +
-                                ((l3 * k4) >> 8);
+                            unchecked(
+                                (dest[k6 + destPos] =
+                                    (((j3 * i4) >> 8) << 16) +
+                                    (((k3 * j4) >> 8) << 8) +
+                                    ((l3 * k4) >> 8))
+                            );
                         } else {
-                            dest[k6 + destPos] = i;
+                            unchecked((dest[k6 + destPos] = i));
                         }
                     }
 
@@ -2481,7 +2612,7 @@ export default class Surface {
 
             if (j3 != 0) {
                 for (let k7 = k6; k7 < k6 + l6; k7++) {
-                    i = src![(j >> 16) + j6];
+                    i = unchecked(src![(j >> 16) + j6]);
 
                     if (i != 0) {
                         let k3 = (i >> 16) & 0xff;
@@ -2489,17 +2620,21 @@ export default class Surface {
                         let i4 = i & 0xff;
 
                         if (k3 == l3 && l3 == i4) {
-                            dest[k7 + destPos] =
-                                (((k3 * j4) >> 8) << 16) +
-                                (((l3 * k4) >> 8) << 8) +
-                                ((i4 * l4) >> 8);
+                            unchecked(
+                                (dest[k7 + destPos] =
+                                    (((k3 * j4) >> 8) << 16) +
+                                    (((l3 * k4) >> 8) << 8) +
+                                    ((i4 * l4) >> 8))
+                            );
                         } else if (k3 == 255 && l3 == i4) {
-                            dest[k7 + destPos] =
-                                (((k3 * i5) >> 8) << 16) +
-                                (((l3 * j5) >> 8) << 8) +
-                                ((i4 * k5) >> 8);
+                            unchecked(
+                                (dest[k7 + destPos] =
+                                    (((k3 * i5) >> 8) << 16) +
+                                    (((l3 * j5) >> 8) << 8) +
+                                    ((i4 * k5) >> 8))
+                            );
                         } else {
-                            dest[k7 + destPos] = i;
+                            unchecked((dest[k7 + destPos] = i));
                         }
                     }
 
@@ -2516,8 +2651,8 @@ export default class Surface {
 
     _transparentSpritePlot_from16A(
         dest: Int32Array,
-        coloursUsed: Int8Array | null,
-        colourList: Int32Array | null,
+        coloursUsed: Int8Array,
+        colourList: Int32Array,
         i: i32,
         j: i32,
         k: i32,
@@ -2558,22 +2693,24 @@ export default class Surface {
 
             if (i3 != 0) {
                 for (let k6 = k5; k6 < k5 + l5; k6++) {
-                    i = coloursUsed![(j >> 16) + j5] & 0xff;
+                    i = unchecked(coloursUsed[(j >> 16) + j5]) & 0xfff;
 
                     if (i != 0) {
-                        i = colourList![i];
+                        i = unchecked(colourList[i]);
 
                         let j3 = (i >> 16) & 0xff;
                         let k3 = (i >> 8) & 0xff;
                         let l3 = i & 0xff;
 
                         if (j3 == k3 && k3 == l3) {
-                            dest[k6 + l] =
-                                (((j3 * i4) >> 8) << 16) +
-                                (((k3 * j4) >> 8) << 8) +
-                                ((l3 * k4) >> 8);
+                            unchecked(
+                                (dest[k6 + l] =
+                                    (((j3 * i4) >> 8) << 16) +
+                                    (((k3 * j4) >> 8) << 8) +
+                                    ((l3 * k4) >> 8))
+                            );
                         } else {
-                            dest[k6 + l] = i;
+                            unchecked((dest[k6 + l] = i));
                         }
                     }
 
@@ -2590,8 +2727,8 @@ export default class Surface {
 
     _transparentSpritePlot_from17(
         dest: Int32Array,
-        coloursUsed: Int8Array | null,
-        colourList: Int32Array | null,
+        coloursUsed: Int8Array,
+        colourList: Int32Array,
         i: i32,
         j: i32,
         k: i32,
@@ -2636,27 +2773,31 @@ export default class Surface {
 
             if (j3 != 0) {
                 for (let k7 = k6; k7 < k6 + l6; k7++) {
-                    i = coloursUsed![(j >> 16) + j6] & 0xff;
+                    i = unchecked(coloursUsed[(j >> 16) + j6]) & 0xff;
 
                     if (i != 0) {
-                        i = colourList![i];
+                        i = unchecked(colourList[i]);
 
                         const k3 = (i >> 16) & 0xff;
                         const l3 = (i >> 8) & 0xff;
                         const i4 = i & 0xff;
 
                         if (k3 == l3 && l3 == i4) {
-                            dest[k7 + l] =
-                                (((k3 * j4) >> 8) << 16) +
-                                (((l3 * k4) >> 8) << 8) +
-                                ((i4 * l4) >> 8);
+                            unchecked(
+                                (dest[k7 + l] =
+                                    (((k3 * j4) >> 8) << 16) +
+                                    (((l3 * k4) >> 8) << 8) +
+                                    ((i4 * l4) >> 8))
+                            );
                         } else if (k3 == 255 && l3 == i4) {
-                            dest[k7 + l] =
-                                (((k3 * i5) >> 8) << 16) +
-                                (((l3 * j5) >> 8) << 8) +
-                                ((i4 * k5) >> 8);
+                            unchecked(
+                                (dest[k7 + l] =
+                                    (((k3 * i5) >> 8) << 16) +
+                                    (((l3 * j5) >> 8) << 8) +
+                                    ((i4 * k5) >> 8))
+                            );
                         } else {
-                            dest[k7 + l] = i;
+                            unchecked((dest[k7 + l] = i));
                         }
                     }
 
@@ -2706,7 +2847,7 @@ export default class Surface {
         max: i32
     ): void {
         let width = 0;
-        const fontData = Surface.gameFonts[font];
+        const fontData = unchecked(Surface.gameFonts[font]);
         let start = 0;
         let end = 0;
 
@@ -2724,10 +2865,9 @@ export default class Surface {
             ) {
                 index += 4;
             } else {
-                width +=
-                    fontData[
-                        Surface.characterWidth[text.charCodeAt(index)] + 7
-                    ];
+                width += unchecked(
+                    fontData[Surface.characterWidth[text.charCodeAt(index)] + 7]
+                );
             }
 
             if (text.charCodeAt(index) == C_SPACE) {
@@ -2765,7 +2905,7 @@ export default class Surface {
     }
 
     drawString(text: string, x: i32, y: i32, font: i32, colour: i32): void {
-        const fontData = Surface.gameFonts[font];
+        const fontData = unchecked(Surface.gameFonts[font]);
 
         for (let i = 0; i < text.length; i++) {
             if (
@@ -2834,7 +2974,9 @@ export default class Surface {
 
                 i += 4;
             } else {
-                const width = Surface.characterWidth[text.charCodeAt(i)];
+                const width = unchecked(
+                    Surface.characterWidth[text.charCodeAt(i)]
+                );
 
                 if (this.loggedIn && colour != 0) {
                     this.drawCharacter(width, x + 1, y, 0, fontData);
@@ -2843,7 +2985,7 @@ export default class Surface {
 
                 this.drawCharacter(width, x, y, colour, fontData);
 
-                x += fontData[width + 7];
+                x += unchecked(fontData[width + 7]);
             }
         }
     }
@@ -2855,15 +2997,15 @@ export default class Surface {
         colour: i32,
         fontData: Int8Array
     ): void {
-        let i1: i32 = x + fontData[width + 5];
-        let j1: i32 = y - fontData[width + 6];
-        let k1: i32 = fontData[width + 3];
-        let l1: i32 = fontData[width + 4];
+        let i1: i32 = x + unchecked(fontData[width + 5]);
+        let j1: i32 = y - unchecked(fontData[width + 6]);
+        let k1: i32 = unchecked(fontData[width + 3]);
+        let l1: i32 = unchecked(fontData[width + 4]);
 
         let i2: i32 =
-            fontData[width] * 16384 +
-            fontData[width + 1] * 128 +
-            fontData[width + 2];
+            unchecked(fontData[width]) * 16384 +
+            unchecked(fontData[width + 1]) * 128 +
+            unchecked(fontData[width + 2]);
 
         let j2 = i1 + j1 * this.width2;
         let k2 = this.width2 - k1;
@@ -2918,7 +3060,7 @@ export default class Surface {
         fontData: Int8Array,
         i: i32,
         j: i32,
-        k: i32,
+        pixelIdx: i32,
         l: i32,
         i1: i32,
         j1: i32,
@@ -2930,40 +3072,40 @@ export default class Surface {
 
         for (let i2 = -i1; i2 < 0; i2++) {
             for (let j2 = l1; j2 < 0; j2++) {
-                if (fontData[j++] != 0) {
-                    dest[k++] = i;
+                if (unchecked(fontData[j++]) != 0) {
+                    unchecked((dest[pixelIdx++] = i));
                 } else {
-                    k++;
+                    pixelIdx++;
                 }
 
-                if (fontData[j++] != 0) {
-                    dest[k++] = i;
+                if (unchecked(fontData[j++]) != 0) {
+                    unchecked((dest[pixelIdx++] = i));
                 } else {
-                    k++;
+                    pixelIdx++;
                 }
 
-                if (fontData[j++] != 0) {
-                    dest[k++] = i;
+                if (unchecked(fontData[j++]) != 0) {
+                    unchecked((dest[pixelIdx++] = i));
                 } else {
-                    k++;
+                    pixelIdx++;
                 }
 
-                if (fontData[j++] != 0) {
-                    dest[k++] = i;
+                if (unchecked(fontData[j++]) != 0) {
+                    unchecked((dest[pixelIdx++] = i));
                 } else {
-                    k++;
+                    pixelIdx++;
                 }
             }
 
             for (let k2 = l; k2 < 0; k2++) {
-                if (fontData[j++] != 0) {
-                    dest[k++] = i;
+                if (unchecked(fontData[j++]) != 0) {
+                    unchecked((dest[pixelIdx++] = i));
                 } else {
-                    k++;
+                    pixelIdx++;
                 }
             }
 
-            k += j1;
+            pixelIdx += j1;
             j += k1;
         }
     }
@@ -2993,15 +3135,15 @@ export default class Surface {
 
     textHeightFont(fontID: i32): i32 {
         if (fontID == 0) {
-            return Surface.gameFonts[fontID][8] - 2;
+            return unchecked(Surface.gameFonts[fontID][8]) - 2;
         }
 
-        return Surface.gameFonts[fontID][8] - 1;
+        return unchecked(Surface.gameFonts[fontID][8]) - 1;
     }
 
     textWidth(text: string, fontID: i32): i32 {
         let total = 0;
-        const font = Surface.gameFonts[fontID];
+        const font = unchecked(Surface.gameFonts[fontID]);
 
         for (let i = 0; i < text.length; i++) {
             if (
@@ -3017,7 +3159,9 @@ export default class Surface {
             ) {
                 i += 4;
             } else {
-                total += font[Surface.characterWidth[text.charCodeAt(i)] + 7];
+                total += unchecked(
+                    font[Surface.characterWidth[text.charCodeAt(i)] + 7]
+                );
             }
         }
 
@@ -3041,7 +3185,7 @@ export default class Surface {
             this.drawBoxAlpha(x + offsetX, y, tabWidth, height, tabColour, 128);
 
             this.drawStringCenter(
-                tabs[i],
+                unchecked(tabs[i]),
                 x + offsetX + ((tabWidth / 2) as i32),
                 y + 16,
                 4,
@@ -3059,10 +3203,6 @@ export default class Surface {
     }
 }
 
-const CHAR_SET =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!"£$%^&*()' +
-    "-_=+[{]};:'@#~,<.>/?\\| ";
-
 for (let i = 0; i < Surface.characterWidth.length; i++) {
     let charCode = CHAR_SET.indexOf(String.fromCharCode(i));
 
@@ -3070,5 +3210,5 @@ for (let i = 0; i < Surface.characterWidth.length; i++) {
         charCode = 74;
     }
 
-    Surface.characterWidth[i] = charCode * 9;
+    unchecked((Surface.characterWidth[i] = charCode * 9));
 }

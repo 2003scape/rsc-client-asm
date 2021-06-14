@@ -46,16 +46,20 @@ export function getUnsignedByte(i: i8): i32 {
     return i & 0xff;
 }
 
+//@inline
 export function getUnsignedShort(buffer: Int8Array, offset: i32): i32 {
-    return ((buffer[offset] & 0xff) << 8) + (buffer[offset + 1] & 0xff);
+    return (
+        ((unchecked(buffer[offset]) & 0xff) << 8) +
+        (unchecked(buffer[offset + 1]) & 0xff)
+    );
 }
 
 export function getUnsignedInt(buffer: Int8Array, offset: i32): i32 {
     return (
-        ((buffer[offset] & 0xff) << 24) +
-        ((buffer[offset + 1] & 0xff) << 16) +
-        ((buffer[offset + 2] & 0xff) << 8) +
-        (buffer[offset + 3] & 0xff)
+        ((unchecked(buffer[offset]) & 0xff) << 24) +
+        ((unchecked(buffer[offset + 1]) & 0xff) << 16) +
+        ((unchecked(buffer[offset + 2]) & 0xff) << 8) +
+        (unchecked(buffer[offset + 3]) & 0xff)
     );
 }
 
@@ -67,8 +71,8 @@ export function getUnsignedLong(buffer: Int8Array, offset: i32): i64 {
 }
 
 export function getSignedShort(buffer: Int8Array, offset: i32): i32 {
-    let i = (getUnsignedByte(buffer[offset]) * 256 +
-        getUnsignedByte(buffer[offset + 1])) as i32;
+    let i = (getUnsignedByte(unchecked(buffer[offset])) * 256 +
+        getUnsignedByte(unchecked(buffer[offset + 1]))) as i32;
 
     if (i > 32767) {
         i -= 0x10000;
@@ -78,14 +82,14 @@ export function getSignedShort(buffer: Int8Array, offset: i32): i32 {
 }
 
 export function getStackInt(buffer: Int8Array, offset: i32): i32 {
-    if ((buffer[offset] & 0xff) < 128) {
-        return buffer[offset];
+    if ((unchecked(buffer[offset]) & 0xff) < 128) {
+        return unchecked(buffer[offset]);
     } else {
         return (
-            (((buffer[offset] & 0xff) - 128) << 24) +
-            ((buffer[offset + 1] & 0xff) << 16) +
-            ((buffer[offset + 2] & 0xff) << 8) +
-            (buffer[offset + 3] & 0xff)
+            (((unchecked(buffer[offset]) & 0xff) - 128) << 24) +
+            ((unchecked(buffer[offset + 1]) & 0xff) << 16) +
+            ((unchecked(buffer[offset + 2]) & 0xff) << 8) +
+            (unchecked(buffer[offset + 3]) & 0xff)
         );
     }
 }
@@ -97,17 +101,18 @@ export function getBitMask(buffer: Int8Array, start: i32, length: i32): i32 {
 
     for (; length > bitOffset; bitOffset = 8) {
         bits +=
-            (buffer[byteOffset++] & BITMASK[bitOffset]) << (length - bitOffset);
+            (unchecked(buffer[byteOffset++]) & unchecked(BITMASK[bitOffset])) <<
+            (length - bitOffset);
 
         length -= bitOffset;
     }
 
     if (length == bitOffset) {
-        bits += buffer[byteOffset] & BITMASK[bitOffset];
+        bits += unchecked(buffer[byteOffset]) & unchecked(BITMASK[bitOffset]);
     } else {
         bits +=
-            ((buffer[byteOffset] as i32) >> (bitOffset - length)) &
-            BITMASK[length];
+            ((unchecked(buffer[byteOffset]) as i32) >> (bitOffset - length)) &
+            unchecked(BITMASK[length]);
     }
 
     return bits;
@@ -230,15 +235,15 @@ export function getDataFileOffset(fileName: string, buffer: Int8Array): i32 {
 
     for (let entry = 0; entry < numEntries; entry++) {
         const fileHash: i32 =
-            (buffer[entry * 10 + 2] & 0xff) * 0x1000000 +
-            (buffer[entry * 10 + 3] & 0xff) * 0x10000 +
-            (buffer[entry * 10 + 4] & 0xff) * 256 +
-            (buffer[entry * 10 + 5] & 0xff);
+            (unchecked(buffer[entry * 10 + 2]) & 0xff) * 0x1000000 +
+            (unchecked(buffer[entry * 10 + 3]) & 0xff) * 0x10000 +
+            (unchecked(buffer[entry * 10 + 4]) & 0xff) * 256 +
+            (unchecked(buffer[entry * 10 + 5]) & 0xff);
 
         const fileSize: i32 =
-            (buffer[entry * 10 + 9] & 0xff) * 0x10000 +
-            (buffer[entry * 10 + 10] & 0xff) * 256 +
-            (buffer[entry * 10 + 11] & 0xff);
+            (unchecked(buffer[entry * 10 + 9]) & 0xff) * 0x10000 +
+            (unchecked(buffer[entry * 10 + 10]) & 0xff) * 256 +
+            (unchecked(buffer[entry * 10 + 11]) & 0xff);
 
         if (fileHash == wantedHash) {
             return offset;
@@ -262,15 +267,15 @@ export function getDataFileLength(fileName: string, buffer: Int8Array): i32 {
 
     for (let i = 0; i < numEntries; i++) {
         let fileHash: i32 =
-            (buffer[i * 10 + 2] & 0xff) * 0x1000000 +
-            (buffer[i * 10 + 3] & 0xff) * 0x10000 +
-            (buffer[i * 10 + 4] & 0xff) * 256 +
-            (buffer[i * 10 + 5] & 0xff);
+            (unchecked(buffer[i * 10 + 2]) & 0xff) * 0x1000000 +
+            (unchecked(buffer[i * 10 + 3]) & 0xff) * 0x10000 +
+            (unchecked(buffer[i * 10 + 4]) & 0xff) * 256 +
+            (unchecked(buffer[i * 10 + 5]) & 0xff);
 
         let fileSize: i32 =
-            (buffer[i * 10 + 6] & 0xff) * 0x10000 +
-            (buffer[i * 10 + 7] & 0xff) * 256 +
-            (buffer[i * 10 + 8] & 0xff);
+            (unchecked(buffer[i * 10 + 6]) & 0xff) * 0x10000 +
+            (unchecked(buffer[i * 10 + 7]) & 0xff) * 256 +
+            (unchecked(buffer[i * 10 + 8]) & 0xff);
 
         if (fileHash == wantedHash) {
             return fileSize;
@@ -287,7 +292,8 @@ export function unpackData(
     fileData: Int8Array | null
 ): Int8Array | null {
     const numEntries: i32 =
-        (archiveData[0] & 0xff) * 256 + (archiveData[1] & 0xff);
+        (unchecked(archiveData[0]) & 0xff) * 256 +
+        (unchecked(archiveData[1]) & 0xff);
 
     let wantedHash = 0;
 
@@ -301,23 +307,23 @@ export function unpackData(
 
     for (let i = 0; i < numEntries; i++) {
         const fileHash: i32 =
-            (archiveData[i * 10 + 2] & 0xff) * 0x1000000 +
-            (archiveData[i * 10 + 3] & 0xff) * 0x10000 +
-            (archiveData[i * 10 + 4] & 0xff) * 256 +
-            (archiveData[i * 10 + 5] & 0xff);
+            (unchecked(archiveData[i * 10 + 2]) & 0xff) * 0x1000000 +
+            (unchecked(archiveData[i * 10 + 3]) & 0xff) * 0x10000 +
+            (unchecked(archiveData[i * 10 + 4]) & 0xff) * 256 +
+            (unchecked(archiveData[i * 10 + 5]) & 0xff);
 
         const fileSize: i32 =
-            (archiveData[i * 10 + 6] & 0xff) * 0x10000 +
-            (archiveData[i * 10 + 7] & 0xff) * 256 +
-            (archiveData[i * 10 + 8] & 0xff);
+            (unchecked(archiveData[i * 10 + 6]) & 0xff) * 0x10000 +
+            (unchecked(archiveData[i * 10 + 7]) & 0xff) * 256 +
+            (unchecked(archiveData[i * 10 + 8]) & 0xff);
 
         const fileSizeCompressed: i32 =
-            (archiveData[i * 10 + 9] & 0xff) * 0x10000 +
-            (archiveData[i * 10 + 10] & 0xff) * 256 +
-            (archiveData[i * 10 + 11] & 0xff);
+            (unchecked(archiveData[i * 10 + 9]) & 0xff) * 0x10000 +
+            (unchecked(archiveData[i * 10 + 10]) & 0xff) * 256 +
+            (unchecked(archiveData[i * 10 + 11]) & 0xff);
 
         if (fileHash == wantedHash) {
-            if (fileData == null) {
+            if (!fileData) {
                 fileData = new Int8Array(fileSize + extraSize);
             }
 
@@ -331,7 +337,7 @@ export function unpackData(
                 );*/
             } else {
                 for (let j = 0; j < fileSize; j++) {
-                    fileData[j] = archiveData[offset + j];
+                    unchecked((fileData[j] = archiveData[offset + j]));
                 }
             }
 

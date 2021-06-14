@@ -34,7 +34,7 @@ export default class GameConnection extends GameShell {
 
     incomingPacket: Int8Array = new Int8Array(5000);
     packetLastRead: i32;
-    packetStream: PacketStream|null;
+    packetStream: PacketStream | null;
 
     constructor() {
         super();
@@ -50,18 +50,30 @@ export default class GameConnection extends GameShell {
 
             for (let i = 0; i < this.friendListCount - 1; i++) {
                 if (
-                    (this.friendListOnline[i] != 255 &&
-                        this.friendListOnline[i + 1] == 255) ||
-                    (this.friendListOnline[i] == 0 &&
-                        this.friendListOnline[i + 1] != 0)
+                    (unchecked(this.friendListOnline[i]) != 255 &&
+                        unchecked(this.friendListOnline[i + 1]) == 255) ||
+                    (unchecked(this.friendListOnline[i]) == 0 &&
+                        unchecked(this.friendListOnline[i + 1]) != 0)
                 ) {
-                    const onlineStatus = this.friendListOnline[i];
-                    this.friendListOnline[i] = this.friendListOnline[i + 1];
-                    this.friendListOnline[i + 1] = onlineStatus;
+                    const onlineStatus = unchecked(this.friendListOnline[i]);
 
-                    const encodedUsername = this.friendListHashes[i];
-                    this.friendListHashes[i] = this.friendListHashes[i + 1];
-                    this.friendListHashes[i + 1] = encodedUsername;
+                    unchecked(
+                        (this.friendListOnline[i] = this.friendListOnline[
+                            i + 1
+                        ])
+                    );
+
+                    unchecked((this.friendListOnline[i + 1] = onlineStatus));
+
+                    const encodedUsername = unchecked(this.friendListHashes[i]);
+
+                    unchecked(
+                        (this.friendListHashes[i] = this.friendListHashes[
+                            i + 1
+                        ])
+                    );
+
+                    unchecked((this.friendListHashes[i + 1] = encodedUsername));
 
                     flag = true;
                 }
@@ -99,7 +111,7 @@ export default class GameConnection extends GameShell {
         this.packetStream!.sendPacket();
 
         for (let i = 0; i < this.ignoreListCount; i++) {
-            if (this.ignoreList[i] == encodedUsername) {
+            if (unchecked(this.ignoreList[i]) == encodedUsername) {
                 return 0;
             }
         }
@@ -108,7 +120,7 @@ export default class GameConnection extends GameShell {
             return 0;
         }
 
-        this.ignoreList[this.ignoreListCount++] = encodedUsername;
+        unchecked((this.ignoreList[this.ignoreListCount++] = encodedUsername));
 
         return 0;
     }
@@ -122,11 +134,11 @@ export default class GameConnection extends GameShell {
         this.packetStream!.sendPacket();
 
         for (let i = 0; i < this.ignoreListCount; i++) {
-            if (this.ignoreList[i] == encodedUsername) {
+            if (unchecked(this.ignoreList[i]) == encodedUsername) {
                 this.ignoreListCount--;
 
                 for (let j = i; j < this.ignoreListCount; j++) {
-                    this.ignoreList[j] = this.ignoreList[j + 1];
+                    unchecked((this.ignoreList[j] = this.ignoreList[j + 1]));
                 }
 
                 return 0;
@@ -147,7 +159,7 @@ export default class GameConnection extends GameShell {
         this.packetStream!.sendPacket();
 
         for (let i = 0; i < this.friendListCount; i++) {
-            if (this.friendListHashes[i] == encodedUsername) {
+            if (unchecked(this.friendListHashes[i]) == encodedUsername) {
                 return 0;
             }
         }
@@ -156,8 +168,12 @@ export default class GameConnection extends GameShell {
             return 0;
         }
 
-        this.friendListHashes[this.friendListCount] = encodedUsername;
-        this.friendListOnline[this.friendListCount] = 0;
+        unchecked(
+            (this.friendListHashes[this.friendListCount] = encodedUsername)
+        );
+
+        unchecked((this.friendListOnline[this.friendListCount] = 0));
+
         this.friendListCount++;
 
         return 0;
@@ -172,15 +188,20 @@ export default class GameConnection extends GameShell {
         this.packetStream!.sendPacket();
 
         for (let i = 0; i < this.friendListCount; i++) {
-            if (this.friendListHashes[i] != encodedUsername) {
+            if (unchecked(this.friendListHashes[i]) != encodedUsername) {
                 continue;
             }
 
             this.friendListCount--;
 
             for (let j = i; j < this.friendListCount; j++) {
-                this.friendListHashes[j] = this.friendListHashes[j + 1];
-                this.friendListOnline[j] = this.friendListOnline[j + 1];
+                unchecked(
+                    (this.friendListHashes[j] = this.friendListHashes[j + 1])
+                );
+
+                unchecked(
+                    (this.friendListOnline[j] = this.friendListOnline[j + 1])
+                );
             }
 
             break;

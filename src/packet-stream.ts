@@ -4,7 +4,7 @@ function toCharArray(s: string): Int8Array {
     const a = new Int8Array(s.length);
 
     for (let i = 0; i < s.length; i += 1) {
-        a[i] = s.charCodeAt(i);
+        unchecked((a[i] = s.charCodeAt(i)));
     }
 
     return a;
@@ -68,25 +68,33 @@ export default class PacketStream {
         const length = this.packetEnd - this.packetStart - 2;
 
         if (length >= 160) {
-            this.packetData[this.packetStart] =
-                (160 + ((length / 256) as i32)) & 0xff;
+            unchecked(
+                (this.packetData[this.packetStart] =
+                    (160 + ((length / 256) as i32)) & 0xff)
+            );
 
-            this.packetData[this.packetStart + 1] = length & 0xff;
+            unchecked((this.packetData[this.packetStart + 1] = length & 0xff));
         } else {
-            this.packetData[this.packetStart] = length & 0xff;
+            unchecked((this.packetData[this.packetStart] = length & 0xff));
             this.packetEnd--;
 
-            this.packetData[this.packetStart + 1] = this.packetData[
-                this.packetEnd
-            ];
+            unchecked(
+                (this.packetData[this.packetStart + 1] = this.packetData[
+                    this.packetEnd
+                ])
+            );
         }
 
         // this seems largely useless and doesn't appear to do anything
         if (PACKET_MAX_LENGTH <= 10000) {
-            let k = this.packetData[this.packetStart + 2] & 0xff;
+            let k = unchecked(this.packetData[this.packetStart + 2]) & 0xff;
 
-            PacketStream.anIntArray537[k]++;
-            PacketStream.anIntArray541[k] += this.packetEnd - this.packetStart;
+            unchecked(PacketStream.anIntArray537[k]++);
+
+            unchecked(
+                (PacketStream.anIntArray541[k] +=
+                    this.packetEnd - this.packetStart)
+            );
         }
 
         this.packetStart = this.packetEnd;
@@ -94,7 +102,9 @@ export default class PacketStream {
 
     putBytes(src: Int8Array, offset: i32, length: i32): void {
         for (let i = 0; i < length; i++) {
-            this.packetData[this.packetEnd++] = src[offset + i] & 0xff;
+            unchecked(
+                (this.packetData[this.packetEnd++] = src[offset + i] & 0xff)
+            );
         }
     }
 
@@ -110,8 +120,8 @@ export default class PacketStream {
             }
         }
 
-        this.packetData[this.packetStart + 2] = opcode & 0xff;
-        this.packetData[this.packetStart + 3] = 0;
+        unchecked((this.packetData[this.packetStart + 2] = opcode & 0xff));
+        unchecked((this.packetData[this.packetStart + 3] = 0));
         this.packetEnd = this.packetStart + 3;
         this.packet8Check = 8;
 
@@ -119,15 +129,15 @@ export default class PacketStream {
     }
 
     putShort(i: i32): void {
-        this.packetData[this.packetEnd++] = (i >> 8) & 0xff;
-        this.packetData[this.packetEnd++] = i & 0xff;
+        unchecked((this.packetData[this.packetEnd++] = (i >> 8) & 0xff));
+        unchecked((this.packetData[this.packetEnd++] = i & 0xff));
     }
 
     putInt(i: i32): void {
-        this.packetData[this.packetEnd++] = (i >> 24) & 0xff;
-        this.packetData[this.packetEnd++] = (i >> 16) & 0xff;
-        this.packetData[this.packetEnd++] = (i >> 8) & 0xff;
-        this.packetData[this.packetEnd++] = i & 0xff;
+        unchecked((this.packetData[this.packetEnd++] = (i >> 24) & 0xff));
+        unchecked((this.packetData[this.packetEnd++] = (i >> 16) & 0xff));
+        unchecked((this.packetData[this.packetEnd++] = (i >> 8) & 0xff));
+        unchecked((this.packetData[this.packetEnd++] = i & 0xff));
     }
 
     putString(s: string): void {
@@ -135,7 +145,7 @@ export default class PacketStream {
     }
 
     putByte(i: i32): void {
-        this.packetData[this.packetEnd++] = i & 0xff;
+        unchecked((this.packetData[this.packetEnd++] = i & 0xff));
     }
 
     flushPacket(): i32 {
