@@ -38,11 +38,11 @@ export class Int322DArray {
     }
 
     static fromArray(array: Array<Array<i32>>): Int322DArray {
-        const wrap = new Int322DArray(array[0].length, array.length);
+        const wrap = new Int322DArray(unchecked(array[0]).length, array.length);
 
         for (let i = 0; i < wrap.width; i += 1) {
             for (let j = 0; j < wrap.height; j += 1) {
-                wrap.set(i, j, array[i][j]);
+                wrap.set(j, i, unchecked(array[j][i]));
             }
         }
 

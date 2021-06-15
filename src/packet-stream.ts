@@ -33,19 +33,19 @@ export default class PacketStream {
         return this.packetStart > 0;
     }
 
-    writePacket(i: i32): i32 {
+    writePacket(i: i32): void {
         if (this.socketException) {
             this.packetStart = 0;
             this.packetEnd = 3;
             this.socketException = false;
 
-            return 1;
+            throw new Error(this.socketExceptionMessage);
         }
 
         this.delay++;
 
         if (this.delay < i) {
-            return 0;
+            return;
         }
 
         if (this.packetStart > 0) {
@@ -55,8 +55,6 @@ export default class PacketStream {
 
         this.packetStart = 0;
         this.packetEnd = 3;
-
-        return 0;
     }
 
     sendPacket(): void {
@@ -113,19 +111,15 @@ export default class PacketStream {
         this.putInt((l & -1) as i32);
     }
 
-    newPacket(opcode: i32): i32 {
+    newPacket(opcode: i32): void {
         if (this.packetStart > (((PACKET_MAX_LENGTH * 4) / 5) as i32)) {
-            if (this.writePacket(0) != 0) {
-                return 1;
-            }
+            this.writePacket(0);
         }
 
         unchecked((this.packetData[this.packetStart + 2] = opcode & 0xff));
         unchecked((this.packetData[this.packetStart + 3] = 0));
         this.packetEnd = this.packetStart + 3;
         this.packet8Check = 8;
-
-        return 0;
     }
 
     putShort(i: i32): void {
@@ -148,9 +142,9 @@ export default class PacketStream {
         unchecked((this.packetData[this.packetEnd++] = i & 0xff));
     }
 
-    flushPacket(): i32 {
+    flushPacket(): void {
         this.sendPacket();
-        return this.writePacket(0);
+        this.writePacket(0);
     }
 
     writeStreamBytes(buffer: Int8Array, offset: i32, length: i32): void {}

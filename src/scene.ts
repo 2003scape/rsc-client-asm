@@ -190,61 +190,61 @@ export default class Scene {
             i += k2 & 0x600000;
             i4 = k2 >> 23;
             k2 += l2;
-            ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
+            unchecked((ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4));
             i += k3;
             j += l3;
-            ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
+            unchecked((ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4));
             i += k3;
             j += l3;
-            ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
+            unchecked((ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4));
             i += k3;
             j += l3;
-            ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
-            i += k3;
-            j += l3;
-            i = (i & 0x3fff) + (k2 & 0x600000);
-            i4 = k2 >> 23;
-            k2 += l2;
-            ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
-            i += k3;
-            j += l3;
-            ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
-            i += k3;
-            j += l3;
-            ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
-            i += k3;
-            j += l3;
-            ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
+            unchecked((ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4));
             i += k3;
             j += l3;
             i = (i & 0x3fff) + (k2 & 0x600000);
             i4 = k2 >> 23;
             k2 += l2;
-            ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
+            unchecked((ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4));
             i += k3;
             j += l3;
-            ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
+            unchecked((ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4));
             i += k3;
             j += l3;
-            ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
+            unchecked((ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4));
             i += k3;
             j += l3;
-            ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
+            unchecked((ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4));
             i += k3;
             j += l3;
             i = (i & 0x3fff) + (k2 & 0x600000);
             i4 = k2 >> 23;
             k2 += l2;
-            ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
+            unchecked((ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4));
             i += k3;
             j += l3;
-            ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
+            unchecked((ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4));
             i += k3;
             j += l3;
-            ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
+            unchecked((ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4));
             i += k3;
             j += l3;
-            ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
+            unchecked((ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4));
+            i += k3;
+            j += l3;
+            i = (i & 0x3fff) + (k2 & 0x600000);
+            i4 = k2 >> 23;
+            k2 += l2;
+            unchecked((ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4));
+            i += k3;
+            j += l3;
+            unchecked((ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4));
+            i += k3;
+            j += l3;
+            unchecked((ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4));
+            i += k3;
+            j += l3;
+            unchecked((ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4));
             i = i3;
             j = j3;
             k += j1;
@@ -273,7 +273,7 @@ export default class Scene {
                 k2 += l2;
             }
 
-            ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
+            unchecked((ai[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4));
             i += k3;
             j += l3;
         }
@@ -3920,6 +3920,7 @@ export default class Scene {
                 let colour = this.textureColourList![id][
                     this.textureColoursUsed![id][y + x * textureWidth] & 0xff
                 ];
+
                 colour &= 0xf8f8ff;
 
                 if (colour == 0) {
@@ -4718,29 +4719,29 @@ export default class Scene {
                 }
             } else {
                 let l5 = this.method306(
-                    ai[(k + 1) % i],
-                    ai1[(k + 1) % i],
-                    ai[k],
-                    ai1[k],
-                    ai1[l]
+                    unchecked(ai[(k + 1) % i]),
+                    unchecked(ai1[(k + 1) % i]),
+                    unchecked(ai[k]),
+                    unchecked(ai1[k]),
+                    unchecked(ai1[l])
                 );
 
                 let j10 = ai[l];
 
                 let i15 = this.method306(
-                    ai2[(i1 + 1) % j],
-                    ai3[(i1 + 1) % j],
-                    ai2[i1],
-                    ai3[i1],
-                    ai1[l]
+                    unchecked(ai2[(i1 + 1) % j]),
+                    unchecked(ai3[(i1 + 1) % j]),
+                    unchecked(ai2[i1]),
+                    unchecked(ai3[i1]),
+                    unchecked(ai1[l])
                 );
 
                 let k19 = this.method306(
-                    ai2[(j1 - 1 + j) % j],
-                    ai3[(j1 - 1 + j) % j],
-                    ai2[j1],
-                    ai3[j1],
-                    ai1[l]
+                    unchecked(ai2[(j1 - 1 + j) % j]),
+                    unchecked(ai3[(j1 - 1 + j) % j]),
+                    unchecked(ai2[j1]),
+                    unchecked(ai3[j1]),
+                    unchecked(ai1[l])
                 );
 
                 if (this.method307(l5, j10, i15, k19, flag)) {
@@ -4755,42 +4756,42 @@ export default class Scene {
             }
         }
 
-        if (ai1[k] < ai3[i1]) {
-            let i6 = ai[k];
+        if (unchecked(ai1[k] < ai3[i1])) {
+            let i6 = unchecked(ai[k]);
 
             let j15 = this.method306(
-                ai2[(i1 + 1) % j],
-                ai3[(i1 + 1) % j],
-                ai2[i1],
-                ai3[i1],
-                ai1[k]
+                unchecked(ai2[(i1 + 1) % j]),
+                unchecked(ai3[(i1 + 1) % j]),
+                unchecked(ai2[i1]),
+                unchecked(ai3[i1]),
+                unchecked(ai1[k])
             );
 
             let l19 = this.method306(
-                ai2[(j1 - 1 + j) % j],
-                ai3[(j1 - 1 + j) % j],
-                ai2[j1],
-                ai3[j1],
-                ai1[k]
+                unchecked(ai2[(j1 - 1 + j) % j]),
+                unchecked(ai3[(j1 - 1 + j) % j]),
+                unchecked(ai2[j1]),
+                unchecked(ai3[j1]),
+                unchecked(ai1[k])
             );
 
             return this.method308(j15, l19, i6, !flag);
         }
 
         let j6 = this.method306(
-            ai[(k + 1) % i],
-            ai1[(k + 1) % i],
-            ai[k],
-            ai1[k],
-            ai3[i1]
+            unchecked(ai[(k + 1) % i]),
+            unchecked(ai1[(k + 1) % i]),
+            unchecked(ai[k]),
+            unchecked(ai1[k]),
+            unchecked(ai3[i1])
         );
 
         let k10 = this.method306(
-            ai[(l - 1 + i) % i],
-            ai1[(l - 1 + i) % i],
-            ai[l],
-            ai1[l],
-            ai3[i1]
+            unchecked(ai[(l - 1 + i) % i]),
+            unchecked(ai1[(l - 1 + i) % i]),
+            unchecked(ai[l]),
+            unchecked(ai1[l]),
+            unchecked(ai3[i1])
         );
 
         let k15 = ai2[i1];
@@ -4800,11 +4801,22 @@ export default class Scene {
 }
 
 for (let i = 0; i < 256; i++) {
-    Scene.sin512Cache[i] = (Math.sin(i * 0.02454369) * 32768) as i32;
-    Scene.sin512Cache[i + 256] = (Math.cos(i * 0.02454369) * 32768) as i32;
+    unchecked(
+        (Scene.sin512Cache[i] = (Math.sin(i * 0.02454369) * 32768) as i32)
+    );
+
+    unchecked(
+        (Scene.sin512Cache[i + 256] = (Math.cos(i * 0.02454369) * 32768) as i32)
+    );
 }
 
 for (let i = 0; i < 1024; i++) {
-    Scene.sinCosCache[i] = (Math.sin(i * 0.00613592315) * 32768) as i32;
-    Scene.sinCosCache[i + 1024] = (Math.cos(i * 0.00613592315) * 32768) as i32;
+    unchecked(
+        (Scene.sinCosCache[i] = (Math.sin(i * 0.00613592315) * 32768) as i32)
+    );
+
+    unchecked(
+        (Scene.sinCosCache[i + 1024] = (Math.cos(i * 0.00613592315) *
+            32768) as i32)
+    );
 }

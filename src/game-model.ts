@@ -468,7 +468,7 @@ export default class GameModel {
         count: i32,
         pieceMaxVertices: i32,
         pickable: bool
-    ): StaticArray<GameModel|null> {
+    ): StaticArray<GameModel | null> {
         this.commit();
 
         let pieceNV = new Int32Array(count);
@@ -498,7 +498,7 @@ export default class GameModel {
             pieceNF[p]++;
         }
 
-        let pieces = new StaticArray<GameModel|null>(count);
+        let pieces = new StaticArray<GameModel | null>(count);
 
         for (let i = 0; i < count; i++) {
             if (pieceNV[i] > pieceMaxVertices) {
@@ -1246,26 +1246,34 @@ export default class GameModel {
 }
 
 for (let i = 0; i < 256; i++) {
-    GameModel.sine9[i] = (Math.sin(i * 0.02454369) * 32768) as i32;
-    GameModel.sine9[i + 256] = (Math.cos(i * 0.02454369) * 32768) as i32;
+    unchecked((GameModel.sine9[i] = (Math.sin(i * 0.02454369) * 32768) as i32));
+
+    unchecked(
+        (GameModel.sine9[i + 256] = (Math.cos(i * 0.02454369) * 32768) as i32)
+    );
 }
 
 for (let i = 0; i < 1024; i++) {
-    GameModel.sine11[i] = (Math.sin(i * 0.00613592315) * 32768) as i32;
-    GameModel.sine11[i + 1024] = (Math.cos(i * 0.00613592315) * 32768) as i32;
+    unchecked(
+        (GameModel.sine11[i] = (Math.sin(i * 0.00613592315) * 32768) as i32)
+    );
+    unchecked(
+        (GameModel.sine11[i + 1024] = (Math.cos(i * 0.00613592315) *
+            32768) as i32)
+    );
 }
 
 for (let i = 0; i < 10; i++) {
-    GameModel.base64Alphabet[48 + i] = i;
+    unchecked((GameModel.base64Alphabet[48 + i] = i));
 }
 
 for (let i = 0; i < 26; i++) {
-    GameModel.base64Alphabet[65 + i] = i + 10;
+    unchecked((GameModel.base64Alphabet[65 + i] = i + 10));
 }
 
 for (let i = 0; i < 26; i++) {
-    GameModel.base64Alphabet[97 + i] = i + 36;
+    unchecked((GameModel.base64Alphabet[97 + i] = i + 36));
 }
 
-GameModel.base64Alphabet[163] = 62;
-GameModel.base64Alphabet[36] = 63;
+unchecked((GameModel.base64Alphabet[163] = 62));
+unchecked((GameModel.base64Alphabet[36] = 63));

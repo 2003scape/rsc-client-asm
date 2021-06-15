@@ -86,50 +86,37 @@ export default class GameConnection extends GameShell {
         privateChat: i32,
         trade: i32,
         duel: i32
-    ): i32 {
-        if (this.packetStream!.newPacket(ClientOpcodes.SETTINGS_PRIVACY) != 0) {
-            return 1;
-        }
-
+    ): void {
+        this.packetStream!.newPacket(ClientOpcodes.SETTINGS_PRIVACY);
         this.packetStream!.putByte(chat);
         this.packetStream!.putByte(privateChat);
         this.packetStream!.putByte(trade);
         this.packetStream!.putByte(duel);
         this.packetStream!.sendPacket();
-
-        return 0;
     }
 
-    ignoreAdd(username: string): i32 {
+    ignoreAdd(username: string): void {
         const encodedUsername = encodeUsername(username);
 
-        if (this.packetStream!.newPacket(ClientOpcodes.IGNORE_ADD) != 0) {
-            return 1;
-        }
-
+        this.packetStream!.newPacket(ClientOpcodes.IGNORE_ADD);
         this.packetStream!.putLong(encodedUsername);
         this.packetStream!.sendPacket();
 
         for (let i = 0; i < this.ignoreListCount; i++) {
             if (unchecked(this.ignoreList[i]) == encodedUsername) {
-                return 0;
+                return;
             }
         }
 
         if (this.ignoreListCount >= GameConnection.maxSocialListSize) {
-            return 0;
+            return;
         }
 
         unchecked((this.ignoreList[this.ignoreListCount++] = encodedUsername));
-
-        return 0;
     }
 
-    ignoreRemove(encodedUsername: i64): i32 {
-        if (this.packetStream!.newPacket(ClientOpcodes.IGNORE_REMOVE) != 0) {
-            return 1;
-        }
-
+    ignoreRemove(encodedUsername: i64): void {
+        this.packetStream!.newPacket(ClientOpcodes.IGNORE_REMOVE);
         this.packetStream!.putLong(encodedUsername);
         this.packetStream!.sendPacket();
 
@@ -141,31 +128,26 @@ export default class GameConnection extends GameShell {
                     unchecked((this.ignoreList[j] = this.ignoreList[j + 1]));
                 }
 
-                return 0;
+                return;
             }
         }
-
-        return 0;
     }
 
-    friendAdd(username: string): i32 {
+    friendAdd(username: string): void {
         const encodedUsername = encodeUsername(username);
 
-        if (this.packetStream!.newPacket(ClientOpcodes.FRIEND_ADD) != 0) {
-            return 1;
-        }
-
+        this.packetStream!.newPacket(ClientOpcodes.FRIEND_ADD);
         this.packetStream!.putLong(encodedUsername);
         this.packetStream!.sendPacket();
 
         for (let i = 0; i < this.friendListCount; i++) {
             if (unchecked(this.friendListHashes[i]) == encodedUsername) {
-                return 0;
+                return;
             }
         }
 
         if (this.friendListCount >= GameConnection.maxSocialListSize) {
-            return 0;
+            return;
         }
 
         unchecked(
@@ -175,15 +157,10 @@ export default class GameConnection extends GameShell {
         unchecked((this.friendListOnline[this.friendListCount] = 0));
 
         this.friendListCount++;
-
-        return 0;
     }
 
-    friendRemove(encodedUsername: i64): i32 {
-        if (this.packetStream!.newPacket(ClientOpcodes.FRIEND_REMOVE) != 0) {
-            return 1;
-        }
-
+    friendRemove(encodedUsername: i64): void {
+        this.packetStream!.newPacket(ClientOpcodes.FRIEND_REMOVE);
         this.packetStream!.putLong(encodedUsername);
         this.packetStream!.sendPacket();
 
@@ -211,45 +188,28 @@ export default class GameConnection extends GameShell {
             `@pri@${decodeUsername(encodedUsername)} has been removed from ` +
                 'your friends list'
         );
-
-        return 0;
     }
 
     sendPrivateMessage(
         encodedUsername: i64,
         message: Int8Array,
         length: i32
-    ): i32 {
-        if (this.packetStream!.newPacket(ClientOpcodes.PM) != 0) {
-            return 1;
-        }
-
+    ): void {
+        this.packetStream!.newPacket(ClientOpcodes.PM);
         this.packetStream!.putLong(encodedUsername);
         this.packetStream!.putBytes(message, 0, length);
         this.packetStream!.sendPacket();
-
-        return 0;
     }
 
-    sendChatMessage(message: Int8Array, length: i32): i32 {
-        if (this.packetStream!.newPacket(ClientOpcodes.CHAT) != 0) {
-            return 1;
-        }
-
+    sendChatMessage(message: Int8Array, length: i32): void {
+        this.packetStream!.newPacket(ClientOpcodes.CHAT);
         this.packetStream!.putBytes(message, 0, length);
         this.packetStream!.sendPacket();
-
-        return 0;
     }
 
-    sendCommandString(command: string): i32 {
-        if (this.packetStream!.newPacket(ClientOpcodes.COMMAND) != 0) {
-            return 1;
-        }
-
+    sendCommandString(command: string): void {
+        this.packetStream!.newPacket(ClientOpcodes.COMMAND);
         this.packetStream!.putString(command);
         this.packetStream!.sendPacket();
-
-        return 0;
     }
 }
