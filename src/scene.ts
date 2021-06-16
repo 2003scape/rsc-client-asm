@@ -336,42 +336,25 @@ export default class Scene {
             i += k2 & 0x600000;
             i4 = k2 >> 23;
             k2 += l2;
-            ai[j2++] =
-                (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
-                ((ai[j2] >> 1) & 0x7f7f7f);
+            unchecked(
+                (ai[j2++] =
+                    (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
+                    ((ai[j2] >> 1) & 0x7f7f7f))
+            );
             i += k3;
             j += l3;
-            ai[j2++] =
-                (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
-                ((ai[j2] >> 1) & 0x7f7f7f);
+            unchecked(
+                (ai[j2++] =
+                    (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
+                    ((ai[j2] >> 1) & 0x7f7f7f))
+            );
             i += k3;
             j += l3;
-            ai[j2++] =
-                (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
-                ((ai[j2] >> 1) & 0x7f7f7f);
-            i += k3;
-            j += l3;
-            ai[j2++] =
-                (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
-                ((ai[j2] >> 1) & 0x7f7f7f);
-            i += k3;
-            j += l3;
-            i = (i & 0x3fff) + (k2 & 0x600000);
-            i4 = k2 >> 23;
-            k2 += l2;
-            ai[j2++] =
-                (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
-                ((ai[j2] >> 1) & 0x7f7f7f);
-            i += k3;
-            j += l3;
-            ai[j2++] =
-                (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
-                ((ai[j2] >> 1) & 0x7f7f7f);
-            i += k3;
-            j += l3;
-            ai[j2++] =
-                (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
-                ((ai[j2] >> 1) & 0x7f7f7f);
+            unchecked(
+                (ai[j2++] =
+                    (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
+                    ((ai[j2] >> 1) & 0x7f7f7f))
+            );
             i += k3;
             j += l3;
             ai[j2++] =
@@ -382,47 +365,94 @@ export default class Scene {
             i = (i & 0x3fff) + (k2 & 0x600000);
             i4 = k2 >> 23;
             k2 += l2;
-            ai[j2++] =
-                (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
-                ((ai[j2] >> 1) & 0x7f7f7f);
+            unchecked(
+                (ai[j2++] =
+                    (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
+                    ((ai[j2] >> 1) & 0x7f7f7f))
+            );
             i += k3;
             j += l3;
-            ai[j2++] =
-                (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
-                ((ai[j2] >> 1) & 0x7f7f7f);
+            unchecked(
+                (ai[j2++] =
+                    (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
+                    ((ai[j2] >> 1) & 0x7f7f7f))
+            );
             i += k3;
             j += l3;
-            ai[j2++] =
-                (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
-                ((ai[j2] >> 1) & 0x7f7f7f);
+            unchecked(
+                (ai[j2++] =
+                    (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
+                    ((ai[j2] >> 1) & 0x7f7f7f))
+            );
             i += k3;
             j += l3;
-            ai[j2++] =
-                (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
-                ((ai[j2] >> 1) & 0x7f7f7f);
+            unchecked(
+                (ai[j2++] =
+                    (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
+                    ((ai[j2] >> 1) & 0x7f7f7f))
+            );
             i += k3;
             j += l3;
             i = (i & 0x3fff) + (k2 & 0x600000);
             i4 = k2 >> 23;
             k2 += l2;
-            ai[j2++] =
-                (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
-                ((ai[j2] >> 1) & 0x7f7f7f);
+            unchecked(
+                (ai[j2++] =
+                    (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
+                    ((ai[j2] >> 1) & 0x7f7f7f))
+            );
             i += k3;
             j += l3;
-            ai[j2++] =
-                (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
-                ((ai[j2] >> 1) & 0x7f7f7f);
+            unchecked(
+                (ai[j2++] =
+                    (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
+                    ((ai[j2] >> 1) & 0x7f7f7f))
+            );
             i += k3;
             j += l3;
-            ai[j2++] =
-                (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
-                ((ai[j2] >> 1) & 0x7f7f7f);
+            unchecked(
+                (ai[j2++] =
+                    (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
+                    ((ai[j2] >> 1) & 0x7f7f7f))
+            );
             i += k3;
             j += l3;
-            ai[j2++] =
-                (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
-                ((ai[j2] >> 1) & 0x7f7f7f);
+            unchecked(
+                (ai[j2++] =
+                    (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
+                    ((ai[j2] >> 1) & 0x7f7f7f))
+            );
+            i += k3;
+            j += l3;
+            i = (i & 0x3fff) + (k2 & 0x600000);
+            i4 = k2 >> 23;
+            k2 += l2;
+            unchecked(
+                (ai[j2++] =
+                    (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
+                    ((ai[j2] >> 1) & 0x7f7f7f))
+            );
+            i += k3;
+            j += l3;
+            unchecked(
+                (ai[j2++] =
+                    (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
+                    ((ai[j2] >> 1) & 0x7f7f7f))
+            );
+            i += k3;
+            j += l3;
+            unchecked(
+                (ai[j2++] =
+                    (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
+                    ((ai[j2] >> 1) & 0x7f7f7f))
+            );
+            i += k3;
+            j += l3;
+            unchecked(
+                (ai[j2++] =
+                    (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
+                    ((ai[j2] >> 1) & 0x7f7f7f))
+            );
             i = i3;
             j = j3;
             k += j1;
@@ -451,9 +481,11 @@ export default class Scene {
                 k2 += l2;
             }
 
-            ai[j2++] =
-                (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
-                ((ai[j2] >> 1) & 0x7f7f7f);
+            unchecked(
+                (ai[j2++] =
+                    (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) +
+                    ((ai[j2] >> 1) & 0x7f7f7f))
+            );
             i += k3;
             j += l3;
         }
@@ -522,8 +554,11 @@ export default class Scene {
 
             if (j4 < 16) {
                 for (let l4 = 0; l4 < j4; l4++) {
-                    if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                        ai[k2] = i;
+                    if (
+                        (i = unchecked(ai1[(k & 0x3f80) + (j >> 7)]) >>> k4) !=
+                        0
+                    ) {
+                        unchecked((ai[k2] = i));
                     }
 
                     k2++;
@@ -537,67 +572,32 @@ export default class Scene {
                     }
                 }
             } else {
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    ai[k2] = i;
+                if ((i = unchecked(ai1[(k & 0x3f80) + (j >> 7)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
                 }
 
                 k2++;
                 j += l3;
                 k += i4;
 
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    ai[k2] = i;
+                if ((i = unchecked(ai1[(k & 0x3f80) + (j >> 7)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
                 }
 
                 k2++;
                 j += l3;
                 k += i4;
 
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    ai[k2] = i;
+                if ((i = unchecked(ai1[(k & 0x3f80) + (j >> 7)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
                 }
 
                 k2++;
                 j += l3;
                 k += i4;
 
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    ai[k2] = i;
-                }
-
-                k2++;
-                j += l3;
-                k += i4;
-                j = (j & 0x3fff) + (l2 & 0x600000);
-                k4 = l2 >> 23;
-                l2 += i3;
-
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    ai[k2] = i;
-                }
-
-                k2++;
-                j += l3;
-                k += i4;
-
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    ai[k2] = i;
-                }
-
-                k2++;
-                j += l3;
-                k += i4;
-
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    ai[k2] = i;
-                }
-
-                k2++;
-                j += l3;
-                k += i4;
-
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    ai[k2] = i;
+                if ((i = unchecked(ai1[(k & 0x3f80) + (j >> 7)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
                 }
 
                 k2++;
@@ -607,32 +607,32 @@ export default class Scene {
                 k4 = l2 >> 23;
                 l2 += i3;
 
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    ai[k2] = i;
+                if ((i = unchecked(ai1[(k & 0x3f80) + (j >> 7)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
                 }
 
                 k2++;
                 j += l3;
                 k += i4;
 
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    ai[k2] = i;
+                if ((i = unchecked(ai1[(k & 0x3f80) + (j >> 7)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
                 }
 
                 k2++;
                 j += l3;
                 k += i4;
 
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    ai[k2] = i;
+                if ((i = unchecked(ai1[(k & 0x3f80) + (j >> 7)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
                 }
 
                 k2++;
                 j += l3;
                 k += i4;
 
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    ai[k2] = i;
+                if ((i = unchecked(ai1[(k & 0x3f80) + (j >> 7)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
                 }
 
                 k2++;
@@ -642,32 +642,67 @@ export default class Scene {
                 k4 = l2 >> 23;
                 l2 += i3;
 
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    ai[k2] = i;
+                if ((i = unchecked(ai1[(k & 0x3f80) + (j >> 7)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
                 }
 
                 k2++;
                 j += l3;
                 k += i4;
 
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    ai[k2] = i;
+                if ((i = unchecked(ai1[(k & 0x3f80) + (j >> 7)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
                 }
 
                 k2++;
                 j += l3;
                 k += i4;
 
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    ai[k2] = i;
+                if ((i = unchecked(ai1[(k & 0x3f80) + (j >> 7)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
                 }
 
                 k2++;
                 j += l3;
                 k += i4;
 
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    ai[k2] = i;
+                if ((i = unchecked(ai1[(k & 0x3f80) + (j >> 7)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
+                }
+
+                k2++;
+                j += l3;
+                k += i4;
+                j = (j & 0x3fff) + (l2 & 0x600000);
+                k4 = l2 >> 23;
+                l2 += i3;
+
+                if ((i = unchecked(ai1[(k & 0x3f80) + (j >> 7)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
+                }
+
+                k2++;
+                j += l3;
+                k += i4;
+
+                if ((i = unchecked(ai1[(k & 0x3f80) + (j >> 7)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
+                }
+
+                k2++;
+                j += l3;
+                k += i4;
+
+                if ((i = unchecked(ai1[(k & 0x3f80) + (j >> 7)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
+                }
+
+                k2++;
+                j += l3;
+                k += i4;
+
+                if ((i = unchecked(ai1[(k & 0x3f80) + (j >> 7)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
                 }
 
                 k2++;
@@ -736,7 +771,7 @@ export default class Scene {
 
             if (i4 < 16) {
                 for (let k4 = 0; k4 < i4; k4++) {
-                    ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
+                    unchecked((ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4));
                     i += k3;
                     j += l3;
 
@@ -747,61 +782,61 @@ export default class Scene {
                     }
                 }
             } else {
-                ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
+                unchecked((ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4));
                 i += k3;
                 j += l3;
-                ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
+                unchecked((ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4));
                 i += k3;
                 j += l3;
-                ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
+                unchecked((ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4));
                 i += k3;
                 j += l3;
-                ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
-                i += k3;
-                j += l3;
-                i = (i & 0xfff) + (k2 & 0xc0000);
-                j4 = k2 >> 20;
-                k2 += l2;
-                ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
-                i += k3;
-                j += l3;
-                ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
-                i += k3;
-                j += l3;
-                ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
-                i += k3;
-                j += l3;
-                ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
+                unchecked((ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4));
                 i += k3;
                 j += l3;
                 i = (i & 0xfff) + (k2 & 0xc0000);
                 j4 = k2 >> 20;
                 k2 += l2;
-                ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
+                unchecked((ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4));
                 i += k3;
                 j += l3;
-                ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
+                unchecked((ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4));
                 i += k3;
                 j += l3;
-                ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
+                unchecked((ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4));
                 i += k3;
                 j += l3;
-                ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
+                unchecked((ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4));
                 i += k3;
                 j += l3;
                 i = (i & 0xfff) + (k2 & 0xc0000);
                 j4 = k2 >> 20;
                 k2 += l2;
-                ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
+                unchecked((ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4));
                 i += k3;
                 j += l3;
-                ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
+                unchecked((ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4));
                 i += k3;
                 j += l3;
-                ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
+                unchecked((ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4));
                 i += k3;
                 j += l3;
-                ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
+                unchecked((ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4));
+                i += k3;
+                j += l3;
+                i = (i & 0xfff) + (k2 & 0xc0000);
+                j4 = k2 >> 20;
+                k2 += l2;
+                unchecked((ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4));
+                i += k3;
+                j += l3;
+                unchecked((ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4));
+                i += k3;
+                j += l3;
+                unchecked((ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4));
+                i += k3;
+                j += l3;
+                unchecked((ai[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4));
             }
         }
     }
@@ -867,9 +902,11 @@ export default class Scene {
 
             if (i4 < 16) {
                 for (let k4 = 0; k4 < i4; k4++) {
-                    ai[j2++] =
-                        (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
-                        ((ai[j2] >> 1) & 0x7f7f7f);
+                    unchecked(
+                        (ai[j2++] =
+                            (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
+                            ((ai[j2] >> 1) & 0x7f7f7f))
+                    );
                     i += k3;
                     j += l3;
 
@@ -880,93 +917,125 @@ export default class Scene {
                     }
                 }
             } else {
-                ai[j2++] =
-                    (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
-                    ((ai[j2] >> 1) & 0x7f7f7f);
+                unchecked(
+                    (ai[j2++] =
+                        (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
+                        ((ai[j2] >> 1) & 0x7f7f7f))
+                );
                 i += k3;
                 j += l3;
-                ai[j2++] =
-                    (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
-                    ((ai[j2] >> 1) & 0x7f7f7f);
+                unchecked(
+                    (ai[j2++] =
+                        (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
+                        ((ai[j2] >> 1) & 0x7f7f7f))
+                );
                 i += k3;
                 j += l3;
-                ai[j2++] =
-                    (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
-                    ((ai[j2] >> 1) & 0x7f7f7f);
+                unchecked(
+                    (ai[j2++] =
+                        (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
+                        ((ai[j2] >> 1) & 0x7f7f7f))
+                );
                 i += k3;
                 j += l3;
-                ai[j2++] =
-                    (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
-                    ((ai[j2] >> 1) & 0x7f7f7f);
-                i += k3;
-                j += l3;
-                i = (i & 0xfff) + (k2 & 0xc0000);
-                j4 = k2 >> 20;
-                k2 += l2;
-                ai[j2++] =
-                    (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
-                    ((ai[j2] >> 1) & 0x7f7f7f);
-                i += k3;
-                j += l3;
-                ai[j2++] =
-                    (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
-                    ((ai[j2] >> 1) & 0x7f7f7f);
-                i += k3;
-                j += l3;
-                ai[j2++] =
-                    (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
-                    ((ai[j2] >> 1) & 0x7f7f7f);
-                i += k3;
-                j += l3;
-                ai[j2++] =
-                    (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
-                    ((ai[j2] >> 1) & 0x7f7f7f);
+                unchecked(
+                    (ai[j2++] =
+                        (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
+                        ((ai[j2] >> 1) & 0x7f7f7f))
+                );
                 i += k3;
                 j += l3;
                 i = (i & 0xfff) + (k2 & 0xc0000);
                 j4 = k2 >> 20;
                 k2 += l2;
-                ai[j2++] =
-                    (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
-                    ((ai[j2] >> 1) & 0x7f7f7f);
+                unchecked(
+                    (ai[j2++] =
+                        (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
+                        ((ai[j2] >> 1) & 0x7f7f7f))
+                );
                 i += k3;
                 j += l3;
-                ai[j2++] =
-                    (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
-                    ((ai[j2] >> 1) & 0x7f7f7f);
+                unchecked(
+                    (ai[j2++] =
+                        (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
+                        ((ai[j2] >> 1) & 0x7f7f7f))
+                );
                 i += k3;
                 j += l3;
-                ai[j2++] =
-                    (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
-                    ((ai[j2] >> 1) & 0x7f7f7f);
+                unchecked(
+                    (ai[j2++] =
+                        (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
+                        ((ai[j2] >> 1) & 0x7f7f7f))
+                );
                 i += k3;
                 j += l3;
-                ai[j2++] =
-                    (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
-                    ((ai[j2] >> 1) & 0x7f7f7f);
+                unchecked(
+                    (ai[j2++] =
+                        (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
+                        ((ai[j2] >> 1) & 0x7f7f7f))
+                );
                 i += k3;
                 j += l3;
                 i = (i & 0xfff) + (k2 & 0xc0000);
                 j4 = k2 >> 20;
                 k2 += l2;
-                ai[j2++] =
-                    (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
-                    ((ai[j2] >> 1) & 0x7f7f7f);
+                unchecked(
+                    (ai[j2++] =
+                        (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
+                        ((ai[j2] >> 1) & 0x7f7f7f))
+                );
                 i += k3;
                 j += l3;
-                ai[j2++] =
-                    (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
-                    ((ai[j2] >> 1) & 0x7f7f7f);
+                unchecked(
+                    (ai[j2++] =
+                        (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
+                        ((ai[j2] >> 1) & 0x7f7f7f))
+                );
                 i += k3;
                 j += l3;
-                ai[j2++] =
-                    (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
-                    ((ai[j2] >> 1) & 0x7f7f7f);
+                unchecked(
+                    (ai[j2++] =
+                        (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
+                        ((ai[j2] >> 1) & 0x7f7f7f))
+                );
                 i += k3;
                 j += l3;
-                ai[j2++] =
-                    (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
-                    ((ai[j2] >> 1) & 0x7f7f7f);
+                unchecked(
+                    (ai[j2++] =
+                        (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
+                        ((ai[j2] >> 1) & 0x7f7f7f))
+                );
+                i += k3;
+                j += l3;
+                i = (i & 0xfff) + (k2 & 0xc0000);
+                j4 = k2 >> 20;
+                k2 += l2;
+                unchecked(
+                    (ai[j2++] =
+                        (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
+                        ((ai[j2] >> 1) & 0x7f7f7f))
+                );
+                i += k3;
+                j += l3;
+                unchecked(
+                    (ai[j2++] =
+                        (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
+                        ((ai[j2] >> 1) & 0x7f7f7f))
+                );
+                i += k3;
+                j += l3;
+                unchecked(
+                    (ai[j2++] =
+                        (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
+                        ((ai[j2] >> 1) & 0x7f7f7f))
+                );
+                i += k3;
+                j += l3;
+                unchecked(
+                    (ai[j2++] =
+                        (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) +
+                        ((ai[j2] >> 1) & 0x7f7f7f))
+                );
             }
         }
     }
@@ -1033,8 +1102,10 @@ export default class Scene {
 
             if (j4 < 16) {
                 for (let l4 = 0; l4 < j4; l4++) {
-                    if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
-                        ai[k2] = i;
+                    if (
+                        (i = unchecked(ai1[(k & 0xfc0) + (j >> 6)]) >>> k4) != 0
+                    ) {
+                        unchecked((ai[k2] = i));
                     }
 
                     k2++;
@@ -1048,67 +1119,32 @@ export default class Scene {
                     }
                 }
             } else {
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
-                    ai[k2] = i;
+                if ((i = unchecked(ai1[(k & 0xfc0) + (j >> 6)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
                 }
 
                 k2++;
                 j += l3;
                 k += i4;
 
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
-                    ai[k2] = i;
+                if ((i = unchecked(ai1[(k & 0xfc0) + (j >> 6)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
                 }
 
                 k2++;
                 j += l3;
                 k += i4;
 
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
-                    ai[k2] = i;
+                if ((i = unchecked(ai1[(k & 0xfc0) + (j >> 6)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
                 }
 
                 k2++;
                 j += l3;
                 k += i4;
 
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
-                    ai[k2] = i;
-                }
-
-                k2++;
-                j += l3;
-                k += i4;
-                j = (j & 0xfff) + (l2 & 0xc0000);
-                k4 = l2 >> 20;
-                l2 += i3;
-
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
-                    ai[k2] = i;
-                }
-
-                k2++;
-                j += l3;
-                k += i4;
-
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
-                    ai[k2] = i;
-                }
-
-                k2++;
-                j += l3;
-                k += i4;
-
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
-                    ai[k2] = i;
-                }
-
-                k2++;
-                j += l3;
-                k += i4;
-
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
-                    ai[k2] = i;
+                if ((i = unchecked(ai1[(k & 0xfc0) + (j >> 6)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
                 }
 
                 k2++;
@@ -1119,7 +1155,23 @@ export default class Scene {
                 l2 += i3;
 
                 if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
-                    ai[k2] = i;
+                    unchecked((ai[k2] = i));
+                }
+
+                k2++;
+                j += l3;
+                k += i4;
+
+                if ((i = unchecked(ai1[(k & 0xfc0) + (j >> 6)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
+                }
+
+                k2++;
+                j += l3;
+                k += i4;
+
+                if ((i = unchecked(ai1[(k & 0xfc0) + (j >> 6)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
                 }
 
                 k2++;
@@ -1127,23 +1179,7 @@ export default class Scene {
                 k += i4;
 
                 if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
-                    ai[k2] = i;
-                }
-
-                k2++;
-                j += l3;
-                k += i4;
-
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
-                    ai[k2] = i;
-                }
-
-                k2++;
-                j += l3;
-                k += i4;
-
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
-                    ai[k2] = i;
+                    unchecked((ai[k2] = i));
                 }
 
                 k2++;
@@ -1153,8 +1189,59 @@ export default class Scene {
                 k4 = l2 >> 20;
                 l2 += i3;
 
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
-                    ai[k2] = i;
+                if ((i = unchecked(ai1[(k & 0xfc0) + (j >> 6)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
+                }
+
+                k2++;
+                j += l3;
+                k += i4;
+
+                if ((i = unchecked(ai1[(k & 0xfc0) + (j >> 6)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
+                }
+
+                k2++;
+                j += l3;
+                k += i4;
+
+                if ((i = unchecked(ai1[(k & 0xfc0) + (j >> 6)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
+                }
+
+                k2++;
+                j += l3;
+                k += i4;
+
+                if ((i = unchecked(ai1[(k & 0xfc0) + (j >> 6)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
+                }
+
+                k2++;
+                j += l3;
+                k += i4;
+                j = (j & 0xfff) + (l2 & 0xc0000);
+                k4 = l2 >> 20;
+                l2 += i3;
+
+                if ((i = unchecked(ai1[(k & 0xfc0) + (j >> 6)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
+                }
+
+                k2++;
+                j += l3;
+                k += i4;
+
+                if ((i = unchecked(ai1[(k & 0xfc0) + (j >> 6)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
+                }
+
+                k2++;
+                j += l3;
+                k += i4;
+
+                if ((i = unchecked(ai1[(k & 0xfc0) + (j >> 6)]) >>> k4) != 0) {
+                    unchecked((ai[k2] = i));
                 }
 
                 k2++;
@@ -1162,23 +1249,7 @@ export default class Scene {
                 k += i4;
 
                 if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
-                    ai[k2] = i;
-                }
-
-                k2++;
-                j += l3;
-                k += i4;
-
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
-                    ai[k2] = i;
-                }
-
-                k2++;
-                j += l3;
-                k += i4;
-
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
-                    ai[k2] = i;
+                    unchecked((ai[k2] = i));
                 }
 
                 k2++;
@@ -1254,39 +1325,39 @@ export default class Scene {
         let j1 = (i / 16) as i32;
 
         for (let k1 = j1; k1 < 0; k1++) {
-            ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f);
-            ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f);
-            ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f);
-            ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f);
-            k = ai1[(l >> 8) & 0xff];
+            unchecked((ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f)));
+            unchecked((ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f)));
+            unchecked((ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f)));
+            unchecked((ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f)));
+            k = unchecked(ai1[(l >> 8) & 0xff]);
             l += i1;
-            ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f);
-            ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f);
-            ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f);
-            ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f);
-            k = ai1[(l >> 8) & 0xff];
+            unchecked((ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f)));
+            unchecked((ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f)));
+            unchecked((ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f)));
+            unchecked((ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f)));
+            k = unchecked(ai1[(l >> 8) & 0xff]);
             l += i1;
-            ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f);
-            ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f);
-            ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f);
-            ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f);
-            k = ai1[(l >> 8) & 0xff];
+            unchecked((ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f)));
+            unchecked((ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f)));
+            unchecked((ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f)));
+            unchecked((ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f)));
+            k = unchecked(ai1[(l >> 8) & 0xff]);
             l += i1;
-            ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f);
-            ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f);
-            ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f);
-            ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f);
-            k = ai1[(l >> 8) & 0xff];
+            unchecked((ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f)));
+            unchecked((ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f)));
+            unchecked((ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f)));
+            unchecked((ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f)));
+            k = unchecked(ai1[(l >> 8) & 0xff]);
             l += i1;
         }
 
         j1 = -(i % 16);
 
         for (let l1 = 0; l1 < j1; l1++) {
-            ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f);
+            unchecked((ai[j++] = k + ((ai[j] >> 1) & 0x7f7f7f)));
 
             if ((l1 & 3) == 3) {
-                k = ai1[(l >> 8) & 0xff];
+                k = unchecked(ai1[(l >> 8) & 0xff]);
                 l += i1;
                 l += i1;
             }
@@ -1307,44 +1378,44 @@ export default class Scene {
         }
 
         i1 <<= 2;
-        k = ai1[(l >> 8) & 0xff];
+        k = unchecked(ai1[(l >> 8) & 0xff]);
         l += i1;
         let j1 = (i / 16) as i32;
 
         for (let k1 = j1; k1 < 0; k1++) {
-            ai[j++] = k;
-            ai[j++] = k;
-            ai[j++] = k;
-            ai[j++] = k;
-            k = ai1[(l >> 8) & 0xff];
+            unchecked((ai[j++] = k));
+            unchecked((ai[j++] = k));
+            unchecked((ai[j++] = k));
+            unchecked((ai[j++] = k));
+            k = unchecked(ai1[(l >> 8) & 0xff]);
             l += i1;
-            ai[j++] = k;
-            ai[j++] = k;
-            ai[j++] = k;
-            ai[j++] = k;
-            k = ai1[(l >> 8) & 0xff];
+            unchecked((ai[j++] = k));
+            unchecked((ai[j++] = k));
+            unchecked((ai[j++] = k));
+            unchecked((ai[j++] = k));
+            k = unchecked(ai1[(l >> 8) & 0xff]);
             l += i1;
-            ai[j++] = k;
-            ai[j++] = k;
-            ai[j++] = k;
-            ai[j++] = k;
-            k = ai1[(l >> 8) & 0xff];
+            unchecked((ai[j++] = k));
+            unchecked((ai[j++] = k));
+            unchecked((ai[j++] = k));
+            unchecked((ai[j++] = k));
+            k = unchecked(ai1[(l >> 8) & 0xff]);
             l += i1;
-            ai[j++] = k;
-            ai[j++] = k;
-            ai[j++] = k;
-            ai[j++] = k;
-            k = ai1[(l >> 8) & 0xff];
+            unchecked((ai[j++] = k));
+            unchecked((ai[j++] = k));
+            unchecked((ai[j++] = k));
+            unchecked((ai[j++] = k));
+            k = unchecked(ai1[(l >> 8) & 0xff]);
             l += i1;
         }
 
         j1 = -(i % 16);
 
         for (let l1 = 0; l1 < j1; l1++) {
-            ai[j++] = k;
+            unchecked((ai[j++] = k));
 
             if ((l1 & 3) == 3) {
-                k = ai1[(l >> 8) & 0xff];
+                k = unchecked(ai1[(l >> 8) & 0xff]);
                 l += i1;
             }
         }
@@ -1406,20 +1477,20 @@ export default class Scene {
     }
 
     addSprite(n: i32, x: i32, z: i32, y: i32, w: i32, h: i32, tag: i32): i32 {
-        this.spriteId[this.spriteCount] = n;
-        this.spriteX[this.spriteCount] = x;
-        this.spriteZ[this.spriteCount] = z;
-        this.spriteY[this.spriteCount] = y;
-        this.spriteWidth[this.spriteCount] = w;
-        this.spriteHeight[this.spriteCount] = h;
-        this.spriteTranslateX[this.spriteCount] = 0;
+        unchecked((this.spriteId[this.spriteCount] = n));
+        unchecked((this.spriteX[this.spriteCount] = x));
+        unchecked((this.spriteZ[this.spriteCount] = z));
+        unchecked((this.spriteY[this.spriteCount] = y));
+        unchecked((this.spriteWidth[this.spriteCount] = w));
+        unchecked((this.spriteHeight[this.spriteCount] = h));
+        unchecked((this.spriteTranslateX[this.spriteCount] = 0));
 
         const bottomVert = this.view.createVertex(x, z, y);
         const topVert = this.view.createVertex(x, z - h, y);
 
         const vertexes = new Int32Array(2);
-        vertexes[0] = bottomVert;
-        vertexes[1] = topVert;
+        unchecked((vertexes[0] = bottomVert));
+        unchecked((vertexes[1] = topVert));
 
         this.view.createFace(2, vertexes, 0, 0);
         this.view.faceTag![this.spriteCount] = tag;
@@ -1473,26 +1544,26 @@ export default class Scene {
             let min = low - 1;
             let max = high + 1;
             let mid = ((low + high) / 2) as i32;
-            let polygon = polygons[mid];
+            let polygon = unchecked(polygons[mid]);
 
-            polygons[mid] = polygons[low];
-            polygons[low] = polygon;
+            unchecked((polygons[mid] = polygons[low]));
+            unchecked((polygons[low] = polygon));
 
             let j1 = polygon.depth;
 
             while (min < max) {
                 do {
                     max--;
-                } while (polygons[max].depth < j1);
+                } while (unchecked(polygons[max]).depth < j1);
 
                 do {
                     min++;
-                } while (polygons[min].depth > j1);
+                } while (unchecked(polygons[min]).depth > j1);
 
                 if (min < max) {
                     let polygon_1 = polygons[min];
-                    polygons[min] = polygons[max];
-                    polygons[max] = polygon_1;
+                    unchecked((polygons[min] = polygons[max]));
+                    unchecked((polygons[max] = polygon_1));
                 }
             }
 
@@ -1507,9 +1578,9 @@ export default class Scene {
         count: i32
     ): void {
         for (let i = 0; i <= count; i++) {
-            polygons[i].skipSomething = false;
-            polygons[i].index = i;
-            polygons[i].index2 = -1;
+            unchecked((polygons[i].skipSomething = false));
+            unchecked((polygons[i].index = i));
+            unchecked((polygons[i].index2 = -1));
         }
 
         let l = 0;
@@ -1523,7 +1594,7 @@ export default class Scene {
                 return;
             }
 
-            let polygon = polygons[l];
+            let polygon = unchecked(polygons[l]);
             polygon.skipSomething = true;
             let start = l;
             let j1 = l + step;
@@ -1546,7 +1617,7 @@ export default class Scene {
                 ) {
                     this.polygonsOrder(polygons, start, k1);
 
-                    if (polygons[k1] != other) {
+                    if (unchecked(polygons[k1]) != other) {
                         k1++;
                     }
 
@@ -1559,17 +1630,17 @@ export default class Scene {
 
     polygonsOrder(polygons: StaticArray<Polygon>, start: i32, end: i32): bool {
         do {
-            let polygon = polygons[start];
+            let polygon = unchecked(polygons[start]);
 
             for (let k = start + 1; k <= end; k++) {
-                let polygon_1 = polygons[k];
+                let polygon_1 = unchecked(polygons[k]);
 
                 if (!this.separatePolygon(polygon_1, polygon)) {
                     break;
                 }
 
-                polygons[start] = polygon_1;
-                polygons[k] = polygon;
+                unchecked((polygons[start] = polygon_1));
+                unchecked((polygons[k] = polygon));
                 start = k;
 
                 if (start == end) {
@@ -1580,17 +1651,17 @@ export default class Scene {
                 }
             }
 
-            let polygon_2 = polygons[end];
+            let polygon_2 = unchecked(polygons[end]);
 
             for (let l = end - 1; l >= start; l--) {
-                let polygon_3 = polygons[l];
+                let polygon_3 = unchecked(polygons[l]);
 
                 if (!this.separatePolygon(polygon_2, polygon_3)) {
                     break;
                 }
 
-                polygons[end] = polygon_3;
-                polygons[l] = polygon_2;
+                unchecked((polygons[end] = polygon_3));
+                unchecked((polygons[l] = polygon_2));
                 end = l;
 
                 if (start == end) {
@@ -4093,20 +4164,20 @@ export default class Scene {
         let i1 = 0;
 
         for (let i21 = 1; i21 < i; i21++) {
-            if (ai1[i21] < i20) {
-                i20 = ai1[i21];
+            if (unchecked(ai1[i21]) < i20) {
+                i20 = unchecked(ai1[i21]);
                 k = i21;
-            } else if (ai1[i21] > k20) {
-                k20 = ai1[i21];
+            } else if (unchecked(ai1[i21]) > k20) {
+                k20 = unchecked(ai1[i21]);
             }
         }
 
         for (let j21 = 1; j21 < j; j21++) {
-            if (ai3[j21] < j20) {
-                j20 = ai3[j21];
+            if (unchecked(ai3[j21]) < j20) {
+                j20 = unchecked(ai3[j21]);
                 i1 = j21;
-            } else if (ai3[j21] > l20) {
-                l20 = ai3[j21];
+            } else if (unchecked(ai3[j21]) > l20) {
+                l20 = unchecked(ai3[j21]);
             }
         }
 
@@ -4122,24 +4193,24 @@ export default class Scene {
         let j1 = 0;
         let flag = false;
 
-        if (ai1[k] < ai3[i1]) {
-            for (l = k; ai1[l] < ai3[i1]; l = (l + 1) % i);
-            for (; ai1[k] < ai3[i1]; k = (k - 1 + i) % i);
+        if (unchecked(ai1[k]) < unchecked(ai3[i1])) {
+            for (l = k; unchecked(ai1[l]) < unchecked(ai3[i1]); l = (l + 1) % i);
+            for (; unchecked(ai1[k]) < unchecked(ai3[i1]); k = (k - 1 + i) % i);
 
             let k1 = this.method306(
-                ai[(k + 1) % i],
-                ai1[(k + 1) % i],
-                ai[k],
-                ai1[k],
-                ai3[i1]
+                unchecked(ai[(k + 1) % i]),
+                unchecked(ai1[(k + 1) % i]),
+                unchecked(ai[k]),
+                unchecked(ai1[k]),
+                unchecked(ai3[i1])
             );
 
             let k6 = this.method306(
-                ai[(l - 1 + i) % i],
-                ai1[(l - 1 + i) % i],
-                ai[l],
-                ai1[l],
-                ai3[i1]
+                unchecked(ai[(l - 1 + i) % i]),
+                unchecked(ai1[(l - 1 + i) % i]),
+                unchecked(ai[l]),
+                unchecked(ai1[l]),
+                unchecked(ai3[i1])
             );
 
             let l10 = ai2[i1];
@@ -4170,11 +4241,11 @@ export default class Scene {
             );
 
             let l15 = this.method306(
-                ai2[(j1 - 1 + j) % j],
-                ai3[(j1 - 1 + j) % j],
-                ai2[j1],
-                ai3[j1],
-                ai1[k]
+                unchecked(ai2[(j1 - 1 + j) % j]),
+                unchecked(ai3[(j1 - 1 + j) % j]),
+                unchecked(ai2[j1]),
+                unchecked(ai3[j1]),
+                unchecked(ai1[k])
             );
 
             flag = (l1 < i11) | (l1 < l15);

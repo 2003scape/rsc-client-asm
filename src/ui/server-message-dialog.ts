@@ -9,15 +9,15 @@ drawDialogServerMessage(): void {
         height = 300;
     }
 
-    this.surface.drawBox(
+    this.surface!.drawBox(
         256 - ((WIDTH / 2) as i32),
         167 - ((height / 2) as i32),
         WIDTH,
         height,
-        Colours.black
+        Colours.Black
     );
 
-    this.surface.drawBoxEdge(
+    this.surface!.drawBoxEdge(
         256 - ((WIDTH / 2) as i32),
         167 - ((height / 2) as i32),
         WIDTH,
@@ -25,7 +25,7 @@ drawDialogServerMessage(): void {
         Colours.White
     );
 
-    this.surface.drawParagraph(
+    this.surface!.drawParagraph(
         this.serverMessage,
         256,
         167 - ((height / 2) as i32) + 20,
@@ -46,7 +46,7 @@ drawDialogServerMessage(): void {
         textColour = Colours.Red;
     }
 
-    this.surface.drawStringCenter(
+    this.surface!.drawStringCenter(
         'Click here to close window',
         256,
         offsetY,

@@ -3,10 +3,10 @@ showUiWildWarn: i32;
 drawDialogWildWarn(): void {
     let y = 97;
 
-    this.surface.drawBox(86, 77, 340, 180, Colours.Black);
-    this.surface.drawBoxEdge(86, 77, 340, 180, Colours.White);
+    this.surface!.drawBox(86, 77, 340, 180, Colours.Black);
+    this.surface!.drawBoxEdge(86, 77, 340, 180, Colours.White);
 
-    this.surface.drawStringCenter(
+    this.surface!.drawStringCenter(
         'Warning! Proceed with caution',
         256,
         y,
@@ -16,7 +16,7 @@ drawDialogWildWarn(): void {
 
     y += 26;
 
-    this.surface.drawStringCenter(
+    this.surface!.drawStringCenter(
         'If you go much further north you will ' + 'enter the',
         256,
         y,
@@ -26,7 +26,7 @@ drawDialogWildWarn(): void {
 
     y += 13;
 
-    this.surface.drawStringCenter(
+    this.surface!.drawStringCenter(
         'wilderness. This a very dangerous area where',
         256,
         y,
@@ -36,7 +36,7 @@ drawDialogWildWarn(): void {
 
     y += 13;
 
-    this.surface.drawStringCenter(
+    this.surface!.drawStringCenter(
         'other players can attack you!',
         256,
         y,
@@ -46,7 +46,7 @@ drawDialogWildWarn(): void {
 
     y += 22;
 
-    this.surface.drawStringCenter(
+    this.surface!.drawStringCenter(
         'The further north you go the more dangerous it',
         256,
         y,
@@ -56,7 +56,7 @@ drawDialogWildWarn(): void {
 
     y += 13;
 
-    this.surface.drawStringCenter(
+    this.surface!.drawStringCenter(
         'becomes, but the more treasure you will find.',
         256,
         y,
@@ -66,7 +66,7 @@ drawDialogWildWarn(): void {
 
     y += 22;
 
-    this.surface.drawStringCenter(
+    this.surface!.drawStringCenter(
         'In the wilderness an indicator at the bottom-right',
         256,
         y,
@@ -76,7 +76,7 @@ drawDialogWildWarn(): void {
 
     y += 13;
 
-    this.surface.drawStringCenter(
+    this.surface!.drawStringCenter(
         'of the screen will show the current level of danger',
         256,
         y,
@@ -97,7 +97,7 @@ drawDialogWildWarn(): void {
         textColour = Colours.Red;
     }
 
-    this.surface.drawStringCenter(
+    this.surface!.drawStringCenter(
         'Click here to close window',
         256,
         y,

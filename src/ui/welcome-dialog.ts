@@ -63,7 +63,7 @@ drawDialogWelcome(): void {
         y += 15;
 
         if (!this.welcomeLastLoggedInHost) {
-            this.welcomeLastLoggedInHost = this.getHostnameIP(
+            this.welcomeLastLoggedInHost = ipToString(
                 this.welcomeLastLoggedInIP
             );
         }
@@ -114,7 +114,7 @@ drawDialogWelcome(): void {
         } else {
             this.surface!.drawStringCenter(
                 'You have @gre@' +
-                    (this.welcomeUnreadMessages - 1) +
+                    (this.welcomeUnreadMessages - 1).toString() +
                     ' unread messages @whi@in your message-centre',
                 256,
                 y,

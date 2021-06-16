@@ -15,8 +15,7 @@ class Options {
     totalExperience: false;
     wordFilter: true;
     accountManagement: true;
-    messageScrollBack: true;
-    retroFPSCounter: true;
+    fpsCounter: true;
     retryLoginOnDisconnect: true;
     mobile: false;
 }
@@ -58,19 +57,18 @@ export default class GameShell {
     inputTextFinal: string = '';
     inputPMCurrent: string = '';
     inputPMFinal: string = '';
+    originMouseX: i32;
+    originRotation: i32;
+    cameraRotation: i32 = 128;
     mobileInputCaret: i32;
+    fps: i32;
 
     handleKeyPress(charCode: i32): void {}
 
     handleMouseDown(button: i32, x: i32, y: i32): void {}
 
     keyPressed(code: i32, charCode: i32): void {
-        if (
-            [8, 10, 13, 9].includes(code) ||
-            (this.options.messageScrollBack &&
-                (code == KeyCodes.UpArrow || code == KeyCodes.DownArrow) &&
-                this.ctrl)
-        ) {
+        if ([8, 10, 13, 9].includes(code)) {
             charCode = code;
         }
 
@@ -187,14 +185,12 @@ export default class GameShell {
         this.mouseX = x;
         this.mouseY = y;
 
-        /*
         if (this.options.middleClickCamera && button == 1) {
             this.middleButtonDown = true;
             this.originRotation = this.cameraRotation;
             this.originMouseX = this.mouseX;
             return;
         }
-        */
 
         if (meta || button == 2) {
             this.mouseButtonDown = 2;
@@ -222,5 +218,8 @@ export default class GameShell {
         if (this.stopTimeout >= 0) {
             this.stopTimeout = 4000 / this.targetFPS;
         }
+    }
+
+    resetTimings(): void {
     }
 }

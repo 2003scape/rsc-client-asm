@@ -227,11 +227,11 @@ export default class World {
             let modelHeight = 0;
 
             if (tileDir == 0 || tileDir == 4) {
-                modelWidth = GameData.objectWidth[id];
-                modelHeight = GameData.objectHeight[id];
+                modelWidth = unchecked(GameData.objectWidth[id]);
+                modelHeight = unchecked(GameData.objectHeight[id]);
             } else {
-                modelHeight = GameData.objectWidth[id];
-                modelWidth = GameData.objectHeight[id];
+                modelHeight = unchecked(GameData.objectWidth[id]);
+                modelWidth = unchecked(GameData.objectHeight[id]);
             }
 
             for (let mx = x; mx < x + modelWidth; mx++) {
@@ -2120,7 +2120,7 @@ export default class World {
                         i27 += byte0;
                     }
 
-                    roofNvs = GameData.roofNumVertices[roofNvs - 1];
+                    roofNvs = unchecked(GameData.roofNumVertices[roofNvs - 1]);
                     j27 = -j27;
                     k27 = -k27;
                     l27 = -l27;
@@ -2136,9 +2136,11 @@ export default class World {
                         unchecked(
                             (ai8[0] = this.parentModel!.vertexAt(l26, l27, i26))
                         );
+
                         unchecked(
                             (ai8[1] = this.parentModel!.vertexAt(j26, i28, i27))
                         );
+
                         unchecked(
                             (ai8[2] = this.parentModel!.vertexAt(k25, k27, k26))
                         );
