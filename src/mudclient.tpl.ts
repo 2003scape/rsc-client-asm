@@ -4,6 +4,7 @@ import GameCharacter from './game-character';
 import GameConnection from './game-connection';
 import GameData from './game-data';
 import GameModel from './game-model';
+import Panel from './panel'
 import Scene from './scene';
 import Surface from './surface';
 import World from './world';
@@ -130,7 +131,6 @@ export default class mudclient extends GameConnection {
     tradeConfirmItemsCount: i32;
     mouseClickXStep: i32;
     newBankItemCount: i32;
-    loginScreen: i32;
 
     npcAnimationArray: Int322DArray = Int322DArray.fromArray([
         [11, 2, 9, 7, 1, 6, 10, 0, 5, 8, 3, 4],
@@ -264,8 +264,6 @@ export default class mudclient extends GameConnection {
     appearanceTopColour: i32 = 8;
     appearanceBottomColour: i32 = 14;
     appearanceHeadGender: i32 = 1;
-    loginUser: string = '';
-    loginPass: string = '';
     cameraAngle: i32 = 1;
     members: bool;
     optionSoundDisabled: bool;
@@ -4040,12 +4038,12 @@ export default class mudclient extends GameConnection {
 
     showLoginScreenStatus(s: string, s1: string): void {
         if (this.loginScreen == 1) {
-            this.panelLoginNewUser.updateText(
+            this.panelLoginNewUser!.updateText(
                 this.controlRegisterStatus,
                 s + ' ' + s1
             );
         } else if (this.loginScreen == 2) {
-            this.panelLoginExistingUser.updateText(
+            this.panelLoginExistingUser!.updateText(
                 this.controlLoginStatus,
                 s + ' ' + s1
             );
@@ -4246,7 +4244,7 @@ export default class mudclient extends GameConnection {
                                 unchecked(
                                     (this.menuItemText2[this.menuItemsCount] =
                                         '@whi@' +
-                                        this.players[idx]!.name +
+                                        this.players[idx]!.name! +
                                         menuText)
                                 );
 
@@ -4291,7 +4289,7 @@ export default class mudclient extends GameConnection {
                                 (this.menuItemText2[
                                     this.menuItemsCount
                                 ] = `@whi@${
-                                    this.players[idx]!.name
+                                    this.players[idx]!.name!
                                 }${menuText}`)
                             );
 
@@ -4423,7 +4421,7 @@ export default class mudclient extends GameConnection {
                             unchecked(
                                 (this.menuItemText2[this.menuItemsCount] =
                                     '@whi@' +
-                                    this.players[idx]!.name +
+                                    this.players[idx]!.name! +
                                     menuText)
                             );
 

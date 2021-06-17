@@ -4,6 +4,7 @@ import GameCharacter from './game-character';
 import GameConnection from './game-connection';
 import GameData from './game-data';
 import GameModel from './game-model';
+import Panel from './panel'
 import Scene from './scene';
 import Surface from './surface';
 import World from './world';
@@ -130,7 +131,6 @@ export default class mudclient extends GameConnection {
     tradeConfirmItemsCount: i32;
     mouseClickXStep: i32;
     newBankItemCount: i32;
-    loginScreen: i32;
 
     npcAnimationArray: Int322DArray = Int322DArray.fromArray([
         [11, 2, 9, 7, 1, 6, 10, 0, 5, 8, 3, 4],
@@ -264,8 +264,6 @@ export default class mudclient extends GameConnection {
     appearanceTopColour: i32 = 8;
     appearanceBottomColour: i32 = 14;
     appearanceHeadGender: i32 = 1;
-    loginUser: string = '';
-    loginPass: string = '';
     cameraAngle: i32 = 1;
     members: bool;
     optionSoundDisabled: bool;
@@ -4040,12 +4038,12 @@ export default class mudclient extends GameConnection {
 
     showLoginScreenStatus(s: string, s1: string): void {
         if (this.loginScreen == 1) {
-            this.panelLoginNewUser.updateText(
+            this.panelLoginNewUser!.updateText(
                 this.controlRegisterStatus,
                 s + ' ' + s1
             );
         } else if (this.loginScreen == 2) {
-            this.panelLoginExistingUser.updateText(
+            this.panelLoginExistingUser!.updateText(
                 this.controlLoginStatus,
                 s + ' ' + s1
             );
@@ -4188,11 +4186,11 @@ export default class mudclient extends GameConnection {
 
                         if (
                             this.localPlayer.level > 0 &&
-                            this.players[idx]!.level > 0
+                            unchecked(this.players[idx]!).level > 0
                         ) {
                             k3 =
                                 this.localPlayer.level -
-                                this.players[idx]!.level;
+                                unchecked(this.players[idx]!).level;
                         }
 
                         if (k3 < 0) {
@@ -4236,27 +4234,48 @@ export default class mudclient extends GameConnection {
                                 GameData.spellType[this.selectedSpell] == 1 ||
                                 GameData.spellType[this.selectedSpell] == 2
                             ) {
-                                this.menuItemText1[this.menuItemsCount] =
-                                    'Cast ' +
-                                    GameData.spellName[this.selectedSpell] +
-                                    ' on';
+                                unchecked(
+                                    (this.menuItemText1[this.menuItemsCount] =
+                                        'Cast ' +
+                                        GameData.spellName[this.selectedSpell] +
+                                        ' on')
+                                );
 
-                                this.menuItemText2[this.menuItemsCount] =
-                                    '@whi@' + this.players[idx]!.name + menuText;
+                                unchecked(
+                                    (this.menuItemText2[this.menuItemsCount] =
+                                        '@whi@' +
+                                        this.players[idx]!.name! +
+                                        menuText)
+                                );
 
-                                this.menuType[this.menuItemsCount] = 800;
-                                this.menuItemX[
-                                    this.menuItemsCount
-                                ] = this.players[idx]!.currentX;
-                                this.menuItemY[
-                                    this.menuItemsCount
-                                ] = this.players[idx]!.currentY;
-                                this.menuIndex[
-                                    this.menuItemsCount
-                                ] = this.players[idx]!.serverIndex;
-                                this.menuSourceIndex[
-                                    this.menuItemsCount
-                                ] = this.selectedSpell;
+                                unchecked(
+                                    (this.menuType[this.menuItemsCount] = 800)
+                                );
+
+                                unchecked(
+                                    (this.menuItemX[
+                                        this.menuItemsCount
+                                    ] = this.players[idx]!.currentX)
+                                );
+
+                                unchecked(
+                                    (this.menuItemY[
+                                        this.menuItemsCount
+                                    ] = this.players[idx]!.currentY)
+                                );
+
+                                unchecked(
+                                    (this.menuIndex[
+                                        this.menuItemsCount
+                                    ] = this.players[idx]!.serverIndex)
+                                );
+
+                                unchecked(
+                                    (this.menuSourceIndex[
+                                        this.menuItemsCount
+                                    ] = this.selectedSpell)
+                                );
+
                                 this.menuItemsCount++;
                             }
                         } else if (this.selectedItemInventoryIndex >= 0) {
@@ -4270,7 +4289,7 @@ export default class mudclient extends GameConnection {
                                 (this.menuItemText2[
                                     this.menuItemsCount
                                 ] = `@whi@${
-                                    this.players[idx]!.name
+                                    this.players[idx]!.name!
                                 }${menuText}`)
                             );
 
@@ -4301,6 +4320,7 @@ export default class mudclient extends GameConnection {
                                     this.menuItemsCount
                                 ] = this.selectedItemInventoryIndex)
                             );
+
                             this.menuItemsCount++;
                         } else {
                             if (
@@ -4310,139 +4330,288 @@ export default class mudclient extends GameConnection {
                                     this.planeHeight +
                                     this.regionY) as i32) < 2203
                             ) {
-                                this.menuItemText1[this.menuItemsCount] =
-                                    'Attack';
+                                unchecked(
+                                    (this.menuItemText1[this.menuItemsCount] =
+                                        'Attack')
+                                );
 
-                                this.menuItemText2[this.menuItemsCount] =
-                                    '@whi@' + this.players[idx]!.name! + menuText;
+                                unchecked(
+                                    (this.menuItemText2[
+                                        this.menuItemsCount
+                                    ] = `@whi@${this.players[idx]!
+                                        .name!}${menuText}`)
+                                );
 
                                 if (k3 >= 0 && k3 < 5) {
-                                    this.menuType[this.menuItemsCount] = 805;
+                                    unchecked(
+                                        (this.menuType[
+                                            this.menuItemsCount
+                                        ] = 805)
+                                    );
                                 } else {
-                                    this.menuType[this.menuItemsCount] = 2805;
+                                    unchecked(
+                                        (this.menuType[
+                                            this.menuItemsCount
+                                        ] = 2805)
+                                    );
                                 }
 
-                                this.menuItemX[
-                                    this.menuItemsCount
-                                ] = this.players[idx]!.currentX;
-                                this.menuItemY[
-                                    this.menuItemsCount
-                                ] = this.players[idx]!.currentY;
-                                this.menuIndex[
-                                    this.menuItemsCount
-                                ] = this.players[idx]!.serverIndex;
+                                unchecked(
+                                    (this.menuItemX[
+                                        this.menuItemsCount
+                                    ] = this.players[idx]!.currentX)
+                                );
+
+                                unchecked(
+                                    (this.menuItemY[
+                                        this.menuItemsCount
+                                    ] = this.players[idx]!.currentY)
+                                );
+
+                                unchecked(
+                                    (this.menuIndex[
+                                        this.menuItemsCount
+                                    ] = this.players[idx]!.serverIndex)
+                                );
+
                                 this.menuItemsCount++;
                             } else if (this.members) {
-                                this.menuItemText1[this.menuItemsCount] =
-                                    'Duel with';
-                                this.menuItemText2[this.menuItemsCount] =
-                                    '@whi@' + this.players[idx]!.name! + menuText;
-                                this.menuItemX[
-                                    this.menuItemsCount
-                                ] = this.players[idx]!.currentX;
-                                this.menuItemY[
-                                    this.menuItemsCount
-                                ] = this.players[idx]!.currentY;
-                                this.menuType[this.menuItemsCount] = 2806;
-                                this.menuIndex[
-                                    this.menuItemsCount
-                                ] = this.players[idx]!.serverIndex;
+                                unchecked(
+                                    (this.menuItemText1[this.menuItemsCount] =
+                                        'Duel with')
+                                );
+
+                                unchecked(
+                                    (this.menuItemText2[this.menuItemsCount] =
+                                        '@whi@' +
+                                        this.players[idx]!.name! +
+                                        menuText)
+                                );
+
+                                unchecked(
+                                    (this.menuItemX[
+                                        this.menuItemsCount
+                                    ] = this.players[idx]!.currentX)
+                                );
+
+                                unchecked(
+                                    (this.menuItemY[
+                                        this.menuItemsCount
+                                    ] = this.players[idx]!.currentY)
+                                );
+
+                                unchecked(
+                                    (this.menuType[this.menuItemsCount] = 2806)
+                                );
+
+                                unchecked(
+                                    (this.menuIndex[
+                                        this.menuItemsCount
+                                    ] = this.players[idx]!.serverIndex)
+                                );
+
                                 this.menuItemsCount++;
                             }
 
-                            this.menuItemText1[this.menuItemsCount] =
-                                'Trade with';
-                            this.menuItemText2[this.menuItemsCount] =
-                                '@whi@' + this.players[idx]!.name + menuText;
-                            this.menuType[this.menuItemsCount] = 2810;
-                            this.menuIndex[this.menuItemsCount] = this.players[
-                                idx
-                            ]!.serverIndex;
+                            unchecked(
+                                (this.menuItemText1[this.menuItemsCount] =
+                                    'Trade with')
+                            );
+
+                            unchecked(
+                                (this.menuItemText2[this.menuItemsCount] =
+                                    '@whi@' +
+                                    this.players[idx]!.name! +
+                                    menuText)
+                            );
+
+                            unchecked(
+                                (this.menuType[this.menuItemsCount] = 2810)
+                            );
+
+                            unchecked(
+                                (this.menuIndex[
+                                    this.menuItemsCount
+                                ] = this.players[idx]!.serverIndex)
+                            );
+
                             this.menuItemsCount++;
-                            this.menuItemText1[this.menuItemsCount] = 'Follow';
-                            this.menuItemText2[this.menuItemsCount] =
-                                '@whi@' + this.players[idx]!.name + menuText;
-                            this.menuType[this.menuItemsCount] = 2820;
-                            this.menuIndex[this.menuItemsCount] = this.players[
-                                idx
-                            ]!.serverIndex;
+
+                            unchecked(
+                                (this.menuItemText1[this.menuItemsCount] =
+                                    'Follow')
+                            );
+
+                            unchecked(
+                                (this.menuItemText2[
+                                    this.menuItemsCount
+                                ] = `@whi@${this.players[idx]!
+                                    .name!}${menuText}`)
+                            );
+
+                            unchecked(
+                                (this.menuType[this.menuItemsCount] = 2820)
+                            );
+
+                            unchecked(
+                                (this.menuIndex[
+                                    this.menuItemsCount
+                                ] = this.players[idx]!.serverIndex)
+                            );
+
                             this.menuItemsCount++;
                         }
                     } else if (type == 2) {
                         if (this.selectedSpell >= 0) {
                             if (GameData.spellType[this.selectedSpell] == 3) {
-                                this.menuItemText1[this.menuItemsCount] =
-                                    'Cast ' +
-                                    GameData.spellName[this.selectedSpell] +
-                                    ' on';
-                                this.menuItemText2[this.menuItemsCount] =
-                                    '@lre@' +
-                                    GameData.itemName[this.groundItemID[idx]];
-                                this.menuType[this.menuItemsCount] = 200;
-                                this.menuItemX[
-                                    this.menuItemsCount
-                                ] = this.groundItemX[idx];
-                                this.menuItemY[
-                                    this.menuItemsCount
-                                ] = this.groundItemY[idx];
-                                this.menuIndex[
-                                    this.menuItemsCount
-                                ] = this.groundItemID[idx];
-                                this.menuSourceIndex[
-                                    this.menuItemsCount
-                                ] = this.selectedSpell;
+                                unchecked(
+                                    (this.menuItemText1[this.menuItemsCount] =
+                                        'Cast ' +
+                                        GameData.spellName[this.selectedSpell] +
+                                        ' on')
+                                );
+
+                                unchecked(
+                                    (this.menuItemText2[this.menuItemsCount] =
+                                        '@lre@' +
+                                        GameData.itemName[
+                                            this.groundItemID[idx]
+                                        ])
+                                );
+
+                                unchecked(
+                                    (this.menuType[this.menuItemsCount] = 200)
+                                );
+
+                                unchecked(
+                                    (this.menuItemX[
+                                        this.menuItemsCount
+                                    ] = this.groundItemX[idx])
+                                );
+
+                                unchecked(
+                                    (this.menuItemY[
+                                        this.menuItemsCount
+                                    ] = this.groundItemY[idx])
+                                );
+
+                                unchecked(
+                                    (this.menuIndex[
+                                        this.menuItemsCount
+                                    ] = this.groundItemID[idx])
+                                );
+
+                                unchecked(
+                                    (this.menuSourceIndex[
+                                        this.menuItemsCount
+                                    ] = this.selectedSpell)
+                                );
                                 this.menuItemsCount++;
                             }
                         } else if (this.selectedItemInventoryIndex >= 0) {
-                            this.menuItemText1[this.menuItemsCount] =
-                                'Use ' + this.selectedItemName + ' with';
-                            this.menuItemText2[this.menuItemsCount] =
-                                '@lre@' +
-                                GameData.itemName[this.groundItemID[idx]];
-                            this.menuType[this.menuItemsCount] = 210;
-                            this.menuItemX[
-                                this.menuItemsCount
-                            ] = this.groundItemX[idx];
-                            this.menuItemY[
-                                this.menuItemsCount
-                            ] = this.groundItemY[idx];
-                            this.menuIndex[
-                                this.menuItemsCount
-                            ] = this.groundItemID[idx];
-                            this.menuSourceIndex[
-                                this.menuItemsCount
-                            ] = this.selectedItemInventoryIndex;
+                            unchecked(
+                                (this.menuItemText1[this.menuItemsCount] =
+                                    'Use ' + this.selectedItemName + ' with')
+                            );
+
+                            unchecked(
+                                (this.menuItemText2[this.menuItemsCount] =
+                                    '@lre@' +
+                                    GameData.itemName[this.groundItemID[idx]])
+                            );
+
+                            unchecked(
+                                (this.menuType[this.menuItemsCount] = 210)
+                            );
+
+                            unchecked(
+                                (this.menuItemX[
+                                    this.menuItemsCount
+                                ] = this.groundItemX[idx])
+                            );
+
+                            unchecked(
+                                (this.menuItemY[
+                                    this.menuItemsCount
+                                ] = this.groundItemY[idx])
+                            );
+
+                            unchecked(
+                                (this.menuIndex[
+                                    this.menuItemsCount
+                                ] = this.groundItemID[idx])
+                            );
+
+                            unchecked(
+                                (this.menuSourceIndex[
+                                    this.menuItemsCount
+                                ] = this.selectedItemInventoryIndex)
+                            );
+
                             this.menuItemsCount++;
                         } else {
-                            this.menuItemText1[this.menuItemsCount] = 'Take';
-                            this.menuItemText2[this.menuItemsCount] =
-                                '@lre@' +
-                                GameData.itemName[this.groundItemID[idx]];
-                            this.menuType[this.menuItemsCount] = 220;
-                            this.menuItemX[
-                                this.menuItemsCount
-                            ] = this.groundItemX[idx];
-                            this.menuItemY[
-                                this.menuItemsCount
-                            ] = this.groundItemY[idx];
-                            this.menuIndex[
-                                this.menuItemsCount
-                            ] = this.groundItemID[idx];
+                            unchecked(
+                                (this.menuItemText1[this.menuItemsCount] =
+                                    'Take')
+                            );
+
+                            unchecked(
+                                (this.menuItemText2[this.menuItemsCount] =
+                                    '@lre@' +
+                                    GameData.itemName[this.groundItemID[idx]])
+                            );
+
+                            unchecked(
+                                (this.menuType[this.menuItemsCount] = 220)
+                            );
+
+                            unchecked(
+                                (this.menuItemX[
+                                    this.menuItemsCount
+                                ] = this.groundItemX[idx])
+                            );
+
+                            unchecked(
+                                (this.menuItemY[
+                                    this.menuItemsCount
+                                ] = this.groundItemY[idx])
+                            );
+
+                            unchecked(
+                                (this.menuIndex[
+                                    this.menuItemsCount
+                                ] = this.groundItemID[idx])
+                            );
+
                             this.menuItemsCount++;
-                            this.menuItemText1[this.menuItemsCount] = 'Examine';
-                            this.menuItemText2[this.menuItemsCount] =
-                                '@lre@' +
-                                GameData.itemName[this.groundItemID[idx]];
-                            this.menuType[this.menuItemsCount] = 3200;
-                            this.menuIndex[
-                                this.menuItemsCount
-                            ] = this.groundItemID[idx];
+
+                            unchecked(
+                                (this.menuItemText1[this.menuItemsCount] =
+                                    'Examine')
+                            );
+
+                            unchecked(
+                                (this.menuItemText2[this.menuItemsCount] =
+                                    '@lre@' +
+                                    GameData.itemName[this.groundItemID[idx]])
+                            );
+
+                            unchecked(
+                                (this.menuType[this.menuItemsCount] = 3200)
+                            );
+
+                            unchecked(
+                                (this.menuIndex[
+                                    this.menuItemsCount
+                                ] = this.groundItemID[idx])
+                            );
+
                             this.menuItemsCount++;
                         }
                     } else if (type == 3) {
                         let menuText = '';
                         let levelDiff = -1;
-                        const id = this.npcs[idx].npcId;
+                        const id = unchecked(this.npcs[idx]!).npcId;
 
                         if (GameData.npcAttackable[id] > 0) {
                             const npcLevel = ((GameData.npcAttack[id] +
@@ -4497,234 +4666,427 @@ export default class mudclient extends GameConnection {
 
                         if (this.selectedSpell >= 0) {
                             if (GameData.spellType[this.selectedSpell] == 2) {
-                                this.menuItemText1[this.menuItemsCount] =
-                                    'Cast ' +
-                                    GameData.spellName[this.selectedSpell] +
-                                    ' on';
-                                this.menuItemText2[this.menuItemsCount] =
-                                    '@yel@' +
-                                    GameData.npcName[this.npcs[idx]!.npcId];
-                                this.menuType[this.menuItemsCount] = 700;
+                                unchecked(
+                                    (this.menuItemText1[this.menuItemsCount] =
+                                        'Cast ' +
+                                        GameData.spellName[this.selectedSpell] +
+                                        ' on')
+                                );
+                                unchecked(
+                                    (this.menuItemText2[this.menuItemsCount] =
+                                        '@yel@' +
+                                        GameData.npcName[this.npcs[idx]!.npcId])
+                                );
+                                unchecked(
+                                    (this.menuType[this.menuItemsCount] = 700)
+                                );
 
-                                this.menuItemX[this.menuItemsCount] = this.npcs[
-                                    idx
-                                ]!.currentX;
+                                unchecked(
+                                    (this.menuItemX[
+                                        this.menuItemsCount
+                                    ] = this.npcs[idx]!.currentX)
+                                );
 
-                                this.menuItemY[this.menuItemsCount] = this.npcs[
-                                    idx
-                                ]!.currentY;
+                                unchecked(
+                                    (this.menuItemY[
+                                        this.menuItemsCount
+                                    ] = this.npcs[idx]!.currentY)
+                                );
 
-                                this.menuIndex[this.menuItemsCount] = this.npcs[
-                                    idx
-                                ]!.serverIndex;
+                                unchecked(
+                                    (this.menuIndex[
+                                        this.menuItemsCount
+                                    ] = this.npcs[idx]!.serverIndex)
+                                );
 
-                                this.menuSourceIndex[
-                                    this.menuItemsCount
-                                ] = this.selectedSpell;
+                                unchecked(
+                                    (this.menuSourceIndex[
+                                        this.menuItemsCount
+                                    ] = this.selectedSpell)
+                                );
+
                                 this.menuItemsCount++;
                             }
                         } else if (this.selectedItemInventoryIndex >= 0) {
-                            this.menuItemText1[this.menuItemsCount] =
-                                'Use ' + this.selectedItemName + ' with';
-                            this.menuItemText2[this.menuItemsCount] =
-                                '@yel@' +
-                                GameData.npcName[this.npcs[idx].npcId];
-                            this.menuType[this.menuItemsCount] = 710;
+                            unchecked(
+                                (this.menuItemText1[
+                                    this.menuItemsCount
+                                ] = `Use ${this.selectedItemName} with`)
+                            );
 
-                            this.menuItemX[this.menuItemsCount] = this.npcs[
-                                idx
-                            ]!.currentX;
+                            unchecked(
+                                (this.menuItemText2[this.menuItemsCount] =
+                                    '@yel@' +
+                                    GameData.npcName[this.npcs[idx]!.npcId])
+                            );
 
-                            this.menuItemY[this.menuItemsCount] = this.npcs[
-                                idx
-                            ]!.currentY;
+                            unchecked(
+                                (this.menuType[this.menuItemsCount] = 710)
+                            );
 
-                            this.menuIndex[this.menuItemsCount] = this.npcs[
-                                idx
-                            ]!.serverIndex;
+                            unchecked(
+                                (this.menuItemX[
+                                    this.menuItemsCount
+                                ] = this.npcs[idx]!.currentX)
+                            );
 
-                            this.menuSourceIndex[
-                                this.menuItemsCount
-                            ] = this.selectedItemInventoryIndex;
+                            unchecked(
+                                (this.menuItemY[
+                                    this.menuItemsCount
+                                ] = this.npcs[idx]!.currentY)
+                            );
+
+                            unchecked(
+                                (this.menuIndex[
+                                    this.menuItemsCount
+                                ] = this.npcs[idx]!.serverIndex)
+                            );
+
+                            unchecked(
+                                (this.menuSourceIndex[
+                                    this.menuItemsCount
+                                ] = this.selectedItemInventoryIndex)
+                            );
+
                             this.menuItemsCount++;
                         } else {
                             if (GameData.npcAttackable[id] > 0) {
-                                this.menuItemText1[this.menuItemsCount] =
-                                    'Attack';
-                                this.menuItemText2[this.menuItemsCount] =
-                                    '@yel@' +
-                                    GameData.npcName[this.npcs[idx].npcId] +
-                                    menuText;
+                                unchecked(
+                                    (this.menuItemText1[this.menuItemsCount] =
+                                        'Attack')
+                                );
+
+                                unchecked(
+                                    (this.menuItemText2[this.menuItemsCount] =
+                                        '@yel@' +
+                                        GameData.npcName[this.npcs[idx]!.npcId])
+                                );
+                                menuText;
 
                                 if (levelDiff >= 0) {
                                     this.menuType[this.menuItemsCount] = 715;
                                 } else {
-                                    this.menuType[this.menuItemsCount] = 2715;
+                                    unchecked(
+                                        (this.menuType[
+                                            this.menuItemsCount
+                                        ] = 2715)
+                                    );
                                 }
 
-                                this.menuItemX[this.menuItemsCount] = this.npcs[
-                                    idx
-                                ]!.currentX;
-                                this.menuItemY[this.menuItemsCount] = this.npcs[
-                                    idx
-                                ]!.currentY;
-                                this.menuIndex[this.menuItemsCount] = this.npcs[
-                                    idx
-                                ]!.serverIndex;
+                                unchecked(
+                                    (this.menuItemX[
+                                        this.menuItemsCount
+                                    ] = this.npcs[idx]!.currentX)
+                                );
+
+                                unchecked(
+                                    (this.menuItemY[
+                                        this.menuItemsCount
+                                    ] = this.npcs[idx]!.currentY)
+                                );
+
+                                unchecked(
+                                    (this.menuIndex[
+                                        this.menuItemsCount
+                                    ] = this.npcs[idx]!.serverIndex)
+                                );
+
                                 this.menuItemsCount++;
                             }
 
-                            this.menuItemText1[this.menuItemsCount] = 'Talk-to';
+                            unchecked(
+                                (this.menuItemText1[this.menuItemsCount] =
+                                    'Talk-to')
+                            );
 
-                            this.menuItemText2[this.menuItemsCount] =
-                                '@yel@' +
-                                GameData.npcName[this.npcs[idx]!.npcId];
+                            unchecked(
+                                (this.menuItemText2[this.menuItemsCount] =
+                                    '@yel@' +
+                                    GameData.npcName[this.npcs[idx]!.npcId])
+                            );
 
-                            this.menuType[this.menuItemsCount] = 720;
+                            unchecked(
+                                (this.menuType[this.menuItemsCount] = 720)
+                            );
 
-                            this.menuItemX[this.menuItemsCount] = this.npcs[
-                                idx
-                            ]!.currentX;
+                            unchecked(
+                                (this.menuItemX[
+                                    this.menuItemsCount
+                                ] = this.npcs[idx]!.currentX)
+                            );
 
-                            this.menuItemY[this.menuItemsCount] = this.npcs[
-                                idx
-                            ]!.currentY;
+                            unchecked(
+                                (this.menuItemY[
+                                    this.menuItemsCount
+                                ] = this.npcs[idx]!.currentY)
+                            );
 
-                            this.menuIndex[this.menuItemsCount] = this.npcs[
-                                idx
-                            ]!.serverIndex;
+                            unchecked(
+                                (this.menuIndex[
+                                    this.menuItemsCount
+                                ] = this.npcs[idx]!.serverIndex)
+                            );
 
                             this.menuItemsCount++;
 
                             if (GameData.npcCommand[id] != '') {
-                                this.menuItemText1[this.menuItemsCount] =
-                                    GameData.npcCommand[id];
-                                this.menuItemText2[this.menuItemsCount] =
-                                    '@yel@' +
-                                    GameData.npcName[this.npcs[idx]!.npcId];
-                                this.menuType[this.menuItemsCount] = 725;
-                                this.menuItemX[this.menuItemsCount] = this.npcs[
-                                    idx
-                                ]!.currentX;
-                                this.menuItemY[this.menuItemsCount] = this.npcs[
-                                    idx
-                                ]!.currentY;
-                                this.menuIndex[this.menuItemsCount] = this.npcs[
-                                    idx
-                                ]!.serverIndex;
+                                unchecked(
+                                    (this.menuItemText1[this.menuItemsCount] =
+                                        GameData.npcCommand[id])
+                                );
+
+                                unchecked(
+                                    (this.menuItemText2[this.menuItemsCount] =
+                                        '@yel@' +
+                                        GameData.npcName[this.npcs[idx]!.npcId])
+                                );
+
+                                unchecked(
+                                    (this.menuType[this.menuItemsCount] = 725)
+                                );
+
+                                unchecked(
+                                    (this.menuItemX[
+                                        this.menuItemsCount
+                                    ] = this.npcs[idx]!.currentX)
+                                );
+
+                                unchecked(
+                                    (this.menuItemY[
+                                        this.menuItemsCount
+                                    ] = this.npcs[idx]!.currentY)
+                                );
+
+                                unchecked(
+                                    (this.menuIndex[
+                                        this.menuItemsCount
+                                    ] = this.npcs[idx]!.serverIndex)
+                                );
+
                                 this.menuItemsCount++;
                             }
 
-                            this.menuItemText1[this.menuItemsCount] = 'Examine';
-                            this.menuItemText2[this.menuItemsCount] =
-                                '@yel@' +
-                                GameData.npcName[this.npcs[idx]!.npcId];
-                            this.menuType[this.menuItemsCount] = 3700;
-                            this.menuIndex[this.menuItemsCount] = this.npcs[
-                                idx
-                            ]!.npcId;
+                            unchecked(
+                                (this.menuItemText1[this.menuItemsCount] =
+                                    'Examine')
+                            );
+
+                            unchecked(
+                                (this.menuItemText2[this.menuItemsCount] =
+                                    '@yel@' +
+                                    GameData.npcName[this.npcs[idx]!.npcId])
+                            );
+
+                            unchecked(
+                                (this.menuType[this.menuItemsCount] = 3700)
+                            );
+
+                            unchecked(
+                                (this.menuIndex[
+                                    this.menuItemsCount
+                                ] = this.npcs[idx]!.npcId)
+                            );
+
                             this.menuItemsCount++;
                         }
                     }
                 } else if (gameModel && gameModel.key >= 10000) {
                     const index = gameModel.key - 10000;
-                    const id = this.wallObjectId[index];
+                    const id = unchecked(this.wallObjectId[index]);
 
                     if (!this.wallObjectAlreadyInMenu[index]) {
                         if (this.selectedSpell >= 0) {
                             if (GameData.spellType[this.selectedSpell] == 4) {
-                                this.menuItemText1[this.menuItemsCount] =
-                                    'Cast ' +
-                                    GameData.spellName[this.selectedSpell] +
-                                    ' on';
-                                this.menuItemText2[this.menuItemsCount] =
-                                    '@cya@' + GameData.wallObjectName[id];
-                                this.menuType[this.menuItemsCount] = 300;
-                                this.menuItemX[
-                                    this.menuItemsCount
-                                ] = this.wallObjectX[index];
-                                this.menuItemY[
-                                    this.menuItemsCount
-                                ] = this.wallObjectY[index];
-                                this.menuIndex[
-                                    this.menuItemsCount
-                                ] = this.wallObjectDirection[index];
-                                this.menuSourceIndex[
-                                    this.menuItemsCount
-                                ] = this.selectedSpell;
+                                unchecked(
+                                    (this.menuItemText1[this.menuItemsCount] =
+                                        'Cast ' +
+                                        GameData.spellName[this.selectedSpell] +
+                                        ' on')
+                                );
+
+                                unchecked(
+                                    (this.menuItemText2[
+                                        this.menuItemsCount
+                                    ] = `@cya@${GameData.wallObjectName[id]}`)
+                                );
+
+                                unchecked(
+                                    (this.menuType[this.menuItemsCount] = 300)
+                                );
+
+                                unchecked(
+                                    (this.menuItemX[
+                                        this.menuItemsCount
+                                    ] = this.wallObjectX[index])
+                                );
+
+                                unchecked(
+                                    (this.menuItemY[
+                                        this.menuItemsCount
+                                    ] = this.wallObjectY[index])
+                                );
+
+                                unchecked(
+                                    (this.menuIndex[
+                                        this.menuItemsCount
+                                    ] = this.wallObjectDirection[index])
+                                );
+
+                                unchecked(
+                                    (this.menuSourceIndex[
+                                        this.menuItemsCount
+                                    ] = this.selectedSpell)
+                                );
+
                                 this.menuItemsCount++;
                             }
                         } else if (this.selectedItemInventoryIndex >= 0) {
-                            this.menuItemText1[this.menuItemsCount] =
-                                'Use ' + this.selectedItemName + ' with';
-                            this.menuItemText2[this.menuItemsCount] =
-                                '@cya@' + GameData.wallObjectName[id];
-                            this.menuType[this.menuItemsCount] = 310;
-                            this.menuItemX[
-                                this.menuItemsCount
-                            ] = this.wallObjectX[index];
-                            this.menuItemY[
-                                this.menuItemsCount
-                            ] = this.wallObjectY[index];
-                            this.menuIndex[
-                                this.menuItemsCount
-                            ] = this.wallObjectDirection[index];
-                            this.menuSourceIndex[
-                                this.menuItemsCount
-                            ] = this.selectedItemInventoryIndex;
+                            unchecked(
+                                (this.menuItemText1[
+                                    this.menuItemsCount
+                                ] = `Use ${this.selectedItemName} with`)
+                            );
+
+                            unchecked(
+                                (this.menuItemText2[
+                                    this.menuItemsCount
+                                ] = `@cya@${GameData.wallObjectName[id]}`)
+                            );
+
+                            unchecked(
+                                (this.menuType[this.menuItemsCount] = 310)
+                            );
+
+                            unchecked(
+                                (this.menuItemX[
+                                    this.menuItemsCount
+                                ] = this.wallObjectX[index])
+                            );
+
+                            unchecked(
+                                (this.menuItemY[
+                                    this.menuItemsCount
+                                ] = this.wallObjectY[index])
+                            );
+
+                            unchecked(
+                                (this.menuIndex[
+                                    this.menuItemsCount
+                                ] = this.wallObjectDirection[index])
+                            );
+
+                            unchecked(
+                                (this.menuSourceIndex[
+                                    this.menuItemsCount
+                                ] = this.selectedItemInventoryIndex)
+                            );
+
                             this.menuItemsCount++;
                         } else {
                             if (
-                                GameData.wallObjectCommand1[id].toLowerCase() !=
-                                'walkto'
+                                unchecked(
+                                    GameData.wallObjectCommand1[id]
+                                ).toLowerCase() != 'walkto'
                             ) {
-                                this.menuItemText1[this.menuItemsCount] =
-                                    GameData.wallObjectCommand1[id];
-                                this.menuItemText2[this.menuItemsCount] =
-                                    '@cya@' + GameData.wallObjectName[id];
-                                this.menuType[this.menuItemsCount] = 320;
-                                this.menuItemX[
-                                    this.menuItemsCount
-                                ] = this.wallObjectX[index];
-                                this.menuItemY[
-                                    this.menuItemsCount
-                                ] = this.wallObjectY[index];
-                                this.menuIndex[
-                                    this.menuItemsCount
-                                ] = this.wallObjectDirection[index];
+                                unchecked(
+                                    (this.menuItemText1[this.menuItemsCount] =
+                                        GameData.wallObjectCommand1[id])
+                                );
+
+                                unchecked(
+                                    (this.menuItemText2[
+                                        this.menuItemsCount
+                                    ] = `@cya@${GameData.wallObjectName[id]}`)
+                                );
+                                unchecked(
+                                    (this.menuType[this.menuItemsCount] = 320)
+                                );
+
+                                unchecked(
+                                    (this.menuItemX[
+                                        this.menuItemsCount
+                                    ] = this.wallObjectX[index])
+                                );
+
+                                unchecked(
+                                    (this.menuItemY[
+                                        this.menuItemsCount
+                                    ] = this.wallObjectY[index])
+                                );
+
+                                unchecked(
+                                    (this.menuIndex[
+                                        this.menuItemsCount
+                                    ] = this.wallObjectDirection[index])
+                                );
+
                                 this.menuItemsCount++;
                             }
 
                             if (
-                                GameData.wallObjectCommand2[id].toLowerCase() !=
-                                'examine'
+                                unchecked(
+                                    GameData.wallObjectCommand2[id]
+                                ).toLowerCase() != 'examine'
                             ) {
-                                this.menuItemText1[this.menuItemsCount] =
-                                    GameData.wallObjectCommand2[id];
-                                this.menuItemText2[this.menuItemsCount] =
-                                    '@cya@' + GameData.wallObjectName[id];
-                                this.menuType[this.menuItemsCount] = 2300;
-                                this.menuItemX[
-                                    this.menuItemsCount
-                                ] = this.wallObjectX[index];
-                                this.menuItemY[
-                                    this.menuItemsCount
-                                ] = this.wallObjectY[index];
-                                this.menuIndex[
-                                    this.menuItemsCount
-                                ] = this.wallObjectDirection[index];
+                                unchecked(
+                                    (this.menuItemText1[this.menuItemsCount] =
+                                        GameData.wallObjectCommand2[id])
+                                );
+
+                                unchecked(
+                                    (this.menuItemText2[
+                                        this.menuItemsCount
+                                    ] = `@cya@${GameData.wallObjectName[id]}`)
+                                );
+
+                                unchecked(
+                                    (this.menuType[this.menuItemsCount] = 2300)
+                                );
+
+                                unchecked(
+                                    (this.menuItemX[
+                                        this.menuItemsCount
+                                    ] = this.wallObjectX[index])
+                                );
+
+                                unchecked(
+                                    (this.menuItemY[
+                                        this.menuItemsCount
+                                    ] = this.wallObjectY[index])
+                                );
+
+                                unchecked(
+                                    (this.menuIndex[
+                                        this.menuItemsCount
+                                    ] = this.wallObjectDirection[index])
+                                );
+
                                 this.menuItemsCount++;
                             }
 
-                            this.menuItemText1[this.menuItemsCount] = 'Examine';
-                            this.menuItemText2[this.menuItemsCount] =
-                                '@cya@' + GameData.wallObjectName[id];
-                            this.menuType[this.menuItemsCount] = 3300;
-                            this.menuIndex[this.menuItemsCount] = id;
+                            unchecked(
+                                (this.menuItemText1[this.menuItemsCount] =
+                                    'Examine')
+                            );
+
+                            unchecked(
+                                (this.menuItemText2[
+                                    this.menuItemsCount
+                                ] = `@cya@${GameData.wallObjectName[id]}`)
+                            );
+
+                            unchecked(
+                                (this.menuType[this.menuItemsCount] = 3300)
+                            );
+
+                            unchecked(
+                                (this.menuIndex[this.menuItemsCount] = id)
+                            );
+
                             this.menuItemsCount++;
                         }
 
-                        this.wallObjectAlreadyInMenu[index] = true;
+                        unchecked((this.wallObjectAlreadyInMenu[index] = true));
                     }
                 } else if (gameModel && gameModel.key >= 0) {
                     const index = gameModel.key;
@@ -4733,74 +5095,145 @@ export default class mudclient extends GameConnection {
                     if (!this.objectAlreadyInMenu[index]) {
                         if (this.selectedSpell >= 0) {
                             if (GameData.spellType[this.selectedSpell] == 5) {
-                                this.menuItemText1[this.menuItemsCount] =
-                                    'Cast ' +
-                                    GameData.spellName[this.selectedSpell] +
-                                    ' on';
-                                this.menuItemText2[this.menuItemsCount] =
-                                    '@cya@' + GameData.objectName[id];
-                                this.menuType[this.menuItemsCount] = 400;
-                                this.menuItemX[
-                                    this.menuItemsCount
-                                ] = this.objectX[index];
-                                this.menuItemY[
-                                    this.menuItemsCount
-                                ] = this.objectY[index];
-                                this.menuIndex[
-                                    this.menuItemsCount
-                                ] = this.objectDirection[index];
-                                this.menuSourceIndex[
-                                    this.menuItemsCount
-                                ] = this.objectId[index];
-                                this.menuTargetIndex[
-                                    this.menuItemsCount
-                                ] = this.selectedSpell;
+                                unchecked(
+                                    (this.menuItemText1[this.menuItemsCount] =
+                                        'Cast ' +
+                                        GameData.spellName[this.selectedSpell] +
+                                        ' on')
+                                );
+
+                                unchecked(
+                                    (this.menuItemText2[
+                                        this.menuItemsCount
+                                    ] = `@cya@${GameData.objectName[id]}`)
+                                );
+
+                                unchecked(
+                                    (this.menuType[this.menuItemsCount] = 400)
+                                );
+
+                                unchecked(
+                                    (this.menuItemX[
+                                        this.menuItemsCount
+                                    ] = this.objectX[index])
+                                );
+
+                                unchecked(
+                                    (this.menuItemY[
+                                        this.menuItemsCount
+                                    ] = this.objectY[index])
+                                );
+
+                                unchecked(
+                                    (this.menuIndex[
+                                        this.menuItemsCount
+                                    ] = this.objectDirection[index])
+                                );
+
+                                unchecked(
+                                    (this.menuSourceIndex[
+                                        this.menuItemsCount
+                                    ] = this.objectId[index])
+                                );
+
+                                unchecked(
+                                    (this.menuTargetIndex[
+                                        this.menuItemsCount
+                                    ] = this.selectedSpell)
+                                );
+
                                 this.menuItemsCount++;
                             }
                         } else if (this.selectedItemInventoryIndex >= 0) {
-                            this.menuItemText1[this.menuItemsCount] =
-                                'Use ' + this.selectedItemName + ' with';
-                            this.menuItemText2[this.menuItemsCount] =
-                                '@cya@' + GameData.objectName[id];
-                            this.menuType[this.menuItemsCount] = 410;
-                            this.menuItemX[this.menuItemsCount] = this.objectX[
-                                index
-                            ];
-                            this.menuItemY[this.menuItemsCount] = this.objectY[
-                                index
-                            ];
-                            this.menuIndex[
-                                this.menuItemsCount
-                            ] = this.objectDirection[index];
-                            this.menuSourceIndex[
-                                this.menuItemsCount
-                            ] = this.objectId[index];
-                            this.menuTargetIndex[
-                                this.menuItemsCount
-                            ] = this.selectedItemInventoryIndex;
+                            unchecked(
+                                (this.menuItemText1[this.menuItemsCount] =
+                                    'Use ' + this.selectedItemName + ' with')
+                            );
+
+                            unchecked(
+                                (this.menuItemText2[this.menuItemsCount] =
+                                    '@cya@' + GameData.objectName[id])
+                            );
+
+                            unchecked(
+                                (this.menuType[this.menuItemsCount] = 410)
+                            );
+
+                            unchecked(
+                                (this.menuItemX[
+                                    this.menuItemsCount
+                                ] = this.objectX[index])
+                            );
+
+                            unchecked(
+                                (this.menuItemY[
+                                    this.menuItemsCount
+                                ] = this.objectY[index])
+                            );
+
+                            unchecked(
+                                (this.menuIndex[
+                                    this.menuItemsCount
+                                ] = this.objectDirection[index])
+                            );
+
+                            unchecked(
+                                (this.menuSourceIndex[
+                                    this.menuItemsCount
+                                ] = this.objectId[index])
+                            );
+
+                            unchecked(
+                                (this.menuTargetIndex[
+                                    this.menuItemsCount
+                                ] = this.selectedItemInventoryIndex)
+                            );
+
                             this.menuItemsCount++;
                         } else {
                             if (
                                 GameData.objectCommand1[id].toLowerCase() !=
                                 'walkto'
                             ) {
-                                this.menuItemText1[this.menuItemsCount] =
-                                    GameData.objectCommand1[id];
-                                this.menuItemText2[this.menuItemsCount] =
-                                    '@cya@' + GameData.objectName[id];
-                                this.menuType[this.menuItemsCount] = 420;
-                                this.menuItemX[
-                                    this.menuItemsCount
-                                ] = this.objectX[index];
-                                this.menuItemY[
-                                    this.menuItemsCount
-                                ] = this.objectY[index];
-                                this.menuIndex[
-                                    this.menuItemsCount
-                                ] = this.objectDirection[index];
-                                this.menuSourceIndex[
-                                    this.menuItemsCount
-                                ] = this.objectId[index];
+                                unchecked(
+                                    (this.menuItemText1[this.menuItemsCount] =
+                                        GameData.objectCommand1[id])
+                                );
+
+                                unchecked(
+                                    (this.menuItemText2[
+                                        this.menuItemsCount
+                                    ] = `@cya@${GameData.objectName[id]}`)
+                                );
+
+                                unchecked(
+                                    (this.menuType[this.menuItemsCount] = 420)
+                                );
+
+                                unchecked(
+                                    (this.menuItemX[
+                                        this.menuItemsCount
+                                    ] = this.objectX[index])
+                                );
+
+                                unchecked(
+                                    (this.menuItemY[
+                                        this.menuItemsCount
+                                    ] = this.objectY[index])
+                                );
+
+                                unchecked(
+                                    (this.menuIndex[
+                                        this.menuItemsCount
+                                    ] = this.objectDirection[index])
+                                );
+
+                                unchecked(
+                                    (this.menuSourceIndex[
+                                        this.menuItemsCount
+                                    ] = this.objectId[index])
+                                );
+
                                 this.menuItemsCount++;
                             }
 
@@ -4887,7 +5320,7 @@ export default class mudclient extends GameConnection {
 
         if (
             this.selectedSpell >= 0 &&
-            GameData.spellType[this.selectedSpell] <= 1
+            unchecked(GameData.spellType[this.selectedSpell]) <= 1
         ) {
             unchecked(
                 (this.menuItemText1[this.menuItemsCount] = `Cast ${
@@ -4976,19 +5409,19 @@ export default class mudclient extends GameConnection {
         let x2 = x;
         let y2 = y;
 
-        const frontTexture = GameData.wallObjectTextureFront[id];
-        const backTexture = GameData.wallObjectTextureBack[id];
-        const height = GameData.wallObjectHeight[id];
+        const frontTexture = unchecked(GameData.wallObjectTextureFront[id]);
+        const backTexture = unchecked(GameData.wallObjectTextureBack[id]);
+        const height = unchecked(GameData.wallObjectHeight[id]);
         const gameModel = GameModel._from2(4, 1);
 
-        if (direction === 0) {
+        if (direction == 0) {
             x2 = x + 1;
-        } else if (direction === 1) {
+        } else if (direction == 1) {
             y2 = y + 1;
-        } else if (direction === 2) {
+        } else if (direction == 2) {
             x1 = x + 1;
             y2 = y + 1;
-        } else if (direction === 3) {
+        } else if (direction == 3) {
             x2 = x + 1;
             y2 = y + 1;
         }
@@ -5042,6 +5475,420 @@ export default class mudclient extends GameConnection {
         gameModel.key = count + 10000;
 
         return gameModel;
+    }
+
+    panelAppearance: Panel | null;
+
+    controlButtonAppearanceHeadLeft: i32;
+    controlButtonAppearanceHeadRight: i32;
+    controlButtonAppearanceHairLeft: i32;
+    controlButtonAppearanceHairRight: i32;
+    controlButtonAppearanceGenderLeft: i32;
+    controlButtonAppearanceGenderRight: i32;
+    controlButtonAppearanceTopLeft: i32;
+    controlButtonAppearanceTopRight: i32;
+    controlButtonAppearanceSkinLeft: i32;
+    controlButtonAppearanceSkinRight: i32;
+    controlButtonAppearanceBottomLeft: i32;
+    controlButtonAppearanceBottomRight: i32;
+    controlButtonAppearanceAccept: i32;
+
+    drawAppearanceOption(
+        panel: Panel,
+        type: string,
+        x: i32,
+        y: i32
+    ): Int32Array {
+        // size of the -> sprite
+        const ARROW_SIZE = 20;
+
+        const BOX_WIDTH = 53;
+        const BOX_HEIGHT = 41;
+
+        panel.addBoxRounded(x, y, BOX_WIDTH, BOX_HEIGHT);
+
+        const typeSplit = type.split('\n');
+
+        if (typeSplit.length == 1) {
+            panel.addTextCentre(x, y, type, 1, true);
+        } else {
+            panel.addTextCentre(x, y - 8, typeSplit[0], 1, true);
+            panel.addTextCentre(x, y + 8, typeSplit[1], 1, true);
+        }
+
+        const leftButton = panel.addButton(x - 40, y, ARROW_SIZE, ARROW_SIZE);
+        panel.addSprite(x - 40, y, Panel.baseSpriteStart + 7);
+
+        const rightButton = panel.addButton(x + 40, y, ARROW_SIZE, ARROW_SIZE);
+        panel.addSprite(x + 40, y, Panel.baseSpriteStart + 6);
+
+        const buttons = new Int32Array(2);
+        unchecked((buttons[0] = leftButton));
+        unchecked((buttons[1] = rightButton));
+
+        return buttons;
+    }
+
+    createAppearancePanel(): void {
+        // the width of each option column including the arrows
+        const COLUMN_WIDTH = 54;
+
+        // size of the accept button
+        const ACCEPT_WIDTH = 200;
+        const ACCEPT_HEIGHT = 30;
+
+        this.panelAppearance = new Panel(this.surface!, 100);
+
+        const x = 256;
+
+        this.panelAppearance!.addTextCentre(
+            x,
+            10,
+            'Please design Your Character',
+            4,
+            true
+        );
+
+        let y = 24;
+
+        this.panelAppearance!.addTextCentre(x - 55, y + 110, 'Front', 3, true);
+        this.panelAppearance!.addTextCentre(x, y + 110, 'Side', 3, true);
+        this.panelAppearance!.addTextCentre(x + 55, y + 110, 'Back', 3, true);
+
+        y += 145;
+
+        let buttons = this.drawAppearanceOption(
+            this.panelAppearance!,
+            'Head\nType',
+            x - COLUMN_WIDTH,
+            y
+        );
+
+        this.controlButtonAppearanceHeadLeft = buttons[0];
+        this.controlButtonAppearanceHeadRight = buttons[1];
+
+        buttons = this.drawAppearanceOption(
+            this.panelAppearance!,
+            'Hair\nColor',
+            x + COLUMN_WIDTH,
+            y
+        );
+
+        this.controlButtonAppearanceHairLeft = buttons[0];
+        this.controlButtonAppearanceHairRight = buttons[1];
+
+        y += 50;
+
+        buttons = this.drawAppearanceOption(
+            this.panelAppearance!,
+            'Gender',
+            x - COLUMN_WIDTH,
+            y
+        );
+
+        this.controlButtonAppearanceGenderLeft = buttons[0];
+        this.controlButtonAppearanceGenderRight = buttons[1];
+
+        buttons = this.drawAppearanceOption(
+            this.panelAppearance!,
+            'Top\nColor',
+            x + COLUMN_WIDTH,
+            y
+        );
+
+        this.controlButtonAppearanceTopLeft = buttons[0];
+        this.controlButtonAppearanceTopRight = buttons[1];
+
+        y += 50;
+
+        buttons = this.drawAppearanceOption(
+            this.panelAppearance!,
+            'Skin\nColor',
+            x - COLUMN_WIDTH,
+            y
+        );
+
+        this.controlButtonAppearanceSkinLeft = buttons[0];
+        this.controlButtonAppearanceSkinRight = buttons[1];
+
+        buttons = this.drawAppearanceOption(
+            this.panelAppearance!,
+            'Bottom\nColor',
+            x + COLUMN_WIDTH,
+            y
+        );
+
+        this.controlButtonAppearanceBottomLeft = buttons[0];
+        this.controlButtonAppearanceBottomRight = buttons[1];
+
+        y += 47;
+
+        this.panelAppearance!.addButtonBackground(
+            x,
+            y,
+            ACCEPT_WIDTH,
+            ACCEPT_HEIGHT
+        );
+
+        this.panelAppearance!.addTextCentre(x, y, 'Accept', 4, false);
+
+        this.controlButtonAppearanceAccept = this.panelAppearance!.addButton(
+            x,
+            y,
+            ACCEPT_WIDTH,
+            ACCEPT_HEIGHT
+        );
+    }
+
+    handleAppearancePanelInput(): void {
+        this.panelAppearance!.handleMouse(
+            this.mouseX,
+            this.mouseY,
+            this.lastMouseButtonDown,
+            this.mouseButtonDown
+        );
+
+        if (this.panelAppearance!.isClicked(this.controlButtonAppearanceHeadLeft)) {
+            do {
+                this.appearanceHeadType =
+                    (this.appearanceHeadType - 1 + GameData.animationCount) %
+                    GameData.animationCount;
+            } while (
+                (GameData.animationGender[this.appearanceHeadType] & 3) != 1 ||
+                (GameData.animationGender[this.appearanceHeadType] &
+                    (4 * this.appearanceHeadGender)) ==
+                    0
+            );
+        }
+
+        if (
+            this.panelAppearance!.isClicked(this.controlButtonAppearanceHeadRight)
+        ) {
+            do {
+                this.appearanceHeadType =
+                    (this.appearanceHeadType + 1) % GameData.animationCount;
+            } while (
+                (GameData.animationGender[this.appearanceHeadType] & 3) != 1 ||
+                (GameData.animationGender[this.appearanceHeadType] &
+                    (4 * this.appearanceHeadGender)) ==
+                    0
+            );
+        }
+
+        if (this.panelAppearance!.isClicked(this.controlButtonAppearanceHairLeft)) {
+            this.appearanceHairColour =
+                (this.appearanceHairColour - 1 + this.characterHairColours.length) %
+                this.characterHairColours.length;
+        }
+
+        if (
+            this.panelAppearance!.isClicked(this.controlButtonAppearanceHairRight)
+        ) {
+            this.appearanceHairColour =
+                (this.appearanceHairColour + 1) % this.characterHairColours.length;
+        }
+
+        if (
+            this.panelAppearance!.isClicked(
+                this.controlButtonAppearanceGenderLeft
+            ) ||
+            this.panelAppearance!.isClicked(this.controlButtonAppearanceGenderRight)
+        ) {
+            for (
+                this.appearanceHeadGender = 3 - this.appearanceHeadGender;
+                (GameData.animationGender[this.appearanceHeadType] & 3) != 1 ||
+                (GameData.animationGender[this.appearanceHeadType] &
+                    (4 * this.appearanceHeadGender)) ==
+                    0;
+                this.appearanceHeadType =
+                    (this.appearanceHeadType + 1) % GameData.animationCount
+            );
+
+            for (
+                ;
+                (GameData.animationGender[this.appearanceBodyGender] & 3) != 2 ||
+                (GameData.animationGender[this.appearanceBodyGender] &
+                    (4 * this.appearanceHeadGender)) ==
+                    0;
+                this.appearanceBodyGender =
+                    (this.appearanceBodyGender + 1) % GameData.animationCount
+            );
+        }
+
+        if (this.panelAppearance!.isClicked(this.controlButtonAppearanceTopLeft)) {
+            this.appearanceTopColour =
+                (this.appearanceTopColour -
+                    1 +
+                    this.characterTopBottomColours.length) %
+                this.characterTopBottomColours.length;
+        }
+
+        if (this.panelAppearance!.isClicked(this.controlButtonAppearanceTopRight)) {
+            this.appearanceTopColour =
+                (this.appearanceTopColour + 1) %
+                this.characterTopBottomColours.length;
+        }
+
+        if (this.panelAppearance!.isClicked(this.controlButtonAppearanceSkinLeft)) {
+            this.appearanceSkinColour =
+                (this.appearanceSkinColour - 1 + this.characterSkinColours.length) %
+                this.characterSkinColours.length;
+        }
+
+        if (
+            this.panelAppearance!.isClicked(this.controlButtonAppearanceSkinRight)
+        ) {
+            this.appearanceSkinColour =
+                (this.appearanceSkinColour + 1) % this.characterSkinColours.length;
+        }
+
+        if (
+            this.panelAppearance!.isClicked(this.controlButtonAppearanceBottomLeft)
+        ) {
+            this.appearanceBottomColour =
+                (this.appearanceBottomColour -
+                    1 +
+                    this.characterTopBottomColours.length) %
+                this.characterTopBottomColours.length;
+        }
+
+        if (
+            this.panelAppearance!.isClicked(this.controlButtonAppearanceBottomRight)
+        ) {
+            this.appearanceBottomColour =
+                (this.appearanceBottomColour + 1) %
+                this.characterTopBottomColours.length;
+        }
+
+        if (this.panelAppearance!.isClicked(this.controlButtonAppearanceAccept)) {
+            this.packetStream!.newPacket(ClientOpcodes.APPEARANCE);
+            this.packetStream!.putByte(this.appearanceHeadGender);
+            this.packetStream!.putByte(this.appearanceHeadType);
+            this.packetStream!.putByte(this.appearanceBodyGender);
+            this.packetStream!.putByte(this.appearance2Colour);
+            this.packetStream!.putByte(this.appearanceHairColour);
+            this.packetStream!.putByte(this.appearanceTopColour);
+            this.packetStream!.putByte(this.appearanceBottomColour);
+            this.packetStream!.putByte(this.appearanceSkinColour);
+            this.packetStream!.sendPacket();
+
+            this.surface!.blackScreen();
+
+            this.showAppearanceChange = false;
+        }
+    }
+
+    drawAppearancePanelCharacterSprites(): void {
+        this.surface!.interlace = false;
+        this.surface!.blackScreen();
+
+        this.panelAppearance!.drawPanel();
+
+        const x = 256;
+        const y = 25;
+
+        this.surface!._spriteClipping_from6(
+            x - 32 - 55,
+            y,
+            64,
+            102,
+            GameData.animationNumber[this.appearance2Colour],
+            this.characterTopBottomColours[this.appearanceBottomColour]
+        );
+
+        this.surface!._spriteClipping_from9(
+            x - 32 - 55,
+            y,
+            64,
+            102,
+            GameData.animationNumber[this.appearanceBodyGender],
+            this.characterTopBottomColours[this.appearanceTopColour],
+            this.characterSkinColours[this.appearanceSkinColour],
+            0,
+            false
+        );
+
+        this.surface!._spriteClipping_from9(
+            x - 32 - 55,
+            y,
+            64,
+            102,
+            GameData.animationNumber[this.appearanceHeadType],
+            this.characterHairColours[this.appearanceHairColour],
+            this.characterSkinColours[this.appearanceSkinColour],
+            0,
+            false
+        );
+
+        this.surface!._spriteClipping_from6(
+            x - 32,
+            y,
+            64,
+            102,
+            GameData.animationNumber[this.appearance2Colour] + 6,
+            this.characterTopBottomColours[this.appearanceBottomColour]
+        );
+
+        this.surface!._spriteClipping_from9(
+            x - 32,
+            y,
+            64,
+            102,
+            GameData.animationNumber[this.appearanceBodyGender] + 6,
+            this.characterTopBottomColours[this.appearanceTopColour],
+            this.characterSkinColours[this.appearanceSkinColour],
+            0,
+            false
+        );
+
+        this.surface!._spriteClipping_from9(
+            x - 32,
+            y,
+            64,
+            102,
+            GameData.animationNumber[this.appearanceHeadType] + 6,
+            this.characterHairColours[this.appearanceHairColour],
+            this.characterSkinColours[this.appearanceSkinColour],
+            0,
+            false
+        );
+
+        this.surface!._spriteClipping_from6(
+            x - 32 + 55,
+            y,
+            64,
+            102,
+            GameData.animationNumber[this.appearance2Colour] + 12,
+            this.characterTopBottomColours[this.appearanceBottomColour]
+        );
+
+        this.surface!._spriteClipping_from9(
+            x - 32 + 55,
+            y,
+            64,
+            102,
+            GameData.animationNumber[this.appearanceBodyGender] + 12,
+            this.characterTopBottomColours[this.appearanceTopColour],
+            this.characterSkinColours[this.appearanceSkinColour],
+            0,
+            false
+        );
+
+        this.surface!._spriteClipping_from9(
+            x - 32 + 55,
+            y,
+            64,
+            102,
+            GameData.animationNumber[this.appearanceHeadType] + 12,
+            this.characterHairColours[this.appearanceHairColour],
+            this.characterSkinColours[this.appearanceSkinColour],
+            0,
+            false
+        );
+
+        this.surface!._drawSprite_from3(0, this.gameHeight, this.spriteMedia + 22);
+
+        //this.surface!.draw(this.graphics, 0, 0);
     }
 
     drawDialogDuel(): void {
@@ -5983,6 +6830,781 @@ export default class mudclient extends GameConnection {
             }
 
             this.mouseButtonClick = 0;
+        }
+    }
+
+    panelLoginWelcome: Panel | null;
+    panelLoginNewUser: Panel | null;
+    panelLoginExistingUser: Panel | null;
+    panelRecoverUser: Panel | null;
+
+    controlWelcomeNewUser: i32;
+    controlWelcomeExistingUser: i32;
+    controlLoginNewOK: i32;
+    controlRegisterStatus: i32;
+    controlRegisterUser: i32;
+    controlRegisterPassword: i32;
+    controlRegisterConfirmPassword: i32;
+    controlRegisterCheckbox: i32;
+    controlRegisterSubmit: i32;
+    controlRegisterCancel: i32;
+    controlLoginStatus: i32;
+    controlLoginUser: i32;
+    controlLoginPassword: i32;
+    controlLoginOk: i32;
+    controlLoginCancel: i32;
+    controlLoginRecover: i32;
+
+    loginScreen: i32;
+    loginUser: string = '';
+    loginPass: string = '';
+    registerUser: string = '';
+    registerPassword: string = '';
+
+    createLoginPanels(): void {
+        this.panelLoginWelcome = new Panel(this.surface!, 50);
+
+        const x = (this.gameWidth / 2) as i32;
+        let y = 40;
+        const click = this.options.mobile ? 'Tap' : 'Click';
+
+        if (!this.members) {
+            this.panelLoginWelcome!.addTextCentre(
+                x,
+                200 + y,
+                `${click} on an option`,
+                5,
+                true
+            );
+
+            this.panelLoginWelcome!.addButtonBackground(x - 100, 240 + y, 120, 35);
+
+            this.panelLoginWelcome!.addTextCentre(
+                x - 100,
+                240 + y,
+                'New User',
+                5,
+                false
+            );
+
+            this.controlWelcomeNewUser = this.panelLoginWelcome!.addButton(
+                x - 100,
+                240 + y,
+                120,
+                35
+            );
+
+            this.panelLoginWelcome!.addButtonBackground(x + 100, 240 + y, 120, 35);
+
+            this.panelLoginWelcome!.addTextCentre(
+                x + 100,
+                240 + y,
+                'Existing User',
+                5,
+                false
+            );
+
+            this.controlWelcomeExistingUser = this.panelLoginWelcome!.addButton(
+                x + 100,
+                240 + y,
+                120,
+                35
+            );
+        } else {
+            this.panelLoginWelcome!.addTextCentre(
+                x,
+                200 + y,
+                'Welcome to RuneScape',
+                4,
+                true
+            );
+
+            this.panelLoginWelcome!.addTextCentre(
+                x,
+                215 + y,
+                'You need a members account to use this server',
+                4,
+                true
+            );
+
+            this.panelLoginWelcome!.addButtonBackground(x, 250 + y, 200, 35);
+
+            this.panelLoginWelcome!.addTextCentre(
+                x,
+                250 + y,
+                `${click} here to login`,
+                5,
+                false
+            );
+
+            this.controlWelcomeExistingUser = this.panelLoginWelcome!.addButton(
+                x,
+                250 + y,
+                200,
+                35
+            );
+        }
+
+        this.panelLoginNewUser = new Panel(this.surface!, 50);
+
+        if (!this.options.accountManagement) {
+            y = 230;
+
+            if (this.referID == 0) {
+                this.panelLoginNewUser!.addTextCentre(
+                    x,
+                    y + 8,
+                    'To create an account please go back to the',
+                    4,
+                    true
+                );
+
+                y += 20;
+
+                this.panelLoginNewUser!.addTextCentre(
+                    x,
+                    y + 8,
+                    "www.runescape.com front page, and choose 'create account'",
+                    4,
+                    true
+                );
+            } else if (this.referID == 1) {
+                this.panelLoginNewUser!.addTextCentre(
+                    x,
+                    y + 8,
+                    'To create an account please click on the',
+                    4,
+                    true
+                );
+
+                y += 20;
+
+                this.panelLoginNewUser!.addTextCentre(
+                    x,
+                    y + 8,
+                    "'create account' link below the game window",
+                    4,
+                    true
+                );
+            } else {
+                this.panelLoginNewUser!.addTextCentre(
+                    x,
+                    y + 8,
+                    'To create an account please go back to the',
+                    4,
+                    true
+                );
+
+                y += 20;
+
+                this.panelLoginNewUser!.addTextCentre(
+                    x,
+                    y + 8,
+                    "runescape front webpage and choose 'create account'",
+                    4,
+                    true
+                );
+            }
+
+            y += 30;
+
+            this.panelLoginNewUser!.addButtonBackground(x, y + 17, 150, 34);
+            this.panelLoginNewUser!.addTextCentre(x, y + 17, 'Ok', 5, false);
+
+            this.controlLoginNewOK = this.panelLoginNewUser!.addButton(
+                x,
+                y + 17,
+                150,
+                34
+            );
+        } else {
+            y = 70;
+
+            this.controlRegisterStatus = this.panelLoginNewUser!.addTextCentre(
+                x,
+                y + 8,
+                'To create an account please enter all the requested details',
+                4,
+                true
+            );
+
+            let offsetY = y + 25;
+
+            this.panelLoginNewUser!.addButtonBackground(x, offsetY + 17, 250, 34);
+
+            this.panelLoginNewUser!.addTextCentre(
+                x,
+                offsetY + 8,
+                'Choose a Username',
+                4,
+                false
+            );
+
+            this.controlRegisterUser = this.panelLoginNewUser!.addTextInput(
+                x,
+                offsetY + 25,
+                200,
+                40,
+                4,
+                12,
+                false,
+                false
+            );
+
+            offsetY += 40;
+
+            this.panelLoginNewUser!.addButtonBackground(
+                x - 115,
+                offsetY + 17,
+                220,
+                34
+            );
+
+            this.panelLoginNewUser!.addTextCentre(
+                x - 115,
+                offsetY + 8,
+                'Choose a Password',
+                4,
+                false
+            );
+
+            this.controlRegisterPassword = this.panelLoginNewUser!.addTextInput(
+                x - 115,
+                offsetY + 25,
+                220,
+                40,
+                4,
+                20,
+                true,
+                false
+            );
+
+            this.panelLoginNewUser!.addButtonBackground(
+                x + 115,
+                offsetY + 17,
+                220,
+                34
+            );
+
+            this.panelLoginNewUser!.addTextCentre(
+                x + 115,
+                offsetY + 8,
+                'Confirm Password',
+                4,
+                false
+            );
+
+            this.controlRegisterConfirmPassword = this.panelLoginNewUser!.addTextInput(
+                x + 115,
+                offsetY + 25,
+                220,
+                40,
+                4,
+                20,
+                true,
+                false
+            );
+
+            offsetY += 60;
+
+            this.controlRegisterCheckbox = this.panelLoginNewUser!.addCheckbox(
+                x - 196 - 7,
+                offsetY - 7,
+                14,
+                14
+            );
+
+            this.panelLoginNewUser!.addText(
+                x - 181,
+                offsetY,
+                'I have read and agreed to the terms and conditions',
+                4,
+                true
+            );
+
+            offsetY += 15;
+
+            this.panelLoginNewUser!.addTextCentre(
+                x,
+                offsetY,
+                '(to view these click the relevant link below this game window)',
+                4,
+                true
+            );
+
+            offsetY += 20;
+
+            this.panelLoginNewUser!.addButtonBackground(
+                x - 100,
+                offsetY + 17,
+                150,
+                34
+            );
+
+            this.panelLoginNewUser!.addTextCentre(
+                x - 100,
+                offsetY + 17,
+                'Submit',
+                5,
+                false
+            );
+
+            this.controlRegisterSubmit = this.panelLoginNewUser!.addButton(
+                x - 100,
+                offsetY + 17,
+                150,
+                34
+            );
+
+            this.panelLoginNewUser!.addButtonBackground(
+                x + 100,
+                offsetY + 17,
+                150,
+                34
+            );
+
+            this.panelLoginNewUser!.addTextCentre(
+                x + 100,
+                offsetY + 17,
+                'Cancel',
+                5,
+                false
+            );
+
+            this.controlRegisterCancel = this.panelLoginNewUser!.addButton(
+                x + 100,
+                offsetY + 17,
+                150,
+                34
+            );
+        }
+
+        this.panelLoginExistingUser = new Panel(this.surface!, 50);
+
+        y = 230;
+
+        this.controlLoginStatus = this.panelLoginExistingUser!.addTextCentre(
+            x,
+            y - 10,
+            'Please enter your username and password',
+            4,
+            true
+        );
+
+        y += 28;
+
+        this.panelLoginExistingUser!.addButtonBackground(x - 116, y, 200, 40);
+
+        this.panelLoginExistingUser!.addTextCentre(
+            x - 116,
+            y - 10,
+            'Username:',
+            4,
+            false
+        );
+
+        this.controlLoginUser = this.panelLoginExistingUser!.addTextInput(
+            x - 116,
+            y + 10,
+            200,
+            40,
+            4,
+            12,
+            false,
+            false
+        );
+
+        y += 47;
+
+        this.panelLoginExistingUser!.addButtonBackground(x - 66, y, 200, 40);
+
+        this.panelLoginExistingUser!.addTextCentre(
+            x - 66,
+            y - 10,
+            'Password:',
+            4,
+            false
+        );
+
+        this.controlLoginPassword = this.panelLoginExistingUser!.addTextInput(
+            x - 66,
+            y + 10,
+            200,
+            40,
+            4,
+            20,
+            true,
+            false
+        );
+
+        y -= 55;
+
+        this.panelLoginExistingUser!.addButtonBackground(x + 154, y, 120, 25);
+        this.panelLoginExistingUser!.addTextCentre(x + 154, y, 'Ok', 4, false);
+
+        this.controlLoginOk = this.panelLoginExistingUser!.addButton(
+            x + 154,
+            y,
+            120,
+            25
+        );
+
+        y += 30;
+
+        this.panelLoginExistingUser!.addButtonBackground(x + 154, y, 120, 25);
+        this.panelLoginExistingUser!.addTextCentre(x + 154, y, 'Cancel', 4, false);
+
+        this.controlLoginCancel = this.panelLoginExistingUser!.addButton(
+            x + 154,
+            y,
+            120,
+            25
+        );
+
+        if (this.options.accountManagement) {
+            y += 30;
+
+            this.panelLoginExistingUser!.addButtonBackground(x + 154, y, 160, 25);
+
+            this.panelLoginExistingUser!.addTextCentre(
+                x + 154,
+                y,
+                "I've lost my password",
+                4,
+                false
+            );
+
+            this.controlLoginRecover = this.panelLoginExistingUser!.addButton(
+                x + 154,
+                y,
+                160,
+                25
+            );
+        }
+
+        //this.panelLoginExistingUser!.setFocus(this.controlLoginUser);
+    }
+
+    drawLoginScreens(): void {
+        this.welcomeScreenAlreadyShown = false;
+
+        this.surface!.interlace = false;
+        this.surface!.blackScreen();
+
+        let showBackground: bool;
+
+        if (this.options.accountManagement) {
+            showBackground = this.loginScreen == 0 || this.loginScreen == 2;
+        } else {
+            showBackground = this.loginScreen >= 0 && this.loginScreen <= 3;
+        }
+
+        if (showBackground) {
+            const cycle = (this.loginTimer * 2) % 3072;
+
+            if (cycle < 1024) {
+                this.surface!._drawSprite_from3(0, 10, this.spriteLogo);
+
+                if (cycle > 768) {
+                    this.surface!._drawSpriteAlpha_from4(
+                        0,
+                        10,
+                        this.spriteLogo + 1,
+                        cycle - 768
+                    );
+                }
+            } else if (cycle < 2048) {
+                this.surface!._drawSprite_from3(0, 10, this.spriteLogo + 1);
+
+                if (cycle > 1792) {
+                    this.surface!._drawSpriteAlpha_from4(
+                        0,
+                        10,
+                        this.spriteMedia + 10,
+                        cycle - 1792
+                    );
+                }
+            } else {
+                this.surface!._drawSprite_from3(0, 10, this.spriteMedia + 10);
+
+                if (cycle > 2816) {
+                    this.surface!._drawSpriteAlpha_from4(
+                        0,
+                        10,
+                        this.spriteLogo,
+                        cycle - 2816
+                    );
+                }
+            }
+        }
+
+        if (this.loginScreen == 0) {
+            this.panelLoginWelcome!.drawPanel();
+        } else if (this.loginScreen == 1) {
+            this.panelLoginNewUser!.drawPanel();
+        } else if (this.loginScreen == 2) {
+            this.panelLoginExistingUser!.drawPanel();
+        }
+
+        // blue bar
+        this.surface!._drawSprite_from3(
+            0,
+            this.gameHeight - 4,
+            this.spriteMedia + 22
+        );
+
+        //this.surface!.draw(this.graphics, 0, 0);
+    }
+
+    handleLoginScreenInput_0(): void {
+        if (this.worldFullTimeout > 0) {
+            this.worldFullTimeout--;
+        }
+
+        if (this.loginScreen == 0) {
+            this.panelLoginWelcome!.handleMouse(
+                this.mouseX,
+                this.mouseY,
+                this.lastMouseButtonDown,
+                this.mouseButtonDown
+            );
+
+            if (this.panelLoginWelcome!.isClicked(this.controlWelcomeNewUser)) {
+                this.loginScreen = 1;
+
+                if (this.options.accountManagement) {
+                    this.panelLoginNewUser!.updateText(this.controlRegisterUser, '');
+
+                    this.panelLoginNewUser!.updateText(
+                        this.controlRegisterPassword,
+                        ''
+                    );
+
+                    this.panelLoginNewUser!.updateText(
+                        this.controlRegisterConfirmPassword,
+                        ''
+                    );
+
+                    this.panelLoginNewUser!.setFocus(this.controlRegisterUser);
+
+                    this.panelLoginNewUser!.toggleCheckbox(
+                        this.controlRegisterCheckbox,
+                        false
+                    );
+
+                    this.panelLoginNewUser!.updateText(
+                        this.controlRegisterStatus,
+                        'To create an account please enter all the requested ' +
+                            'details'
+                    );
+                }
+            }
+
+            if (this.panelLoginWelcome!.isClicked(this.controlWelcomeExistingUser)) {
+                this.loginScreen = 2;
+
+                this.panelLoginExistingUser!.updateText(
+                    this.controlLoginStatus,
+                    'Please enter your username and password'
+                );
+
+                this.panelLoginExistingUser!.updateText(this.controlLoginUser, '');
+
+                this.panelLoginExistingUser!.updateText(
+                    this.controlLoginPassword,
+                    ''
+                );
+
+                this.panelLoginExistingUser!.setFocus(this.controlLoginUser);
+
+                return;
+            }
+        } else if (this.loginScreen == 1) {
+            this.panelLoginNewUser!.handleMouse(
+                this.mouseX,
+                this.mouseY,
+                this.lastMouseButtonDown,
+                this.mouseButtonDown
+            );
+
+            if (this.options.accountManagement) {
+                // allow mobile to click the entire text to agree to ToS
+                if (
+                    this.options.mobile &&
+                    this.lastMouseButtonDown == 1 &&
+                    this.mouseX >= 74 &&
+                    this.mouseX <= 474 &&
+                    this.mouseY >= 188 &&
+                    this.mouseY <= 216
+                ) {
+                    this.panelLoginNewUser!.toggleCheckbox(
+                        this.controlRegisterCheckbox,
+                        !this.panelLoginNewUser!.isActivated(
+                            this.controlRegisterCheckbox
+                        )
+                    );
+
+                    this.lastMouseButtonDown = 0;
+
+                    return;
+                }
+
+                if (this.panelLoginNewUser!.isClicked(this.controlRegisterCancel)) {
+                    this.loginScreen = 0;
+                    return;
+                }
+
+                if (this.panelLoginNewUser!.isClicked(this.controlRegisterUser)) {
+                    this.panelLoginNewUser!.setFocus(this.controlRegisterPassword);
+                    return;
+                }
+
+                if (
+                    this.panelLoginNewUser!.isClicked(this.controlRegisterPassword)
+                ) {
+                    this.panelLoginNewUser!.setFocus(
+                        this.controlRegisterConfirmPassword
+                    );
+
+                    return;
+                }
+
+                if (
+                    this.panelLoginNewUser!.isClicked(
+                        this.controlRegisterConfirmPassword
+                    ) ||
+                    this.panelLoginNewUser!.isClicked(this.controlRegisterSubmit)
+                ) {
+                    const username = this.panelLoginNewUser!.getText(
+                        this.controlRegisterUser
+                    );
+
+                    const password = this.panelLoginNewUser!.getText(
+                        this.controlRegisterPassword
+                    );
+
+                    const confirmPassword = this.panelLoginNewUser!.getText(
+                        this.controlRegisterConfirmPassword
+                    );
+
+                    if (
+                        !username ||
+                        username.length == 0 ||
+                        !password ||
+                        password.length == 0 ||
+                        !confirmPassword ||
+                        confirmPassword.length == 0
+                    ) {
+                        this.panelLoginNewUser!.updateText(
+                            this.controlRegisterStatus,
+                            '@yel@Please fill in ALL requested information to ' +
+                                'continue!'
+                        );
+
+                        return;
+                    }
+
+                    if (password != confirmPassword) {
+                        this.panelLoginNewUser!.updateText(
+                            this.controlRegisterStatus,
+                            '@yel@The two passwords entered are not the same as ' +
+                                'each other!'
+                        );
+
+                        return;
+                    }
+
+                    if (password.length < 5) {
+                        this.panelLoginNewUser!.updateText(
+                            this.controlRegisterStatus,
+                            '@yel@Your password must be at least 5 letters long'
+                        );
+
+                        return;
+                    }
+
+                    if (
+                        !this.panelLoginNewUser!.isActivated(
+                            this.controlRegisterCheckbox
+                        )
+                    ) {
+                        this.panelLoginNewUser!.updateText(
+                            this.controlRegisterStatus,
+                            '@yel@You must agree to the terms+conditions to ' +
+                                'continue'
+                        );
+
+                        return;
+                    }
+
+                    this.panelLoginNewUser!.updateText(
+                        this.controlRegisterStatus,
+                        'Please wait... Creating new account'
+                    );
+
+                    this.drawLoginScreens();
+                    this.resetTimings();
+
+                    this.registerUser = this.panelLoginNewUser!.getText(
+                        this.controlRegisterUser
+                    );
+
+                    this.registerPassword = this.panelLoginNewUser!.getText(
+                        this.controlRegisterPassword
+                    );
+
+                    //await this.register(this.registerUser, this.registerPassword);
+                }
+            } else {
+                if (this.panelLoginNewUser!.isClicked(this.controlLoginNewOK)) {
+                    this.loginScreen = 0;
+                }
+            }
+        } else if (this.loginScreen == 2) {
+            this.panelLoginExistingUser!.handleMouse(
+                this.mouseX,
+                this.mouseY,
+                this.lastMouseButtonDown,
+                this.mouseButtonDown
+            );
+
+            if (this.panelLoginExistingUser!.isClicked(this.controlLoginCancel)) {
+                this.loginScreen = 0;
+            } else if (
+                this.panelLoginExistingUser!.isClicked(this.controlLoginUser)
+            ) {
+                this.panelLoginExistingUser!.setFocus(this.controlLoginPassword);
+            } else if (
+                this.panelLoginExistingUser!.isClicked(this.controlLoginPassword) ||
+                this.panelLoginExistingUser!.isClicked(this.controlLoginOk)
+            ) {
+                this.loginUser = this.panelLoginExistingUser!.getText(
+                    this.controlLoginUser
+                );
+
+                this.loginPass = this.panelLoginExistingUser!.getText(
+                    this.controlLoginPassword
+                );
+
+                //await this.login(this.loginUser, this.loginPass, false);
+            } else if (
+                this.panelLoginExistingUser!.isClicked(this.controlLoginRecover)
+            ) {
+                this.loginUser = this.panelLoginExistingUser!.getText(
+                    this.controlLoginUser
+                );
+
+                if (this.loginUser.trim().length == 0) {
+                    this.showLoginScreenStatus(
+                        'You must enter your username to recover your password',
+                        ''
+                    );
+
+                    return;
+                }
+
+                //await this.recoverAttempt(this.loginUser);
+            }
         }
     }
 
