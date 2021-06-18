@@ -1,5 +1,3 @@
-panelMagic: Panel | null;
-
 uiTabMagicSubTab: i32;
 
 drawUiTabMagic(noMenus: bool): void {

@@ -18,6 +18,125 @@ import {
     formatConfirmAmount
 } from './utility';
 
+const SHORT_SKILL_NAMES = [
+    'Attack',
+    'Defense',
+    'Strength',
+    'Hits',
+    'Ranged',
+    'Prayer',
+    'Magic',
+    'Cooking',
+    'Woodcut',
+    'Fletching',
+    'Fishing',
+    'Firemaking',
+    'Crafting',
+    'Smithing',
+    'Mining',
+    'Herblaw',
+    'Agility',
+    'Thieving'
+];
+
+const SKILL_NAMES = [
+    'Attack',
+    'Defense',
+    'Strength',
+    'Hits',
+    'Ranged',
+    'Prayer',
+    'Magic',
+    'Cooking',
+    'Woodcutting',
+    'Fletching',
+    'Fishing',
+    'Firemaking',
+    'Crafting',
+    'Smithing',
+    'Mining',
+    'Herblaw',
+    'Agility',
+    'Thieving'
+];
+
+const EQUIPMENT_STAT_NAMES = [
+    'Armour',
+    'WeaponAim',
+    'WeaponPower',
+    'Magic',
+    'Prayer'
+];
+
+const EXPERIENCE_ARRAY: StaticArray<i32> = new StaticArray<i32>(100);
+
+let totalExp = 0;
+
+for (let i = 0; i < 99; i++) {
+    const level = i + 1;
+    const exp = (level + 300 * Math.pow(2, level / 7)) as i32;
+    totalExp += exp;
+    EXPERIENCE_ARRAY[i] = totalExp & 0xffffffc;
+}
+
+const FREE_QUESTS = [
+    "Black knight's fortress",
+    "Cook's assistant",
+    'Demon slayer',
+    "Doric's quest",
+    'The restless ghost',
+    'Goblin diplomacy',
+    'Ernest the chicken',
+    'Imp catcher',
+    "Pirate's treasure",
+    'Prince Ali rescue',
+    'Romeo & Juliet',
+    'Sheep shearer',
+    'Shield of Arrav',
+    "The knight's sword",
+    'Vampire slayer',
+    "Witch's potion",
+    'Dragon slayer'
+];
+
+const MEMBERS_QUESTS = [
+    "Witch's house",
+    'Lost city',
+    "Hero's quest",
+    'Druidic ritual',
+    "Merlin's crystal",
+    'Scorpion catcher',
+    'Family crest',
+    'Tribal totem',
+    'Fishing contest',
+    "Monk's friend",
+    'Temple of Ikov',
+    'Clock tower',
+    'The Holy Grail',
+    'Fight Arena',
+    'Tree Gnome Village',
+    'The Hazeel Cult',
+    'Sheep Herder',
+    'Plague City',
+    'Sea Slug',
+    'Waterfall quest',
+    'Biohazard',
+    'Jungle potion',
+    'Grand tree',
+    'Shilo village',
+    'Underground pass',
+    'Observatory quest',
+    'Tourist trap',
+    'Watchtower',
+    'Dwarf Cannon',
+    'Murder Mystery',
+    'Digsite',
+    "Gertrude's Cat",
+    "Legend's Quest"
+].map<string>((questName: string): string => `${questName} (members)`);
+
+const QUEST_NAMES = FREE_QUESTS.concat(MEMBERS_QUESTS);
+
 const ZOOM_MIN = 450;
 const ZOOM_MAX = 1250;
 const ZOOM_INDOORS = 550;
@@ -444,6 +563,11 @@ export default class mudclient extends GameConnection {
     surface: Surface | null;
     isInWild: bool;
 
+    panelQuestList: Panel | null;
+    panelMagic: Panel | null;
+    panelSocialList: Panel | null;
+    controlListSocialPlayers: i32;
+
     constructor() {
         super();
     }
@@ -769,7 +893,7 @@ export default class mudclient extends GameConnection {
 
             if (this.options.mobile) {
                 if (!this.showOptionMenu) {
-                    this.setActiveMobileUITab();
+                    //this.setActiveMobileUITab();
                 }
             } else {
                 this.setActiveUITab();
@@ -3421,8 +3545,8 @@ export default class mudclient extends GameConnection {
             const colour = 255 + time * 5 * 256;
 
             this.surface!.drawCircle(
-                x + ((width / 2) | 0),
-                y + ((height / 2) | 0),
+                x + ((width / 2) as i32),
+                y + ((height / 2) as i32),
                 20 + time * 2,
                 colour,
                 255 - time * 5
@@ -3432,8 +3556,8 @@ export default class mudclient extends GameConnection {
             const colour = 0xff0000 + time * 5 * 256;
 
             this.surface!.drawCircle(
-                x + ((width / 2) | 0),
-                y + ((height / 2) | 0),
+                x + ((width / 2) as i32),
+                y + ((height / 2) as i32),
                 10 + time,
                 colour,
                 255 - time * 5
@@ -4178,7 +4302,7 @@ export default class mudclient extends GameConnection {
             ) {
                 if (gameModel == this.scene!.view) {
                     let idx = gameModel.faceTag![pid] % 10000;
-                    const type = (gameModel.faceTag![pid] / 10000) | 0;
+                    const type = (gameModel.faceTag![pid] / 10000) as i32;
 
                     if (type == 1) {
                         let menuText = '';

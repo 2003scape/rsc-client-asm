@@ -300,7 +300,7 @@ export function unpackData(
     fileName = fileName.toUpperCase();
 
     for (let i = 0; i < fileName.length; i++) {
-        wantedHash = ((wantedHash * 61) | 0) + fileName.charCodeAt(i) - 32;
+        wantedHash = ((wantedHash * 61) as i32) + fileName.charCodeAt(i) - 32;
     }
 
     let offset = 2 + numEntries * 10;

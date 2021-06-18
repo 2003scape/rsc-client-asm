@@ -18,6 +18,125 @@ import {
     formatConfirmAmount
 } from './utility';
 
+const SHORT_SKILL_NAMES = [
+    'Attack',
+    'Defense',
+    'Strength',
+    'Hits',
+    'Ranged',
+    'Prayer',
+    'Magic',
+    'Cooking',
+    'Woodcut',
+    'Fletching',
+    'Fishing',
+    'Firemaking',
+    'Crafting',
+    'Smithing',
+    'Mining',
+    'Herblaw',
+    'Agility',
+    'Thieving'
+];
+
+const SKILL_NAMES = [
+    'Attack',
+    'Defense',
+    'Strength',
+    'Hits',
+    'Ranged',
+    'Prayer',
+    'Magic',
+    'Cooking',
+    'Woodcutting',
+    'Fletching',
+    'Fishing',
+    'Firemaking',
+    'Crafting',
+    'Smithing',
+    'Mining',
+    'Herblaw',
+    'Agility',
+    'Thieving'
+];
+
+const EQUIPMENT_STAT_NAMES = [
+    'Armour',
+    'WeaponAim',
+    'WeaponPower',
+    'Magic',
+    'Prayer'
+];
+
+const EXPERIENCE_ARRAY: StaticArray<i32> = new StaticArray<i32>(100);
+
+let totalExp = 0;
+
+for (let i = 0; i < 99; i++) {
+    const level = i + 1;
+    const exp = (level + 300 * Math.pow(2, level / 7)) as i32;
+    totalExp += exp;
+    EXPERIENCE_ARRAY[i] = totalExp & 0xffffffc;
+}
+
+const FREE_QUESTS = [
+    "Black knight's fortress",
+    "Cook's assistant",
+    'Demon slayer',
+    "Doric's quest",
+    'The restless ghost',
+    'Goblin diplomacy',
+    'Ernest the chicken',
+    'Imp catcher',
+    "Pirate's treasure",
+    'Prince Ali rescue',
+    'Romeo & Juliet',
+    'Sheep shearer',
+    'Shield of Arrav',
+    "The knight's sword",
+    'Vampire slayer',
+    "Witch's potion",
+    'Dragon slayer'
+];
+
+const MEMBERS_QUESTS = [
+    "Witch's house",
+    'Lost city',
+    "Hero's quest",
+    'Druidic ritual',
+    "Merlin's crystal",
+    'Scorpion catcher',
+    'Family crest',
+    'Tribal totem',
+    'Fishing contest',
+    "Monk's friend",
+    'Temple of Ikov',
+    'Clock tower',
+    'The Holy Grail',
+    'Fight Arena',
+    'Tree Gnome Village',
+    'The Hazeel Cult',
+    'Sheep Herder',
+    'Plague City',
+    'Sea Slug',
+    'Waterfall quest',
+    'Biohazard',
+    'Jungle potion',
+    'Grand tree',
+    'Shilo village',
+    'Underground pass',
+    'Observatory quest',
+    'Tourist trap',
+    'Watchtower',
+    'Dwarf Cannon',
+    'Murder Mystery',
+    'Digsite',
+    "Gertrude's Cat",
+    "Legend's Quest"
+].map<string>((questName: string): string => `${questName} (members)`);
+
+const QUEST_NAMES = FREE_QUESTS.concat(MEMBERS_QUESTS);
+
 const ZOOM_MIN = 450;
 const ZOOM_MAX = 1250;
 const ZOOM_INDOORS = 550;
@@ -444,6 +563,11 @@ export default class mudclient extends GameConnection {
     surface: Surface | null;
     isInWild: bool;
 
+    panelQuestList: Panel | null;
+    panelMagic: Panel | null;
+    panelSocialList: Panel | null;
+    controlListSocialPlayers: i32;
+
     constructor() {
         super();
     }
@@ -769,7 +893,7 @@ export default class mudclient extends GameConnection {
 
             if (this.options.mobile) {
                 if (!this.showOptionMenu) {
-                    this.setActiveMobileUITab();
+                    //this.setActiveMobileUITab();
                 }
             } else {
                 this.setActiveUITab();
@@ -3421,8 +3545,8 @@ export default class mudclient extends GameConnection {
             const colour = 255 + time * 5 * 256;
 
             this.surface!.drawCircle(
-                x + ((width / 2) | 0),
-                y + ((height / 2) | 0),
+                x + ((width / 2) as i32),
+                y + ((height / 2) as i32),
                 20 + time * 2,
                 colour,
                 255 - time * 5
@@ -3432,8 +3556,8 @@ export default class mudclient extends GameConnection {
             const colour = 0xff0000 + time * 5 * 256;
 
             this.surface!.drawCircle(
-                x + ((width / 2) | 0),
-                y + ((height / 2) | 0),
+                x + ((width / 2) as i32),
+                y + ((height / 2) as i32),
                 10 + time,
                 colour,
                 255 - time * 5
@@ -4178,7 +4302,7 @@ export default class mudclient extends GameConnection {
             ) {
                 if (gameModel == this.scene!.view) {
                     let idx = gameModel.faceTag![pid] % 10000;
-                    const type = (gameModel.faceTag![pid] / 10000) | 0;
+                    const type = (gameModel.faceTag![pid] / 10000) as i32;
 
                     if (type == 1) {
                         let menuText = '';
@@ -5889,6 +6013,786 @@ export default class mudclient extends GameConnection {
         this.surface!._drawSprite_from3(0, this.gameHeight, this.spriteMedia + 22);
 
         //this.surface!.draw(this.graphics, 0, 0);
+    }
+
+    bankActivePage: i32;
+
+    drawDialogBank(): void {
+        const WIDTH = 408;
+        const HEIGHT = 334;
+
+        const ITEMS_PER_PAGE = 48;
+        const MAGIC_DEPOSIT = 0x87654321;
+        const MAGIC_WITHDRAW = 0x12345678;
+
+        if (this.bankActivePage > 0 && this.bankItemCount <= ITEMS_PER_PAGE) {
+            this.bankActivePage = 0;
+        }
+
+        if (this.bankActivePage > 1 && this.bankItemCount <= 96) {
+            this.bankActivePage = 1;
+        }
+
+        if (this.bankActivePage > 2 && this.bankItemCount <= 144) {
+            this.bankActivePage = 2;
+        }
+
+        if (
+            this.bankSelectedItemSlot >= this.bankItemCount ||
+            this.bankSelectedItemSlot < 0
+        ) {
+            this.bankSelectedItemSlot = -1;
+        }
+
+        if (
+            this.bankSelectedItemSlot != -1 &&
+            this.bankItems[this.bankSelectedItemSlot] != this.bankSelectedItem
+        ) {
+            this.bankSelectedItemSlot = -1;
+            this.bankSelectedItem = -2;
+        }
+
+        if (this.mouseButtonClick != 0) {
+            this.mouseButtonClick = 0;
+
+            let mouseX =
+                this.mouseX -
+                (((this.gameWidth / 2) as i32) - ((WIDTH / 2) as i32));
+
+            let mouseY =
+                this.mouseY -
+                (((this.gameHeight / 2) as i32) - ((HEIGHT / 2) as i32));
+
+            if (mouseX >= 0 && mouseY >= 12 && mouseX < 408 && mouseY < 280) {
+                let slotIndex = this.bankActivePage * ITEMS_PER_PAGE;
+
+                for (let row = 0; row < 6; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        const slotX = 7 + col * 49;
+                        const slotY = 28 + row * 34;
+
+                        if (
+                            mouseX > slotX &&
+                            mouseX < slotX + 49 &&
+                            mouseY > slotY &&
+                            mouseY < slotY + 34 &&
+                            slotIndex < this.bankItemCount &&
+                            this.bankItems[slotIndex] != -1
+                        ) {
+                            this.bankSelectedItem = this.bankItems[slotIndex];
+                            this.bankSelectedItemSlot = slotIndex;
+                        }
+
+                        slotIndex++;
+                    }
+                }
+
+                mouseX = 256 - ((WIDTH / 2) as i32);
+                mouseY = 170 - ((HEIGHT / 2) as i32);
+
+                let slot = 0;
+
+                if (this.bankSelectedItemSlot < 0) {
+                    slot = -1;
+                } else {
+                    slot = this.bankItems[this.bankSelectedItemSlot];
+                }
+
+                if (slot != -1) {
+                    let itemAmount = this.bankItemsCount[this.bankSelectedItemSlot];
+
+                    if (GameData.itemStackable[slot] == 1 && itemAmount > 1) {
+                        itemAmount = 1;
+                    }
+
+                    if (
+                        itemAmount >= 1 &&
+                        this.mouseX >= mouseX + 220 &&
+                        this.mouseY >= mouseY + 238 &&
+                        this.mouseX < mouseX + 250 &&
+                        this.mouseY <= mouseY + 249
+                    ) {
+                        this.packetStream!.newPacket(ClientOpcodes.BANK_WITHDRAW);
+                        this.packetStream!.putShort(slot);
+                        this.packetStream!.putShort(1);
+                        this.packetStream!.putInt(MAGIC_WITHDRAW);
+                        this.packetStream!.sendPacket();
+                    }
+
+                    if (
+                        itemAmount >= 5 &&
+                        this.mouseX >= mouseX + 250 &&
+                        this.mouseY >= mouseY + 238 &&
+                        this.mouseX < mouseX + 280 &&
+                        this.mouseY <= mouseY + 249
+                    ) {
+                        this.packetStream!.newPacket(ClientOpcodes.BANK_WITHDRAW);
+                        this.packetStream!.putShort(slot);
+                        this.packetStream!.putShort(5);
+                        this.packetStream!.putInt(MAGIC_WITHDRAW);
+                        this.packetStream!.sendPacket();
+                    }
+
+                    if (
+                        itemAmount >= 25 &&
+                        this.mouseX >= mouseX + 280 &&
+                        this.mouseY >= mouseY + 238 &&
+                        this.mouseX < mouseX + 305 &&
+                        this.mouseY <= mouseY + 249
+                    ) {
+                        this.packetStream!.newPacket(ClientOpcodes.BANK_WITHDRAW);
+                        this.packetStream!.putShort(slot);
+                        this.packetStream!.putShort(25);
+                        this.packetStream!.putInt(MAGIC_WITHDRAW);
+                        this.packetStream!.sendPacket();
+                    }
+
+                    if (
+                        itemAmount >= 100 &&
+                        this.mouseX >= mouseX + 305 &&
+                        this.mouseY >= mouseY + 238 &&
+                        this.mouseX < mouseX + 335 &&
+                        this.mouseY <= mouseY + 249
+                    ) {
+                        this.packetStream!.newPacket(ClientOpcodes.BANK_WITHDRAW);
+                        this.packetStream!.putShort(slot);
+                        this.packetStream!.putShort(100);
+                        this.packetStream!.putInt(MAGIC_WITHDRAW);
+                        this.packetStream!.sendPacket();
+                    }
+
+                    if (
+                        itemAmount >= 500 &&
+                        this.mouseX >= mouseX + 335 &&
+                        this.mouseY >= mouseY + 238 &&
+                        this.mouseX < mouseX + 368 &&
+                        this.mouseY <= mouseY + 249
+                    ) {
+                        this.packetStream!.newPacket(ClientOpcodes.BANK_WITHDRAW);
+                        this.packetStream!.putShort(slot);
+                        this.packetStream!.putShort(500);
+                        this.packetStream!.putInt(MAGIC_WITHDRAW);
+                        this.packetStream!.sendPacket();
+                    }
+
+                    if (
+                        itemAmount >= 2500 &&
+                        this.mouseX >= mouseX + 370 &&
+                        this.mouseY >= mouseY + 238 &&
+                        this.mouseX < mouseX + 400 &&
+                        this.mouseY <= mouseY + 249
+                    ) {
+                        this.packetStream!.newPacket(ClientOpcodes.BANK_WITHDRAW);
+                        this.packetStream!.putShort(slot);
+                        this.packetStream!.putShort(2500);
+                        this.packetStream!.putInt(MAGIC_WITHDRAW);
+                        this.packetStream!.sendPacket();
+                    }
+
+                    if (
+                        this.getInventoryCount(slot) >= 1 &&
+                        this.mouseX >= mouseX + 220 &&
+                        this.mouseY >= mouseY + 263 &&
+                        this.mouseX < mouseX + 250 &&
+                        this.mouseY <= mouseY + 274
+                    ) {
+                        this.packetStream!.newPacket(ClientOpcodes.BANK_DEPOSIT);
+                        this.packetStream!.putShort(slot);
+                        this.packetStream!.putShort(1);
+                        this.packetStream!.putInt(MAGIC_DEPOSIT);
+                        this.packetStream!.sendPacket();
+                    }
+
+                    if (
+                        this.getInventoryCount(slot) >= 5 &&
+                        this.mouseX >= mouseX + 250 &&
+                        this.mouseY >= mouseY + 263 &&
+                        this.mouseX < mouseX + 280 &&
+                        this.mouseY <= mouseY + 274
+                    ) {
+                        this.packetStream!.newPacket(ClientOpcodes.BANK_DEPOSIT);
+                        this.packetStream!.putShort(slot);
+                        this.packetStream!.putShort(5);
+                        this.packetStream!.putInt(MAGIC_DEPOSIT);
+                        this.packetStream!.sendPacket();
+                    }
+                    if (
+                        this.getInventoryCount(slot) >= 25 &&
+                        this.mouseX >= mouseX + 280 &&
+                        this.mouseY >= mouseY + 263 &&
+                        this.mouseX < mouseX + 305 &&
+                        this.mouseY <= mouseY + 274
+                    ) {
+                        this.packetStream!.newPacket(ClientOpcodes.BANK_DEPOSIT);
+                        this.packetStream!.putShort(slot);
+                        this.packetStream!.putShort(25);
+                        this.packetStream!.putInt(MAGIC_DEPOSIT);
+                        this.packetStream!.sendPacket();
+                    }
+
+                    if (
+                        this.getInventoryCount(slot) >= 100 &&
+                        this.mouseX >= mouseX + 305 &&
+                        this.mouseY >= mouseY + 263 &&
+                        this.mouseX < mouseX + 335 &&
+                        this.mouseY <= mouseY + 274
+                    ) {
+                        this.packetStream!.newPacket(ClientOpcodes.BANK_DEPOSIT);
+                        this.packetStream!.putShort(slot);
+                        this.packetStream!.putShort(100);
+                        this.packetStream!.putInt(MAGIC_DEPOSIT);
+                        this.packetStream!.sendPacket();
+                    }
+
+                    if (
+                        this.getInventoryCount(slot) >= 500 &&
+                        this.mouseX >= mouseX + 335 &&
+                        this.mouseY >= mouseY + 263 &&
+                        this.mouseX < mouseX + 368 &&
+                        this.mouseY <= mouseY + 274
+                    ) {
+                        this.packetStream!.newPacket(ClientOpcodes.BANK_DEPOSIT);
+                        this.packetStream!.putShort(slot);
+                        this.packetStream!.putShort(500);
+                        this.packetStream!.putInt(MAGIC_DEPOSIT);
+                        this.packetStream!.sendPacket();
+                    }
+
+                    if (
+                        this.getInventoryCount(slot) >= 2500 &&
+                        this.mouseX >= mouseX + 370 &&
+                        this.mouseY >= mouseY + 263 &&
+                        this.mouseX < mouseX + 400 &&
+                        this.mouseY <= mouseY + 274
+                    ) {
+                        this.packetStream!.newPacket(ClientOpcodes.BANK_DEPOSIT);
+                        this.packetStream!.putShort(slot);
+                        this.packetStream!.putShort(2500);
+                        this.packetStream!.putInt(MAGIC_DEPOSIT);
+                        this.packetStream!.sendPacket();
+                    }
+                }
+            } else if (
+                this.bankItemCount > ITEMS_PER_PAGE &&
+                mouseX >= 50 &&
+                mouseX <= 115 &&
+                mouseY <= 12
+            ) {
+                this.bankActivePage = 0;
+            } else if (
+                this.bankItemCount > ITEMS_PER_PAGE &&
+                mouseX >= 115 &&
+                mouseX <= 180 &&
+                mouseY <= 12
+            ) {
+                this.bankActivePage = 1;
+            } else if (
+                this.bankItemCount > ITEMS_PER_PAGE * 2 &&
+                mouseX >= 180 &&
+                mouseX <= 245 &&
+                mouseY <= 12
+            ) {
+                this.bankActivePage = 2;
+            } else if (
+                this.bankItemCount > ITEMS_PER_PAGE * 3 &&
+                mouseX >= 245 &&
+                mouseX <= 310 &&
+                mouseY <= 12
+            ) {
+                this.bankActivePage = 3;
+            } else {
+                this.packetStream!.newPacket(ClientOpcodes.BANK_CLOSE);
+                this.packetStream!.sendPacket();
+                this.showDialogBank = false;
+                return;
+            }
+        }
+
+        const x = ((this.gameWidth / 2) as i32) - ((WIDTH / 2) as i32);
+        const y = ((this.gameHeight / 2) as i32) - ((HEIGHT / 2) as i32);
+
+        this.surface!.drawBox(x, y, 408, 12, 192);
+        this.surface!.drawBoxAlpha(x, y + 12, 408, 17, Colours.Grey, 160);
+        this.surface!.drawBoxAlpha(x, y + 29, 8, 204, Colours.Grey, 160);
+        this.surface!.drawBoxAlpha(x + 399, y + 29, 9, 204, Colours.Grey, 160);
+        this.surface!.drawBoxAlpha(x, y + 233, 408, 47, Colours.Grey, 160);
+        this.surface!.drawString('Bank', x + 1, y + 10, 1, Colours.White);
+
+        // TODO drawPages
+
+        let offsetX = 50;
+
+        if (this.bankItemCount > ITEMS_PER_PAGE) {
+            let textColour = Colours.White;
+
+            if (this.bankActivePage == 0) {
+                textColour = Colours.Red;
+            } else if (
+                this.mouseX > x + offsetX &&
+                this.mouseY >= y &&
+                this.mouseX < x + offsetX + 65 &&
+                this.mouseY < y + 12
+            ) {
+                textColour = Colours.Yellow;
+            }
+
+            this.surface!.drawString(
+                '<page 1>',
+                x + offsetX,
+                y + 10,
+                1,
+                textColour
+            );
+
+            offsetX += 65;
+            textColour = Colours.White;
+
+            if (this.bankActivePage == 1) {
+                textColour = Colours.Red;
+            } else if (
+                this.mouseX > x + offsetX &&
+                this.mouseY >= y &&
+                this.mouseX < x + offsetX + 65 &&
+                this.mouseY < y + 12
+            ) {
+                textColour = Colours.Yellow;
+            }
+
+            this.surface!.drawString(
+                '<page 2>',
+                x + offsetX,
+                y + 10,
+                1,
+                textColour
+            );
+            offsetX += 65;
+        }
+
+        if (this.bankItemCount > ITEMS_PER_PAGE * 2) {
+            let textColour = Colours.White;
+
+            if (this.bankActivePage == 2) {
+                textColour = Colours.Red;
+            } else if (
+                this.mouseX > x + offsetX &&
+                this.mouseY >= y &&
+                this.mouseX < x + offsetX + 65 &&
+                this.mouseY < y + 12
+            ) {
+                textColour = Colours.Yellow;
+            }
+
+            this.surface!.drawString(
+                '<page 3>',
+                x + offsetX,
+                y + 10,
+                1,
+                textColour
+            );
+            offsetX += 65;
+        }
+
+        if (this.bankItemCount > ITEMS_PER_PAGE * 3) {
+            let textColour = Colours.White;
+
+            if (this.bankActivePage == 3) {
+                textColour = Colours.Red;
+            } else if (
+                this.mouseX > x + offsetX &&
+                this.mouseY >= y &&
+                this.mouseX < x + offsetX + 65 &&
+                this.mouseY < y + 12
+            ) {
+                textColour = Colours.Yellow;
+            }
+
+            this.surface!.drawString(
+                '<page 4>',
+                x + offsetX,
+                y + 10,
+                1,
+                textColour
+            );
+            offsetX += 65;
+        }
+
+        let textColour = Colours.White;
+
+        if (
+            this.mouseX > x + 320 &&
+            this.mouseY >= y &&
+            this.mouseX < x + 408 &&
+            this.mouseY < y + 12
+        ) {
+            textColour = Colours.Red;
+        }
+
+        this.surface!.drawStringRight(
+            'Close window',
+            x + 406,
+            y + 10,
+            1,
+            textColour
+        );
+
+        this.surface!.drawString(
+            'Number in bank in Green',
+            x + 7,
+            y + 24,
+            1,
+            Colours.Green
+        );
+
+        this.surface!.drawString(
+            'Number held in blue',
+            x + 289,
+            y + 24,
+            1,
+            Colours.Cyan
+        );
+
+        let selectedIndex = this.bankActivePage * ITEMS_PER_PAGE;
+
+        for (let row = 0; row < 6; row++) {
+            for (let col = 0; col < 8; col++) {
+                const slotX = x + 7 + col * 49;
+                const slotY = y + 28 + row * 34;
+
+                if (this.bankSelectedItemSlot == selectedIndex) {
+                    this.surface!.drawBoxAlpha(
+                        slotX,
+                        slotY,
+                        49,
+                        34,
+                        Colours.Red,
+                        160
+                    );
+                } else {
+                    this.surface!.drawBoxAlpha(
+                        slotX,
+                        slotY,
+                        49,
+                        34,
+                        Colours.LightGrey2,
+                        160
+                    );
+                }
+
+                this.surface!.drawBoxEdge(slotX, slotY, 50, 35, 0);
+
+                if (
+                    selectedIndex < this.bankItemCount &&
+                    this.bankItems[selectedIndex] != -1
+                ) {
+                    this.surface!._spriteClipping_from9(
+                        slotX,
+                        slotY,
+                        48,
+                        32,
+                        this.spriteItem +
+                            GameData.itemPicture[this.bankItems[selectedIndex]],
+                        GameData.itemMask[this.bankItems[selectedIndex]],
+                        0,
+                        0,
+                        false
+                    );
+
+                    this.surface!.drawString(
+                        this.bankItemsCount[selectedIndex].toString(),
+                        slotX + 1,
+                        slotY + 10,
+                        1,
+                        Colours.Green
+                    );
+
+                    this.surface!.drawStringRight(
+                        this.getInventoryCount(
+                            this.bankItems[selectedIndex]
+                        ).toString(),
+                        slotX + 47,
+                        slotY + 29,
+                        1,
+                        Colours.Cyan
+                    );
+                }
+
+                selectedIndex++;
+            }
+        }
+
+        this.surface!.drawLineHoriz(x + 5, y + 256, 398, 0);
+
+        if (this.bankSelectedItemSlot == -1) {
+            this.surface!.drawStringCenter(
+                'Select an object to withdraw or deposit',
+                x + 204,
+                y + 248,
+                3,
+                Colours.Yellow
+            );
+
+            return;
+        }
+
+        let itemType = 0;
+
+        if (this.bankSelectedItemSlot < 0) {
+            itemType = -1;
+        } else {
+            itemType = this.bankItems[this.bankSelectedItemSlot];
+        }
+
+        if (itemType != -1) {
+            let itemCount = this.bankItemsCount[this.bankSelectedItemSlot];
+
+            if (GameData.itemStackable[itemType] == 1 && itemCount > 1) {
+                itemCount = 1;
+            }
+
+            if (itemCount > 0) {
+                this.surface!.drawString(
+                    `Withdraw ${GameData.itemName[itemType]}`,
+                    x + 2,
+                    y + 248,
+                    1,
+                    Colours.White
+                );
+
+                textColour = Colours.White;
+
+                if (
+                    this.mouseX >= x + 220 &&
+                    this.mouseY >= y + 238 &&
+                    this.mouseX < x + 250 &&
+                    this.mouseY <= y + 249
+                ) {
+                    textColour = Colours.Red;
+                }
+
+                this.surface!.drawString('One', x + 222, y + 248, 1, textColour);
+
+                if (itemCount >= 5) {
+                    textColour = Colours.White;
+
+                    if (
+                        this.mouseX >= x + 250 &&
+                        this.mouseY >= y + 238 &&
+                        this.mouseX < x + 280 &&
+                        this.mouseY <= y + 249
+                    ) {
+                        textColour = Colours.Red;
+                    }
+
+                    this.surface!.drawString(
+                        'Five',
+                        x + 252,
+                        y + 248,
+                        1,
+                        textColour
+                    );
+                }
+
+                if (itemCount >= 25) {
+                    textColour = Colours.White;
+
+                    if (
+                        this.mouseX >= x + 280 &&
+                        this.mouseY >= y + 238 &&
+                        this.mouseX < x + 305 &&
+                        this.mouseY <= y + 249
+                    ) {
+                        textColour = Colours.Red;
+                    }
+
+                    this.surface!.drawString('25', x + 282, y + 248, 1, textColour);
+                }
+
+                if (itemCount >= 100) {
+                    textColour = Colours.White;
+
+                    if (
+                        this.mouseX >= x + 305 &&
+                        this.mouseY >= y + 238 &&
+                        this.mouseX < x + 335 &&
+                        this.mouseY <= y + 249
+                    ) {
+                        textColour = Colours.Red;
+                    }
+
+                    this.surface!.drawString(
+                        '100',
+                        x + 307,
+                        y + 248,
+                        1,
+                        textColour
+                    );
+                }
+
+                if (itemCount >= 500) {
+                    textColour = Colours.White;
+
+                    if (
+                        this.mouseX >= x + 335 &&
+                        this.mouseY >= y + 238 &&
+                        this.mouseX < x + 368 &&
+                        this.mouseY <= y + 249
+                    ) {
+                        textColour = Colours.Red;
+                    }
+
+                    this.surface!.drawString(
+                        '500',
+                        x + 337,
+                        y + 248,
+                        1,
+                        textColour
+                    );
+                }
+
+                if (itemCount >= 2500) {
+                    textColour = Colours.White;
+
+                    if (
+                        this.mouseX >= x + 370 &&
+                        this.mouseY >= y + 238 &&
+                        this.mouseX < x + 400 &&
+                        this.mouseY <= y + 249
+                    ) {
+                        textColour = Colours.Red;
+                    }
+
+                    this.surface!.drawString(
+                        '2500',
+                        x + 370,
+                        y + 248,
+                        1,
+                        textColour
+                    );
+                }
+            }
+
+            if (this.getInventoryCount(itemType) > 0) {
+                this.surface!.drawString(
+                    `Deposit ${GameData.itemName[itemType]}`,
+                    x + 2,
+                    y + 273,
+                    1,
+                    Colours.White
+                );
+
+                textColour = Colours.White;
+
+                if (
+                    this.mouseX >= x + 220 &&
+                    this.mouseY >= y + 263 &&
+                    this.mouseX < x + 250 &&
+                    this.mouseY <= y + 274
+                ) {
+                    textColour = Colours.Red;
+                }
+
+                this.surface!.drawString('One', x + 222, y + 273, 1, textColour);
+
+                if (this.getInventoryCount(itemType) >= 5) {
+                    textColour = Colours.White;
+
+                    if (
+                        this.mouseX >= x + 250 &&
+                        this.mouseY >= y + 263 &&
+                        this.mouseX < x + 280 &&
+                        this.mouseY <= y + 274
+                    ) {
+                        textColour = Colours.Red;
+                    }
+
+                    this.surface!.drawString(
+                        'Five',
+                        x + 252,
+                        y + 273,
+                        1,
+                        textColour
+                    );
+                }
+
+                if (this.getInventoryCount(itemType) >= 25) {
+                    textColour = Colours.White;
+
+                    if (
+                        this.mouseX >= x + 280 &&
+                        this.mouseY >= y + 263 &&
+                        this.mouseX < x + 305 &&
+                        this.mouseY <= y + 274
+                    ) {
+                        textColour = Colours.Red;
+                    }
+
+                    this.surface!.drawString('25', x + 282, y + 273, 1, textColour);
+                }
+
+                if (this.getInventoryCount(itemType) >= 100) {
+                    textColour = Colours.White;
+
+                    if (
+                        this.mouseX >= x + 305 &&
+                        this.mouseY >= y + 263 &&
+                        this.mouseX < x + 335 &&
+                        this.mouseY <= y + 274
+                    ) {
+                        textColour = Colours.Red;
+                    }
+
+                    this.surface!.drawString(
+                        '100',
+                        x + 307,
+                        y + 273,
+                        1,
+                        textColour
+                    );
+                }
+
+                if (this.getInventoryCount(itemType) >= 500) {
+                    textColour = Colours.White;
+
+                    if (
+                        this.mouseX >= x + 335 &&
+                        this.mouseY >= y + 263 &&
+                        this.mouseX < x + 368 &&
+                        this.mouseY <= y + 274
+                    ) {
+                        textColour = Colours.Red;
+                    }
+
+                    this.surface!.drawString(
+                        '500',
+                        x + 337,
+                        y + 273,
+                        1,
+                        textColour
+                    );
+                }
+
+                if (this.getInventoryCount(itemType) >= 2500) {
+                    textColour = Colours.White;
+
+                    if (
+                        this.mouseX >= x + 370 &&
+                        this.mouseY >= y + 263 &&
+                        this.mouseX < x + 400 &&
+                        this.mouseY <= y + 274
+                    ) {
+                        textColour = Colours.Red;
+                    }
+
+                    this.surface!.drawString(
+                        '2500',
+                        x + 370,
+                        y + 273,
+                        1,
+                        textColour
+                    );
+                }
+            }
+        }
     }
 
     panelMessageTabs: Panel | null;
@@ -8278,8 +9182,6 @@ export default class mudclient extends GameConnection {
         );
     }
 
-    panelMagic: Panel | null;
-
     uiTabMagicSubTab: i32;
 
     drawUiTabMagic(noMenus: bool): void {
@@ -8588,6 +9490,1295 @@ export default class mudclient extends GameConnection {
             }
 
             this.mouseButtonClick = 0;
+        }
+    }
+
+    drawMinimapEntity(x: i32, y: i32, colour: i32): void {
+        this.surface!.setPixel(x, y, colour);
+        this.surface!.setPixel(x - 1, y, colour);
+        this.surface!.setPixel(x + 1, y, colour);
+        this.surface!.setPixel(x, y - 1, colour);
+        this.surface!.setPixel(x, y + 1, colour);
+    }
+
+    drawUiTabMinimap(noMenus: bool): void {
+        const MENU_WIDTH = 245;
+
+        const HEIGHT = 152;
+        const WIDTH = 156;
+
+        const HALF_HEIGHT = (HEIGHT / 2) as i32;
+        const HALF_WIDTH = (WIDTH / 2) as i32;
+
+        let uiX = this.gameWidth - WIDTH - 3;
+        let uiY = 36;
+
+        if (this.options.mobile) {
+            uiX -= 32;
+            uiY = this.gameHeight / 2 - HEIGHT / 2;
+        } else {
+            this.surface!._drawSprite_from3(
+                this.gameWidth - MENU_WIDTH - 3,
+                3,
+                this.spriteMedia + 2
+            );
+        }
+
+        /*
+        this.uiOpenX = uiX;
+        this.uiOpenY = uiY;
+        this.uiOpenWidth = WIDTH;
+        this.uiOpenHeight = HEIGHT;
+        */
+
+        this.surface!.drawBox(uiX, uiY, WIDTH, HEIGHT, 0);
+        this.surface!.setBounds(uiX, uiY, uiX + WIDTH, uiY + HEIGHT);
+
+        const scale = 192 + this.minimapRandom2;
+        const rotation = (this.cameraRotation + this.minimapRandom1) & 0xff;
+
+        let playerX = (((this.localPlayer.currentX - 6040) * 3 * scale) /
+            2048) as i32;
+
+        let playerY = (((this.localPlayer.currentY - 6040) * 3 * scale) /
+            2048) as i32;
+
+        const sin = Scene.sinCosCache[(1024 - rotation * 4) & 0x3ff];
+        const cos = Scene.sinCosCache[((1024 - rotation * 4) & 0x3ff) + 1024];
+        const tempX = (playerY * sin + playerX * cos) >> 18;
+
+        playerY = (playerY * cos - playerX * sin) >> 18;
+        playerX = tempX;
+
+        this.surface!.drawMinimapSprite(
+            uiX + HALF_WIDTH - playerX,
+            uiY + HALF_HEIGHT + playerY,
+            this.spriteMedia - 1,
+            (rotation + 64) & 255,
+            scale
+        );
+
+        for (let i = 0; i < this.objectCount; i++) {
+            let objectX = (((this.objectX[i] * this.magicLoc +
+                64 -
+                this.localPlayer.currentX) *
+                3 *
+                scale) /
+                2048) as i32;
+
+            let objectY = (((this.objectY[i] * this.magicLoc +
+                64 -
+                this.localPlayer.currentY) *
+                3 *
+                scale) /
+                2048) as i32;
+
+            const tempX = (objectY * sin + objectX * cos) >> 18;
+
+            objectY = (objectY * cos - objectX * sin) >> 18;
+            objectX = tempX;
+
+            this.drawMinimapEntity(
+                uiX + HALF_WIDTH + objectX,
+                uiY + HALF_HEIGHT - objectY,
+                Colours.Cyan
+            );
+        }
+
+        for (let i = 0; i < this.groundItemCount; i++) {
+            let itemX = (((this.groundItemX[i] * this.magicLoc +
+                64 -
+                this.localPlayer.currentX) *
+                3 *
+                scale) /
+                2048) as i32;
+
+            let itemY = (((this.groundItemY[i] * this.magicLoc +
+                64 -
+                this.localPlayer.currentY) *
+                3 *
+                scale) /
+                2048) as i32;
+
+            const tempX = (itemY * sin + itemX * cos) >> 18;
+
+            itemY = (itemY * cos - itemX * sin) >> 18;
+            itemX = tempX;
+
+            this.drawMinimapEntity(
+                uiX + HALF_WIDTH + itemX,
+                uiY + HALF_HEIGHT - itemY,
+                Colours.Red
+            );
+        }
+
+        for (let i = 0; i < this.npcCount; i++) {
+            const npc = this.npcs[i]!;
+
+            let npcX =
+                (((npc.currentX - this.localPlayer.currentX) * 3 * scale) / 2048) |
+                0;
+
+            let npcY =
+                (((npc.currentY - this.localPlayer.currentY) * 3 * scale) / 2048) |
+                0;
+
+            const tempX = (npcY * sin + npcX * cos) >> 18;
+
+            npcY = (npcY * cos - npcX * sin) >> 18;
+            npcX = tempX;
+
+            this.drawMinimapEntity(
+                uiX + HALF_WIDTH + npcX,
+                uiY + HALF_HEIGHT - npcY,
+                Colours.Yellow
+            );
+        }
+
+        for (let i = 0; i < this.playerCount; i++) {
+            const player = this.players[i]!;
+
+            let otherPlayerX =
+                (((player.currentX - this.localPlayer.currentX) * 3 * scale) /
+                    2048) |
+                0;
+
+            let otherPlayerY =
+                (((player.currentY - this.localPlayer.currentY) * 3 * scale) /
+                    2048) |
+                0;
+
+            const tempX = (otherPlayerY * sin + otherPlayerX * cos) >> 18;
+
+            otherPlayerY = (otherPlayerY * cos - otherPlayerX * sin) >> 18;
+            otherPlayerX = tempX;
+
+            let playerColour = Colours.White;
+
+            for (let j = 0; j < this.friendListCount; j++) {
+                if (
+                    player.hash != this.friendListHashes[j] ||
+                    this.friendListOnline[j] != 255
+                ) {
+                    continue;
+                }
+
+                playerColour = Colours.Green;
+                break;
+            }
+
+            this.drawMinimapEntity(
+                uiX + HALF_WIDTH + otherPlayerX,
+                uiY + HALF_HEIGHT - otherPlayerY,
+                playerColour
+            );
+        }
+
+        this.surface!.drawCircle(
+            uiX + HALF_WIDTH,
+            uiY + HALF_HEIGHT,
+            2,
+            Colours.White,
+            255
+        );
+
+        // compass
+        this.surface!.drawMinimapSprite(
+            uiX + 19,
+            uiY + 19,
+            this.spriteMedia + 24,
+            (this.cameraRotation + 128) & 255,
+            128
+        );
+
+        this.surface!.setBounds(0, 0, this.gameWidth, this.gameHeight + 12);
+
+        if (!noMenus) {
+            return;
+        }
+
+        const mouseX = this.mouseX - uiX;
+        const mouseY = this.mouseY - uiY;
+
+        if (
+            this.options.resetCompass &&
+            this.mouseButtonClick == 1 &&
+            mouseX > 0 &&
+            mouseX <= 32 &&
+            mouseY > 0 &&
+            mouseY <= 32
+        ) {
+            this.cameraRotation = 128;
+            this.mouseButtonClick = 0;
+            return;
+        }
+
+        if (mouseX >= 0 && mouseY >= 0 && mouseX < WIDTH + 40 && mouseY < HEIGHT) {
+            let deltaY = (((this.mouseX - (uiX + HALF_WIDTH)) * 16384) /
+                (3 * scale)) as i32;
+
+            let deltaX = (((this.mouseY - (uiY + HALF_HEIGHT)) * 16384) /
+                (3 * scale)) as i32;
+
+            const tempX = (deltaX * sin + deltaY * cos) >> 15;
+
+            deltaX = (deltaX * cos - deltaY * sin) >> 15;
+            deltaY = tempX;
+            deltaY += this.localPlayer.currentX;
+            deltaX = this.localPlayer.currentY - deltaX;
+
+            if (this.mouseButtonClick == 1) {
+                this._walkToActionSource_from5(
+                    this.localRegionX,
+                    this.localRegionY,
+                    (deltaY / 128) as i32,
+                    (deltaX / 128) as i32,
+                    false
+                );
+
+                this.mouseButtonClick = 0;
+            }
+        }
+    }
+
+    drawOptionMenu(): void {
+        const fontSize = this.options.mobile ? 5 : 1;
+        const fontHeight = this.options.mobile ? 18 : 12;
+        const maxHeight = fontHeight * 5;
+
+        const uiX = this.options.mobile ? 48 : 6;
+
+        const uiY = this.options.mobile
+            ? ((this.gameHeight / 2 - maxHeight / 2) as i32)
+            : 0;
+
+        if (this.mouseButtonClick !== 0) {
+            for (let i = 0; i < this.optionMenuCount; i++) {
+                if (
+                    this.mouseX < uiX - 6 ||
+                    this.mouseX >=
+                        uiX -
+                            6 +
+                            this.surface!.textWidth(
+                                this.optionMenuEntry[i]!,
+                                fontSize
+                            ) ||
+                    this.mouseY <= uiY + i * fontHeight ||
+                    this.mouseY >= uiY + (fontHeight + i * fontHeight)
+                ) {
+                    continue;
+                }
+
+                this.packetStream!.newPacket(ClientOpcodes.CHOOSE_OPTION);
+                this.packetStream!.putByte(i);
+                this.packetStream!.sendPacket();
+                break;
+            }
+
+            this.mouseButtonClick = 0;
+            this.showOptionMenu = false;
+            return;
+        }
+
+        for (let i = 0; i < this.optionMenuCount; i++) {
+            let textColour = Colours.Cyan;
+
+            if (
+                !this.options.mobile &&
+                this.mouseX > uiX - 6 &&
+                this.mouseX <
+                    uiX -
+                        6 +
+                        this.surface!.textWidth(
+                            this.optionMenuEntry[i]!,
+                            fontSize
+                        ) &&
+                this.mouseY > uiY + i * fontHeight &&
+                this.mouseY < uiY + (i * fontHeight + fontHeight)
+            ) {
+                textColour = Colours.Red;
+            }
+
+            this.surface!.drawString(
+                this.optionMenuEntry[i]!,
+                uiX,
+                uiY + (fontHeight + i * fontHeight),
+                fontSize,
+                textColour
+            );
+        }
+    }
+
+    drawUiTabOptions(noMenus: bool): void {
+        const MENU_WIDTH = 245;
+
+        const WIDTH = 196;
+        const HEIGHT = 265;
+
+        const LINE_BREAK = 15;
+
+        let uiX = this.gameWidth - WIDTH - 3;
+        let uiY = 36;
+
+        if (this.options.mobile) {
+            uiX = 35;
+            uiY = (this.gameHeight / 2 - HEIGHT / 2) as i32;
+        } else {
+            this.surface!._drawSprite_from3(
+                this.gameWidth - MENU_WIDTH - 3,
+                3,
+                this.spriteMedia + 6
+            );
+        }
+
+        /*
+        this.uiOpenX = uiX;
+        this.uiOpenY = uiY;
+        this.uiOpenWidth = WIDTH;
+        this.uiOpenHeight = HEIGHT;
+        */
+
+        this.surface!.drawBoxAlpha(uiX, uiY, WIDTH, 65, Colours.DarkGrey, 160);
+
+        this.surface!.drawBoxAlpha(
+            uiX,
+            uiY + 65,
+            WIDTH,
+            65,
+            Colours.LightGrey3,
+            160
+        );
+
+        this.surface!.drawBoxAlpha(
+            uiX,
+            uiY + 130,
+            WIDTH,
+            95,
+            Colours.DarkGrey,
+            160
+        );
+
+        this.surface!.drawBoxAlpha(
+            uiX,
+            uiY + 225,
+            WIDTH,
+            40,
+            Colours.LightGrey3,
+            160
+        );
+
+        const x = uiX + 3;
+        let y = uiY + LINE_BREAK;
+
+        this.surface!.drawString(
+            `Game options - ${this.options.mobile ? 'tap' : 'click'} to toggle`,
+            x,
+            y,
+            1,
+            Colours.Black
+        );
+
+        y += LINE_BREAK;
+
+        this.surface!.drawString(
+            'Camera angle mode - ' +
+                (this.optionCameraModeAuto ? '@gre@Auto' : '@red@Manual'),
+            x,
+            y,
+            1,
+            Colours.White
+        );
+
+        y += LINE_BREAK;
+
+        this.surface!.drawString(
+            this.options.mobile
+                ? 'Single tap mode - ' +
+                      (this.optionMouseButtonOne ? '@gre@on' : '@red@off')
+                : 'Mouse buttons - ' +
+                      (this.optionMouseButtonOne ? '@red@One' : '@gre@Two'),
+            x,
+            y,
+            1,
+            Colours.White
+        );
+
+        y += LINE_BREAK;
+
+        if (this.members) {
+            this.surface!.drawString(
+                'Sound effects - ' +
+                    (this.optionSoundDisabled ? '@red@off' : '@gre@on'),
+                x,
+                y,
+                1,
+                Colours.White
+            );
+        }
+
+        y += LINE_BREAK;
+
+        if (this.options.accountManagement) {
+            y += 5;
+
+            this.surface!.drawString('Security settings', x, y, 1, 0);
+
+            y += LINE_BREAK;
+
+            let textColour = Colours.White;
+
+            if (
+                this.mouseX > x &&
+                this.mouseX < x + WIDTH &&
+                this.mouseY > y - 12 &&
+                this.mouseY < y + 4
+            ) {
+                textColour = Colours.Yellow;
+            }
+
+            this.surface!.drawString('Change password', x, y, 1, textColour);
+
+            y += LINE_BREAK;
+
+            textColour = Colours.White;
+
+            if (
+                this.mouseX > x &&
+                this.mouseX < x + WIDTH &&
+                this.mouseY > y - 12 &&
+                this.mouseY < y + 4
+            ) {
+                textColour = Colours.Yellow;
+            }
+
+            this.surface!.drawString(
+                'Change recovery questions',
+                x,
+                y,
+                1,
+                textColour
+            );
+
+            y += LINE_BREAK * 2;
+        } else {
+            this.surface!.drawString(
+                'To change your contact details,',
+                x,
+                y,
+                0,
+                Colours.White
+            );
+
+            y += LINE_BREAK;
+
+            this.surface!.drawString(
+                'password, recovery questions, etc..',
+                x,
+                y,
+                0,
+                Colours.White
+            );
+
+            y += LINE_BREAK;
+
+            this.surface!.drawString(
+                "please select 'account management'",
+                x,
+                y,
+                0,
+                Colours.White
+            );
+
+            y += LINE_BREAK;
+
+            if (this.referID == 0) {
+                this.surface!.drawString(
+                    'from the runescape.com front page',
+                    x,
+                    y,
+                    0,
+                    Colours.White
+                );
+            } else if (this.referID == 1) {
+                this.surface!.drawString(
+                    'from the link below the gamewindow',
+                    x,
+                    y,
+                    0,
+                    Colours.White
+                );
+            } else {
+                this.surface!.drawString(
+                    'from the runescape front webpage',
+                    x,
+                    y,
+                    0,
+                    Colours.White
+                );
+            }
+
+            y += LINE_BREAK + 5;
+        }
+
+        this.surface!.drawString(
+            'Privacy settings. Will be applied to',
+            uiX + 3,
+            y,
+            1,
+            Colours.Black
+        );
+
+        y += LINE_BREAK;
+
+        this.surface!.drawString(
+            'all people not on your friends list',
+            uiX + 3,
+            y,
+            1,
+            Colours.Black
+        );
+
+        y += LINE_BREAK;
+
+        this.surface!.drawString(
+            'Block chat messages: ' +
+                (!this.settingsBlockChat ? '@red@<off>' : '@gre@<on>'),
+            uiX + 3,
+            y,
+            1,
+            Colours.White
+        );
+
+        y += LINE_BREAK;
+
+        this.surface!.drawString(
+            'Block private messages: ' +
+                (!this.settingsBlockPrivate ? '@red@<off>' : '@gre@<on>'),
+            uiX + 3,
+            y,
+            1,
+            Colours.White
+        );
+
+        y += LINE_BREAK;
+
+        this.surface!.drawString(
+            'Block trade requests: ' +
+                (!this.settingsBlockTrade ? '@red@<off>' : '@gre@<on>'),
+            uiX + 3,
+            y,
+            1,
+            Colours.White
+        );
+
+        y += LINE_BREAK;
+
+        if (this.members) {
+            this.surface!.drawString(
+                'Block duel requests: ' +
+                    (!this.settingsBlockDuel ? '@red@<off>' : '@gre@<on>'),
+                uiX + 3,
+                y,
+                1,
+                Colours.White
+            );
+        }
+
+        y += LINE_BREAK + 5;
+
+        this.surface!.drawString(
+            'Always logout when you finish',
+            x,
+            y,
+            1,
+            Colours.Black
+        );
+
+        y += LINE_BREAK;
+
+        let textColour = Colours.White;
+
+        if (
+            this.mouseX > x &&
+            this.mouseX < x + WIDTH &&
+            this.mouseY > y - 12 &&
+            this.mouseY < y + 4
+        ) {
+            textColour = Colours.Yellow;
+        }
+
+        this.surface!.drawString(
+            `${this.options.mobile ? 'Tap' : 'Click'} here to logout`,
+            uiX + 3,
+            y,
+            1,
+            textColour
+        );
+
+        if (!noMenus) {
+            return;
+        }
+
+        const mouseX = this.mouseX - uiX;
+        const mouseY = this.mouseY - uiY;
+
+        if (mouseX >= 0 && mouseY >= 0 && mouseX < 196 && mouseY < 265) {
+            const x = uiX + 3;
+            let y = uiY + 30;
+
+            if (
+                this.mouseX > x &&
+                this.mouseX < x + WIDTH &&
+                this.mouseY > y - 12 &&
+                this.mouseY < y + 4 &&
+                this.mouseButtonClick == 1
+            ) {
+                this.optionCameraModeAuto = !this.optionCameraModeAuto;
+                this.packetStream!.newPacket(ClientOpcodes.SETTINGS_GAME);
+                this.packetStream!.putByte(0);
+                this.packetStream!.putByte(this.optionCameraModeAuto ? 1 : 0);
+                this.packetStream!.sendPacket();
+            }
+
+            y += LINE_BREAK;
+
+            if (
+                this.mouseX > x &&
+                this.mouseX < x + WIDTH &&
+                this.mouseY > y - 12 &&
+                this.mouseY < y + 4 &&
+                this.mouseButtonClick == 1
+            ) {
+                this.optionMouseButtonOne = !this.optionMouseButtonOne;
+                this.packetStream!.newPacket(ClientOpcodes.SETTINGS_GAME);
+                this.packetStream!.putByte(2);
+                this.packetStream!.putByte(this.optionMouseButtonOne ? 1 : 0);
+                this.packetStream!.sendPacket();
+            }
+
+            y += LINE_BREAK;
+
+            if (
+                this.members &&
+                this.mouseX > x &&
+                this.mouseX < x + WIDTH &&
+                this.mouseY > y - 12 &&
+                this.mouseY < y + 4 &&
+                this.mouseButtonClick == 1
+            ) {
+                this.optionSoundDisabled = !this.optionSoundDisabled;
+                this.packetStream!.newPacket(ClientOpcodes.SETTINGS_GAME);
+                this.packetStream!.putByte(3);
+                this.packetStream!.putByte(this.optionSoundDisabled ? 1 : 0);
+                this.packetStream!.sendPacket();
+            }
+
+            if (this.options.accountManagement) {
+                y += LINE_BREAK + 20;
+
+                if (
+                    this.mouseX > x &&
+                    this.mouseX < x + WIDTH &&
+                    this.mouseY > y - 12 &&
+                    this.mouseY < y + 4 &&
+                    this.mouseButtonClick == 1
+                ) {
+                    this.showChangePasswordStep = 6;
+                    this.inputTextCurrent = '';
+                    this.inputTextFinal = '';
+                }
+
+                y += LINE_BREAK;
+
+                if (
+                    this.mouseX > x &&
+                    this.mouseX < x + WIDTH &&
+                    this.mouseY > y - 12 &&
+                    this.mouseY < y + 4 &&
+                    this.mouseButtonClick == 1
+                ) {
+                    this.packetStream!.newPacket(ClientOpcodes.RECOVER_SET_REQUEST);
+                    this.packetStream!.sendPacket();
+                }
+
+                y += LINE_BREAK * 2;
+            } else {
+                y += LINE_BREAK * 5;
+            }
+
+            let hasChangedSetting = false;
+
+            y += 35;
+
+            if (
+                this.mouseX > x &&
+                this.mouseX < x + WIDTH &&
+                this.mouseY > y - 12 &&
+                this.mouseY < y + 4 &&
+                this.mouseButtonClick == 1
+            ) {
+                this.settingsBlockChat = 1 - this.settingsBlockChat;
+                hasChangedSetting = true;
+            }
+
+            y += LINE_BREAK;
+
+            if (
+                this.mouseX > x &&
+                this.mouseX < x + WIDTH &&
+                this.mouseY > y - 12 &&
+                this.mouseY < y + 4 &&
+                this.mouseButtonClick == 1
+            ) {
+                this.settingsBlockPrivate = 1 - this.settingsBlockPrivate;
+                hasChangedSetting = true;
+            }
+
+            y += LINE_BREAK;
+
+            if (
+                this.mouseX > x &&
+                this.mouseX < x + WIDTH &&
+                this.mouseY > y - 12 &&
+                this.mouseY < y + 4 &&
+                this.mouseButtonClick == 1
+            ) {
+                this.settingsBlockTrade = 1 - this.settingsBlockTrade;
+                hasChangedSetting = true;
+            }
+
+            y += LINE_BREAK;
+
+            if (
+                this.members &&
+                this.mouseX > x &&
+                this.mouseX < x + WIDTH &&
+                this.mouseY > y - 12 &&
+                this.mouseY < y + 4 &&
+                this.mouseButtonClick == 1
+            ) {
+                this.settingsBlockDuel = 1 - this.settingsBlockDuel;
+                hasChangedSetting = true;
+            }
+
+            y += LINE_BREAK;
+
+            if (hasChangedSetting) {
+                this.sendPrivacySettings(
+                    this.settingsBlockChat,
+                    this.settingsBlockPrivate,
+                    this.settingsBlockTrade,
+                    this.settingsBlockDuel
+                );
+            }
+
+            y += LINE_BREAK + 5;
+
+            if (
+                this.mouseX > x &&
+                this.mouseX < x + WIDTH &&
+                this.mouseY > y - 12 &&
+                this.mouseY < y + 4 &&
+                this.mouseButtonClick == 1
+            ) {
+                this.sendLogout();
+            }
+
+            this.mouseButtonClick = 0;
+        }
+    }
+
+    showChangePasswordStep: i32;
+    changePasswordOld: string = '';
+    changePasswordNew: string = '';
+
+    drawDialogChangePassword(): void {
+        const DIALOG_X = 106;
+        const DIALOG_Y = 150;
+
+        const WIDTH = 300;
+        const HEIGHT = 60;
+
+        const LINE_BREAK = 25;
+
+        if (this.mouseButtonClick != 0) {
+            this.mouseButtonClick = 0;
+
+            if (
+                this.mouseX < DIALOG_X ||
+                this.mouseY < DIALOG_Y ||
+                this.mouseX > WIDTH + DIALOG_X ||
+                this.mouseY > HEIGHT + DIALOG_Y
+            ) {
+                this.showChangePasswordStep = 0;
+                return;
+            }
+        }
+
+        this.surface!.drawBox(DIALOG_X, DIALOG_Y, WIDTH, HEIGHT, Colours.Black);
+        this.surface!.drawBoxEdge(DIALOG_X, DIALOG_Y, WIDTH, HEIGHT, Colours.White);
+
+        let y = DIALOG_Y + 22;
+        let passwordInput = '';
+
+        if (this.showChangePasswordStep == 6) {
+            this.surface!.drawStringCenter(
+                'Please enter your current password',
+                256,
+                y,
+                4,
+                Colours.White
+            );
+
+            y += LINE_BREAK;
+
+            passwordInput = '*';
+
+            for (let i = 0; i < this.inputTextCurrent.length; i++) {
+                passwordInput = 'X' + passwordInput;
+            }
+
+            this.surface!.drawStringCenter(passwordInput, 256, y, 4, Colours.White);
+
+            if (this.inputTextFinal.length > 0) {
+                this.changePasswordOld = this.inputTextFinal;
+                this.inputTextCurrent = '';
+                this.inputTextFinal = '';
+                this.showChangePasswordStep = 1;
+                return;
+            }
+        } else if (this.showChangePasswordStep == 1) {
+            this.surface!.drawStringCenter(
+                'Please enter your new password',
+                256,
+                y,
+                4,
+                Colours.White
+            );
+
+            y += LINE_BREAK;
+
+            passwordInput = '*';
+
+            for (let i = 0; i < this.inputTextCurrent.length; i++) {
+                passwordInput = 'X' + passwordInput;
+            }
+
+            this.surface!.drawStringCenter(passwordInput, 256, y, 4, Colours.White);
+
+            if (this.inputTextFinal.length > 0) {
+                this.changePasswordNew = this.inputTextFinal;
+                this.inputTextCurrent = '';
+                this.inputTextFinal = '';
+
+                if (this.changePasswordNew.length >= 5) {
+                    this.showChangePasswordStep = 2;
+                    return;
+                }
+
+                this.showChangePasswordStep = 5;
+                return;
+            }
+        } else if (this.showChangePasswordStep == 2) {
+            this.surface!.drawStringCenter(
+                'Enter password again to confirm',
+                256,
+                y,
+                4,
+                Colours.White
+            );
+
+            y += LINE_BREAK;
+
+            passwordInput = '*';
+
+            for (let i = 0; i < this.inputTextCurrent.length; ++i) {
+                passwordInput = 'X' + passwordInput;
+            }
+
+            this.surface!.drawStringCenter(passwordInput, 256, y, 4, Colours.White);
+
+            if (this.inputTextFinal.length > 0) {
+                if (
+                    this.inputTextFinal.toLowerCase() ==
+                    this.changePasswordNew.toLowerCase()
+                ) {
+                    this.showChangePasswordStep = 4;
+
+                    /*this.changePassword(
+                        this.changePasswordOld,
+                        this.changePasswordNew
+                    );*/
+
+                    return;
+                }
+
+                this.showChangePasswordStep = 3;
+                return;
+            }
+        } else {
+            if (this.showChangePasswordStep == 3) {
+                this.surface!.drawStringCenter(
+                    'Passwords do not match!',
+                    256,
+                    y,
+                    4,
+                    Colours.White
+                );
+
+                y += LINE_BREAK;
+
+                this.surface!.drawStringCenter(
+                    'Press any key to close',
+                    256,
+                    y,
+                    4,
+                    Colours.White
+                );
+
+                return;
+            }
+
+            if (this.showChangePasswordStep == 4) {
+                this.surface!.drawStringCenter(
+                    'Ok, your request has been sent',
+                    256,
+                    y,
+                    4,
+                    Colours.White
+                );
+
+                y += LINE_BREAK;
+
+                this.surface!.drawStringCenter(
+                    'Press any key to close',
+                    256,
+                    y,
+                    4,
+                    Colours.White
+                );
+
+                return;
+            }
+
+            if (this.showChangePasswordStep == 5) {
+                this.surface!.drawStringCenter(
+                    'Password must be at',
+                    256,
+                    y,
+                    4,
+                    Colours.White
+                );
+
+                y += LINE_BREAK;
+
+                this.surface!.drawStringCenter(
+                    'least 5 letters long',
+                    256,
+                    y,
+                    4,
+                    Colours.White
+                );
+            }
+        }
+    }
+
+    uiTabPlayerInfoSubTab: i32;
+
+    drawUiTabPlayerInfo(noMenus: bool): void {
+        const MENU_WIDTH = 245;
+
+        const WIDTH = 196;
+        const HEIGHT = 275;
+        const LINE_BREAK = 12;
+
+        const HALF_WIDTH = (WIDTH / 2) as i32;
+
+        const TABS: StaticArray<string> = ['Stats', 'Quests'];
+        const TAB_HEIGHT = 24;
+
+        let uiX = this.gameWidth - WIDTH - 3;
+        let uiY = 36;
+
+        if (this.options.mobile) {
+            uiX -= 32;
+            uiY = (this.gameHeight / 2 - HEIGHT / 2) as i32;
+        } else {
+            this.surface!._drawSprite_from3(
+                this.gameWidth - MENU_WIDTH - 3,
+                3,
+                this.spriteMedia + 3
+            );
+        }
+
+        /*
+        this.uiOpenX = uiX;
+        this.uiOpenY = uiY;
+        this.uiOpenWidth = WIDTH;
+        this.uiOpenHeight = HEIGHT;
+        */
+
+        this.surface!.drawBoxAlpha(
+            uiX,
+            uiY + TAB_HEIGHT,
+            WIDTH,
+            HEIGHT - TAB_HEIGHT,
+            Colours.LightGrey,
+            128
+        );
+
+        this.surface!.drawLineHoriz(uiX, uiY + TAB_HEIGHT, WIDTH, Colours.Black);
+
+        this.surface!.drawTabs(
+            uiX,
+            uiY,
+            WIDTH,
+            TAB_HEIGHT,
+            TABS,
+            this.uiTabPlayerInfoSubTab
+        );
+
+        // the handler for the Stats tab
+        if (this.uiTabPlayerInfoSubTab == 0) {
+            let y = uiY + 36;
+            let selectedSkill = -1;
+
+            this.surface!.drawString('Skills', uiX + 5, y, 3, Colours.Yellow);
+
+            y += 13;
+
+            // draw two columns with each skill name and current/base levels
+            for (let i = 0; i < 9; i++) {
+                // left column
+                let textColour = Colours.White;
+
+                if (
+                    this.mouseX > uiX + 3 &&
+                    this.mouseY >= y - 11 &&
+                    this.mouseY < y + 2 &&
+                    this.mouseX < uiX + 90
+                ) {
+                    textColour = Colours.Red;
+                    selectedSkill = i;
+                }
+
+                this.surface!.drawString(
+                    `${SHORT_SKILL_NAMES[i]}:@yel@${this.playerStatCurrent[i]}/${this.playerStatBase[i]}`,
+                    uiX + 5,
+                    y,
+                    1,
+                    textColour
+                );
+
+                // right column
+                textColour = Colours.White;
+
+                if (
+                    this.mouseX >= uiX + 90 &&
+                    this.mouseY >= y - 13 - 11 &&
+                    this.mouseY < y - 13 + 2 &&
+                    this.mouseX < uiX + 196
+                ) {
+                    textColour = Colours.Red;
+                    selectedSkill = i + 9;
+                }
+
+                this.surface!.drawString(
+                    `${SHORT_SKILL_NAMES[i + 9]}:@yel@` +
+                        `${this.playerStatCurrent[i + 9]}/` +
+                        this.playerStatBase[i + 9].toString(),
+                    uiX + HALF_WIDTH - 5,
+                    y - 13,
+                    1,
+                    textColour
+                );
+
+                y += 13;
+            }
+
+            this.surface!.drawString(
+                `Quest Points:@yel@${this.playerQuestPoints}`,
+                uiX + HALF_WIDTH - 5,
+                y - 13,
+                1,
+                Colours.White
+            );
+
+            y += LINE_BREAK;
+
+            this.surface!.drawString(
+                `Fatigue: @yel@${((this.statFatigue * 100) / 750) as i32}%`,
+                uiX + 5,
+                y - 13,
+                1,
+                Colours.White
+            );
+
+            y += 8;
+
+            this.surface!.drawString(
+                'Equipment Status',
+                uiX + 5,
+                y,
+                3,
+                Colours.Yellow
+            );
+
+            y += LINE_BREAK;
+
+            for (let i = 0; i < 3; i++) {
+                this.surface!.drawString(
+                    `${EQUIPMENT_STAT_NAMES[i]}:@yel@${this.playerStatEquipment[i]}`,
+                    uiX + 5,
+                    y,
+                    1,
+                    Colours.White
+                );
+
+                if (i < 2) {
+                    this.surface!.drawString(
+                        `${EQUIPMENT_STAT_NAMES[i + 3]}:@yel@${
+                            this.playerStatEquipment[i + 3]
+                        }`,
+                        uiX + HALF_WIDTH + 25,
+                        y,
+                        1,
+                        Colours.White
+                    );
+                }
+
+                y += 13;
+            }
+
+            y += 6;
+
+            this.surface!.drawLineHoriz(uiX, y - 15, WIDTH, Colours.Black);
+
+            if (selectedSkill !== -1) {
+                this.surface!.drawString(
+                    `${SKILL_NAMES[selectedSkill]} skill`,
+                    uiX + 5,
+                    y,
+                    1,
+                    Colours.Yellow
+                );
+
+                y += LINE_BREAK;
+
+                let nextLevelAt = EXPERIENCE_ARRAY[0];
+
+                for (let i = 0; i < 98; i++) {
+                    if (
+                        this.playerExperience[selectedSkill] >= EXPERIENCE_ARRAY[i]
+                    ) {
+                        nextLevelAt = EXPERIENCE_ARRAY[i + 1];
+                    }
+                }
+
+                this.surface!.drawString(
+                    `Total xp: ${
+                        (this.playerExperience[selectedSkill] / 4) as i32
+                    }`,
+                    uiX + 5,
+                    y,
+                    1,
+                    Colours.White
+                );
+
+                y += LINE_BREAK;
+
+                this.surface!.drawString(
+                    `Next level at: ${(nextLevelAt / 4) as i32}`,
+                    uiX + 5,
+                    y,
+                    1,
+                    Colours.White
+                );
+            } else {
+                this.surface!.drawString(
+                    'Overall levels',
+                    uiX + 5,
+                    y,
+                    1,
+                    Colours.Yellow
+                );
+
+                y += LINE_BREAK;
+
+                let totalLevel = 0;
+
+                for (let i = 0; i < SKILL_NAMES.length; i++) {
+                    totalLevel += this.playerStatBase[i];
+                }
+
+                this.surface!.drawString(
+                    `Skill total: ${totalLevel}`,
+                    uiX + 5,
+                    y,
+                    1,
+                    Colours.White
+                );
+
+                y += LINE_BREAK;
+
+                this.surface!.drawString(
+                    `Combat level: ${this.localPlayer.level}`,
+                    uiX + 5,
+                    y,
+                    1,
+                    Colours.White
+                );
+
+                y += LINE_BREAK;
+            }
+        } else if (this.uiTabPlayerInfoSubTab == 1) {
+            // the handler for the Quests tab
+            this.panelQuestList!.clearList(this.controlListQuest);
+
+            this.panelQuestList!.addListEntry(
+                this.controlListQuest,
+                0,
+                '@whi@Quest-list (green=completed)'
+            );
+
+            for (let i = 0; i < QUEST_NAMES.length; i++) {
+                this.panelQuestList!.addListEntry(
+                    this.controlListQuest,
+                    i + 1,
+                    (this.questComplete[i] ? '@gre@' : '@red@') + QUEST_NAMES[i]
+                );
+            }
+
+            this.panelQuestList!.drawPanel();
+        }
+
+        if (!noMenus) {
+            return;
+        }
+
+        const mouseX = this.mouseX - uiX;
+        const mouseY = this.mouseY - uiY;
+
+        // handle clicking of Stats and Quest tab, and the scroll wheel for the
+        // quest list
+        if (mouseX >= 0 && mouseY >= 0 && mouseX < WIDTH && mouseY < HEIGHT) {
+            if (this.uiTabPlayerInfoSubTab == 1) {
+                this.panelQuestList!.handleMouse(
+                    mouseX + uiX,
+                    mouseY + uiY,
+                    this.lastMouseButtonDown,
+                    this.mouseButtonDown,
+                    this.mouseScrollDelta
+                );
+            }
+
+            if (mouseY <= TAB_HEIGHT && this.mouseButtonClick == 1) {
+                if (mouseX < HALF_WIDTH) {
+                    this.uiTabPlayerInfoSubTab = 0;
+                } else if (mouseX > HALF_WIDTH) {
+                    this.uiTabPlayerInfoSubTab = 1;
+                }
+            }
         }
     }
 
@@ -8969,6 +11160,592 @@ export default class mudclient extends GameConnection {
         this.mouseButtonClick = 0;
     }
 
+    setActiveUITab(): void {
+        if (
+            this.showUITab == 0 &&
+            this.mouseX >= this.gameWidth - 35 &&
+            this.mouseY >= 3 &&
+            this.mouseX < this.gameWidth - 3 &&
+            this.mouseY < 35
+        ) {
+            this.showUITab = 1;
+        }
+
+        if (
+            this.showUITab == 0 &&
+            this.mouseX >= this.gameWidth - 35 - 33 &&
+            this.mouseY >= 3 &&
+            this.mouseX < this.gameWidth - 3 - 33 &&
+            this.mouseY < 35
+        ) {
+            this.showUITab = 2;
+            this.minimapRandom1 = ((Math.random() * 13) as i32) - 6;
+            this.minimapRandom2 = ((Math.random() * 23) as i32) - 11;
+        }
+
+        if (
+            this.showUITab == 0 &&
+            this.mouseX >= this.gameWidth - 35 - 66 &&
+            this.mouseY >= 3 &&
+            this.mouseX < this.gameWidth - 3 - 66 &&
+            this.mouseY < 35
+        ) {
+            this.showUITab = 3;
+        }
+
+        if (
+            this.showUITab == 0 &&
+            this.mouseX >= this.gameWidth - 35 - 99 &&
+            this.mouseY >= 3 &&
+            this.mouseX < this.gameWidth - 3 - 99 &&
+            this.mouseY < 35
+        ) {
+            this.showUITab = 4;
+        }
+
+        if (
+            this.showUITab == 0 &&
+            this.mouseX >= this.gameWidth - 35 - 132 &&
+            this.mouseY >= 3 &&
+            this.mouseX < this.gameWidth - 3 - 132 &&
+            this.mouseY < 35
+        ) {
+            this.showUITab = 5;
+        }
+
+        if (
+            this.showUITab == 0 &&
+            this.mouseX >= this.gameWidth - 35 - 165 &&
+            this.mouseY >= 3 &&
+            this.mouseX < this.gameWidth - 3 - 165 &&
+            this.mouseY < 35
+        ) {
+            this.showUITab = 6;
+        }
+
+        if (
+            this.showUITab != 0 &&
+            this.mouseX >= this.gameWidth - 35 &&
+            this.mouseY >= 3 &&
+            this.mouseX < this.gameWidth - 3 &&
+            this.mouseY < 26
+        ) {
+            this.showUITab = 1;
+        }
+
+        if (
+            this.showUITab != 0 &&
+            this.showUITab != 2 &&
+            this.mouseX >= this.gameWidth - 35 - 33 &&
+            this.mouseY >= 3 &&
+            this.mouseX < this.gameWidth - 3 - 33 &&
+            this.mouseY < 26
+        ) {
+            this.showUITab = 2;
+            this.minimapRandom1 = ((Math.random() * 13) as i32) - 6;
+            this.minimapRandom2 = ((Math.random() * 23) as i32) - 11;
+        }
+
+        if (
+            this.showUITab != 0 &&
+            this.mouseX >= this.gameWidth - 35 - 66 &&
+            this.mouseY >= 3 &&
+            this.mouseX < this.gameWidth - 3 - 66 &&
+            this.mouseY < 26
+        ) {
+            this.showUITab = 3;
+        }
+
+        if (
+            this.showUITab != 0 &&
+            this.mouseX >= this.gameWidth - 35 - 99 &&
+            this.mouseY >= 3 &&
+            this.mouseX < this.gameWidth - 3 - 99 &&
+            this.mouseY < 26
+        ) {
+            this.showUITab = 4;
+        }
+
+        if (
+            this.showUITab != 0 &&
+            this.mouseX >= this.gameWidth - 35 - 132 &&
+            this.mouseY >= 3 &&
+            this.mouseX < this.gameWidth - 3 - 132 &&
+            this.mouseY < 26
+        ) {
+            this.showUITab = 5;
+        }
+
+        if (
+            this.showUITab != 0 &&
+            this.mouseX >= this.gameWidth - 35 - 165 &&
+            this.mouseY >= 3 &&
+            this.mouseX < this.gameWidth - 3 - 165 &&
+            this.mouseY < 26
+        ) {
+            this.showUITab = 6;
+        }
+
+        if (
+            this.showUITab == 1 &&
+            (this.mouseX < this.gameWidth - 248 ||
+                this.mouseY > 36 + ((this.inventoryMaxItemCount / 5) as i32) * 34)
+        ) {
+            this.showUITab = 0;
+        }
+
+        if (
+            this.showUITab == 3 &&
+            (this.mouseX < this.gameWidth - 199 || this.mouseY > 316)
+        ) {
+            this.showUITab = 0;
+        }
+
+        if (
+            (this.showUITab == 2 ||
+                this.showUITab == 4 ||
+                this.showUITab == 5) &&
+            (this.mouseX < this.gameWidth - 199 || this.mouseY > 240)
+        ) {
+            this.showUITab = 0;
+        }
+
+        if (
+            this.showUITab == 6 &&
+            (this.mouseX < this.gameWidth - 199 || this.mouseY > 311)
+        ) {
+            this.showUITab = 0;
+        }
+    }
+
+    /*
+    setActiveMobileUITab(): void {
+        const BUTTON_SIZE = 32;
+
+        const rightX = this.gameWidth - BUTTON_SIZE - 3;
+        const leftX = 3;
+        const uiY = this.gameHeight / 2 - 49;
+
+        let offsetY = uiY;
+
+        for (let i = 0; i < 6; i += 1) {
+            const buttonX = i > 2 ? leftX : rightX;
+
+            if (
+                this.mouseX >= buttonX &&
+                this.mouseX <= buttonX + BUTTON_SIZE &&
+                this.mouseY >= offsetY &&
+                this.mouseY <= offsetY + BUTTON_SIZE
+            ) {
+                if (this.showUITab == 0) {
+                    this.showUITab = i + 1;
+                    return;
+                } else if (this.showUITab == i + 1) {
+                    return;
+                }
+            }
+
+            if (i == 2) {
+                offsetY = uiY;
+            } else {
+                offsetY += BUTTON_SIZE + 1;
+            }
+        }
+
+        if (
+            this.showUITab != 0 &&
+            (this.mouseX < this.uiOpenX ||
+                this.mouseX > this.uiOpenX + this.uiOpenWidth ||
+                this.mouseY < this.uiOpenY ||
+                this.mouseY > this.uiOpenY + this.uiOpenHeight)
+        ) {
+            this.showUITab = 0;
+        }
+    }*/
+
+    drawDialogShop(): void {
+        const COINS_ID = 10;
+
+        if (this.mouseButtonClick != 0) {
+            this.mouseButtonClick = 0;
+
+            const mouseX = this.mouseX - 52;
+            const mouseY = this.mouseY - 44;
+
+            if (mouseX >= 0 && mouseY >= 12 && mouseX < 408 && mouseY < 246) {
+                let itemIndex = 0;
+
+                for (let row = 0; row < 5; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        const slotX = 7 + col * 49;
+                        const slotY = 28 + row * 34;
+
+                        if (
+                            mouseX > slotX &&
+                            mouseX < slotX + 49 &&
+                            mouseY > slotY &&
+                            mouseY < slotY + 34 &&
+                            this.shopItem[itemIndex] != -1
+                        ) {
+                            this.shopSelectedItemIndex = itemIndex;
+                            this.shopSelectedItemType = this.shopItem[itemIndex];
+                        }
+
+                        itemIndex++;
+                    }
+                }
+
+                if (this.shopSelectedItemIndex >= 0) {
+                    const itemID = this.shopItem[this.shopSelectedItemIndex];
+
+                    if (itemID != -1) {
+                        if (
+                            this.shopItemCount[this.shopSelectedItemIndex] > 0 &&
+                            mouseX > 298 &&
+                            mouseY >= 204 &&
+                            mouseX < 408 &&
+                            mouseY <= 215
+                        ) {
+                            let priceMod =
+                                this.shopBuyPriceMod +
+                                this.shopItemPrice[this.shopSelectedItemIndex];
+
+                            if (priceMod < 10) {
+                                priceMod = 10;
+                            }
+
+                            const itemPrice =
+                                ((priceMod * GameData.itemBasePrice[itemID]) /
+                                    100) |
+                                0;
+
+                            this.packetStream!.newPacket(ClientOpcodes.SHOP_BUY);
+
+                            this.packetStream!.putShort(
+                                this.shopItem[this.shopSelectedItemIndex]
+                            );
+
+                            this.packetStream!.putInt(itemPrice);
+                            this.packetStream!.sendPacket();
+                        }
+
+                        if (
+                            this.getInventoryCount(itemID) > 0 &&
+                            mouseX > 2 &&
+                            mouseY >= 229 &&
+                            mouseX < 112 &&
+                            mouseY <= 240
+                        ) {
+                            let priceMod =
+                                this.shopSellPriceMod +
+                                this.shopItemPrice[this.shopSelectedItemIndex];
+
+                            if (priceMod < 10) {
+                                priceMod = 10;
+                            }
+
+                            const itemPrice =
+                                ((priceMod * GameData.itemBasePrice[itemID]) /
+                                    100) |
+                                0;
+
+                            this.packetStream!.newPacket(ClientOpcodes.SHOP_SELL);
+
+                            this.packetStream!.putShort(
+                                this.shopItem[this.shopSelectedItemIndex]
+                            );
+
+                            this.packetStream!.putInt(itemPrice);
+                            this.packetStream!.sendPacket();
+                        }
+                    }
+                }
+            } else {
+                this.packetStream!.newPacket(ClientOpcodes.SHOP_CLOSE);
+                this.packetStream!.sendPacket();
+
+                this.showDialogShop = false;
+                return;
+            }
+        }
+
+        const dialogX = 52;
+        const dialogY = 44;
+
+        this.surface!.drawBox(dialogX, dialogY, 408, 12, 192);
+
+        this.surface!.drawBoxAlpha(
+            dialogX,
+            dialogY + 12,
+            408,
+            17,
+            Colours.Grey,
+            160
+        );
+
+        this.surface!.drawBoxAlpha(
+            dialogX,
+            dialogY + 29,
+            8,
+            170,
+            Colours.Grey,
+            160
+        );
+
+        this.surface!.drawBoxAlpha(
+            dialogX + 399,
+            dialogY + 29,
+            9,
+            170,
+            Colours.Grey,
+            160
+        );
+
+        this.surface!.drawBoxAlpha(
+            dialogX,
+            dialogY + 199,
+            408,
+            47,
+            Colours.Grey,
+            160
+        );
+
+        this.surface!.drawString(
+            'Buying and selling items',
+            dialogX + 1,
+            dialogY + 10,
+            1,
+            Colours.White
+        );
+
+        let textColour = Colours.White;
+
+        if (
+            this.mouseX > dialogX + 320 &&
+            this.mouseY >= dialogY &&
+            this.mouseX < dialogX + 408 &&
+            this.mouseY < dialogY + 12
+        ) {
+            textColour = Colours.Red;
+        }
+
+        this.surface!.drawStringRight(
+            'Close window',
+            dialogX + 406,
+            dialogY + 10,
+            1,
+            textColour
+        );
+
+        this.surface!.drawString(
+            'Shops stock in Green',
+            dialogX + 2,
+            dialogY + 24,
+            1,
+            Colours.Green
+        );
+
+        this.surface!.drawString(
+            'Number you own in blue',
+            dialogX + 135,
+            dialogY + 24,
+            1,
+            Colours.Cyan
+        );
+
+        this.surface!.drawString(
+            `Your money: ${this.getInventoryCount(COINS_ID)}gp`,
+            dialogX + 280,
+            dialogY + 24,
+            1,
+            Colours.Yellow
+        );
+
+        let itemIndex = 0;
+
+        for (let row = 0; row < 5; row++) {
+            for (let col = 0; col < 8; col++) {
+                const slotX = dialogX + 7 + col * 49;
+                const slotY = dialogY + 28 + row * 34;
+
+                if (this.shopSelectedItemIndex == itemIndex) {
+                    this.surface!.drawBoxAlpha(
+                        slotX,
+                        slotY,
+                        49,
+                        34,
+                        Colours.Red,
+                        160
+                    );
+                } else {
+                    this.surface!.drawBoxAlpha(
+                        slotX,
+                        slotY,
+                        49,
+                        34,
+                        Colours.LightGrey2,
+                        160
+                    );
+                }
+
+                this.surface!.drawBoxEdge(slotX, slotY, 50, 35, 0);
+
+                if (this.shopItem[itemIndex] != -1) {
+                    this.surface!._spriteClipping_from9(
+                        slotX,
+                        slotY,
+                        48,
+                        32,
+                        this.spriteItem +
+                            GameData.itemPicture[this.shopItem[itemIndex]],
+                        GameData.itemMask[this.shopItem[itemIndex]],
+                        0,
+                        0,
+                        false
+                    );
+
+                    this.surface!.drawString(
+                        this.shopItemCount[itemIndex].toString(),
+                        slotX + 1,
+                        slotY + 10,
+                        1,
+                        Colours.Green
+                    );
+
+                    this.surface!.drawStringRight(
+                        this.getInventoryCount(this.shopItem[itemIndex]).toString(),
+                        slotX + 47,
+                        slotY + 10,
+                        1,
+                        Colours.Cyan
+                    );
+                }
+
+                itemIndex++;
+            }
+        }
+
+        this.surface!.drawLineHoriz(dialogX + 5, dialogY + 222, 398, 0);
+
+        if (this.shopSelectedItemIndex == -1) {
+            this.surface!.drawStringCenter(
+                'Select an object to buy or sell',
+                dialogX + 204,
+                dialogY + 214,
+                3,
+                Colours.Yellow
+            );
+
+            return;
+        }
+
+        const selectedItemID = this.shopItem[this.shopSelectedItemIndex];
+
+        if (selectedItemID != -1) {
+            if (this.shopItemCount[this.shopSelectedItemIndex] > 0) {
+                let priceMod =
+                    this.shopBuyPriceMod +
+                    this.shopItemPrice[this.shopSelectedItemIndex];
+
+                if (priceMod < 10) {
+                    priceMod = 10;
+                }
+
+                const itemPrice = ((priceMod *
+                    GameData.itemBasePrice[selectedItemID]) /
+                    100) as i32;
+
+                this.surface!.drawString(
+                    `Buy a new ${GameData.itemName[selectedItemID]} for ` +
+                        `${itemPrice}gp`,
+                    dialogX + 2,
+                    dialogY + 214,
+                    1,
+                    Colours.Yellow
+                );
+
+                textColour = Colours.White;
+
+                if (
+                    this.mouseX > dialogX + 298 &&
+                    this.mouseY >= dialogY + 204 &&
+                    this.mouseX < dialogX + 408 &&
+                    this.mouseY <= dialogY + 215
+                ) {
+                    textColour = Colours.Red;
+                }
+
+                this.surface!.drawStringRight(
+                    'Click here to buy',
+                    dialogX + 405,
+                    dialogY + 214,
+                    3,
+                    textColour
+                );
+            } else {
+                this.surface!.drawStringCenter(
+                    'This item is not currently available to buy',
+                    dialogX + 204,
+                    dialogY + 214,
+                    3,
+                    Colours.Yellow
+                );
+            }
+
+            if (this.getInventoryCount(selectedItemID) > 0) {
+                let priceMod =
+                    this.shopSellPriceMod +
+                    this.shopItemPrice[this.shopSelectedItemIndex];
+
+                if (priceMod < 10) {
+                    priceMod = 10;
+                }
+
+                const itemPrice = ((priceMod *
+                    GameData.itemBasePrice[selectedItemID]) /
+                    100) as i32;
+
+                this.surface!.drawStringRight(
+                    `Sell your ${GameData.itemName[selectedItemID]} for ` +
+                        `${itemPrice}gp`,
+                    dialogX + 405,
+                    dialogY + 239,
+                    1,
+                    Colours.Yellow
+                );
+
+                textColour = Colours.White;
+
+                if (
+                    this.mouseX > dialogX + 2 &&
+                    this.mouseY >= dialogY + 229 &&
+                    this.mouseX < dialogX + 112 &&
+                    this.mouseY <= dialogY + 240
+                ) {
+                    textColour = Colours.Red;
+                }
+
+                this.surface!.drawString(
+                    'Click here to sell',
+                    dialogX + 2,
+                    dialogY + 239,
+                    3,
+                    textColour
+                );
+
+                return;
+            }
+
+            this.surface!.drawStringCenter(
+                'You do not have any of this item to sell',
+                dialogX + 204,
+                dialogY + 239,
+                3,
+                Colours.Yellow
+            );
+        }
+    }
+
     isSleeping: bool;
     sleepingStatusText: string | null;
 
@@ -9136,6 +11913,1200 @@ export default class mudclient extends GameConnection {
         }
 
         this.lastMouseButtonDown = 0;
+    }
+
+    showDialogSocialInput: i32;
+
+    drawDialogSocialInput(): void {
+        if (this.mouseButtonClick != 0) {
+            this.mouseButtonClick = 0;
+
+            if (
+                this.showDialogSocialInput == 1 &&
+                (this.mouseX < 106 ||
+                    this.mouseY < 145 ||
+                    this.mouseX > 406 ||
+                    this.mouseY > 215)
+            ) {
+                this.showDialogSocialInput = 0;
+                return;
+            }
+
+            if (
+                this.showDialogSocialInput == 2 &&
+                (this.mouseX < 6 ||
+                    this.mouseY < 145 ||
+                    this.mouseX > 506 ||
+                    this.mouseY > 215)
+            ) {
+                this.showDialogSocialInput = 0;
+                return;
+            }
+
+            if (
+                this.showDialogSocialInput == 3 &&
+                (this.mouseX < 106 ||
+                    this.mouseY < 145 ||
+                    this.mouseX > 406 ||
+                    this.mouseY > 215)
+            ) {
+                this.showDialogSocialInput = 0;
+                return;
+            }
+
+            if (
+                this.mouseX > 236 &&
+                this.mouseX < 276 &&
+                this.mouseY > 193 &&
+                this.mouseY < 213
+            ) {
+                this.showDialogSocialInput = 0;
+                return;
+            }
+        }
+
+        let y = 145;
+
+        if (this.showDialogSocialInput == 1) {
+            this.surface!.drawBox(106, y, 300, 70, 0);
+            this.surface!.drawBoxEdge(106, y, 300, 70, Colours.White);
+            y += 20;
+            this.surface!.drawStringCenter(
+                'Enter name to add to friends list',
+                256,
+                y,
+                4,
+                Colours.White
+            );
+
+            y += 20;
+
+            this.surface!.drawStringCenter(
+                `${this.inputTextCurrent}*`,
+                256,
+                y,
+                4,
+                Colours.White
+            );
+
+            if (this.inputTextFinal.length > 0) {
+                const username = this.inputTextFinal.trim();
+                const encodedUsername = encodeUsername(username);
+
+                this.inputTextCurrent = '';
+                this.inputTextFinal = '';
+                this.showDialogSocialInput = 0;
+
+                if (
+                    username.length > 0 &&
+                    encodedUsername != this.localPlayer.hash
+                ) {
+                    this.friendAdd(username);
+                }
+            }
+        } else if (this.showDialogSocialInput == 2) {
+            this.surface!.drawBox(6, y, 500, 70, 0);
+            this.surface!.drawBoxEdge(6, y, 500, 70, Colours.White);
+
+            y += 20;
+
+            const targetName = decodeUsername(this.privateMessageTarget);
+
+            this.surface!.drawStringCenter(
+                `Enter message to send to ${targetName}`,
+                256,
+                y,
+                4,
+                Colours.White
+            );
+
+            y += 20;
+
+            this.surface!.drawStringCenter(
+                `${this.inputPMCurrent}*`,
+                256,
+                y,
+                4,
+                Colours.White
+            );
+
+            if (this.inputPMFinal.length > 0) {
+                let message = this.inputPMFinal;
+
+                this.inputPMCurrent = '';
+                this.inputPMFinal = '';
+                this.showDialogSocialInput = 0;
+
+                const length = ChatMessage.encode(message);
+
+                this.sendPrivateMessage(
+                    this.privateMessageTarget,
+                    ChatMessage.encodedBuffer,
+                    length
+                );
+
+                message = ChatMessage.decode(ChatMessage.encodedBuffer, 0, length);
+
+                if (this.options.wordFilter) {
+                    //message = WordFilter.filter(message);
+                }
+
+                this.showServerMessage(`@pri@You tell ${targetName}: ${message}`);
+            }
+        } else if (this.showDialogSocialInput == 3) {
+            this.surface!.drawBox(106, y, 300, 70, 0);
+            this.surface!.drawBoxEdge(106, y, 300, 70, Colours.White);
+
+            y += 20;
+
+            this.surface!.drawStringCenter(
+                'Enter name to add to ignore list',
+                256,
+                y,
+                4,
+                Colours.White
+            );
+
+            y += 20;
+
+            this.surface!.drawStringCenter(
+                `${this.inputTextCurrent}*`,
+                256,
+                y,
+                4,
+                Colours.White
+            );
+
+            if (this.inputTextFinal.length > 0) {
+                const username = this.inputTextFinal.trim();
+                const encodedUsername = encodeUsername(username);
+
+                this.inputTextCurrent = '';
+                this.inputTextFinal = '';
+                this.showDialogSocialInput = 0;
+
+                if (
+                    username.length > 0 &&
+                    encodedUsername != this.localPlayer.hash
+                ) {
+                    this.ignoreAdd(username);
+                }
+            }
+        }
+
+        let textColour = Colours.White;
+
+        if (
+            this.mouseX > 236 &&
+            this.mouseX < 276 &&
+            this.mouseY > 193 &&
+            this.mouseY < 213
+        ) {
+            textColour = Colours.Yellow;
+        }
+
+        this.surface!.drawStringCenter('Cancel', 256, 208, 1, textColour);
+    }
+
+    resetPMText(): void {
+        this.inputPMCurrent = '';
+        this.inputPMFinal = '';
+    }
+
+    uiTabSocialSubTab: i32;
+
+    drawUiTabSocial(noMenus: bool): void {
+        const MENU_WIDTH = 245;
+
+        const HEIGHT = 182;
+        const WIDTH = 196;
+        const HALF_WIDTH = (WIDTH / 2) as i32;
+
+        const TABS: StaticArray<string> = ['Friends', 'Ignore'];
+        const TAB_HEIGHT = 24;
+
+        let uiX = this.gameWidth - WIDTH - 3;
+        let uiY = 36;
+
+        if (this.options.mobile) {
+            uiX = 35;
+            uiY = this.gameHeight / 2 - HEIGHT / 2;
+        } else {
+            this.surface!._drawSprite_from3(
+                this.gameWidth - MENU_WIDTH - 3,
+                3,
+                this.spriteMedia + 5
+            );
+        }
+
+        /*
+        this.uiOpenX = uiX;
+        this.uiOpenY = uiY;
+        this.uiOpenWidth = WIDTH;
+        this.uiOpenHeight = HEIGHT;
+        */
+
+        this.surface!.drawBoxAlpha(
+            uiX,
+            uiY + TAB_HEIGHT,
+            WIDTH,
+            HEIGHT - TAB_HEIGHT,
+            Colours.LightGrey,
+            128
+        );
+
+        this.surface!.drawLineHoriz(uiX, uiY + HEIGHT - 16, WIDTH, Colours.Black);
+
+        this.surface!.drawTabs(
+            uiX,
+            uiY,
+            WIDTH,
+            TAB_HEIGHT,
+            TABS,
+            this.uiTabSocialSubTab
+        );
+
+        this.panelSocialList!.clearList(this.controlListSocialPlayers);
+
+        if (this.uiTabSocialSubTab == 0) {
+            for (let i = 0; i < this.friendListCount; i++) {
+                let colour = '';
+
+                if (this.friendListOnline[i] == 255) {
+                    colour = '@gre@';
+                } else if (this.friendListOnline[i] > 0) {
+                    colour = '@yel@';
+                } else {
+                    colour = '@red@';
+                }
+
+                this.panelSocialList!.addListEntry(
+                    this.controlListSocialPlayers,
+                    i,
+                    `${colour}${decodeUsername(this.friendListHashes[i])}` +
+                        `~${uiX + 126}~@whi@Remove`
+                );
+            }
+        } else if (this.uiTabSocialSubTab == 1) {
+            for (let i = 0; i < this.ignoreListCount; i++) {
+                this.panelSocialList!.addListEntry(
+                    this.controlListSocialPlayers,
+                    i,
+                    `@yel@${decodeUsername(this.ignoreList[i])}` +
+                        `~${uiX + 126}~@whi@Remove`
+                );
+            }
+        }
+
+        this.panelSocialList!.drawPanel();
+
+        const click = this.options.mobile ? 'Tap' : 'Click';
+
+        if (this.uiTabSocialSubTab == 0) {
+            const friendIndex = this.panelSocialList!.getListEntryIndex(
+                this.controlListSocialPlayers
+            );
+
+            if (friendIndex >= 0 && this.mouseX < uiX + 176) {
+                const username = decodeUsername(this.friendListHashes[friendIndex]);
+
+                if (this.mouseX > uiX + 116) {
+                    this.surface!.drawStringCenter(
+                        `${click} to remove ${username}`,
+                        uiX + HALF_WIDTH,
+                        uiY + 35,
+                        1,
+                        Colours.White
+                    );
+                } else if (this.friendListOnline[friendIndex] == 255) {
+                    this.surface!.drawStringCenter(
+                        `${click} to message ${username}`,
+                        uiX + HALF_WIDTH,
+                        uiY + 35,
+                        1,
+                        Colours.White
+                    );
+                } else if (this.friendListOnline[friendIndex] > 0) {
+                    if (this.friendListOnline[friendIndex] < 200) {
+                        this.surface!.drawStringCenter(
+                            `${username} is on world ` +
+                                (this.friendListOnline[friendIndex] - 9).toString(),
+                            uiX + HALF_WIDTH,
+                            uiY + 35,
+                            1,
+                            Colours.White
+                        );
+                    } else {
+                        this.surface!.drawStringCenter(
+                            `${username} is on classic ` +
+                                (
+                                    this.friendListOnline[friendIndex] - 219
+                                ).toString(),
+                            uiX + HALF_WIDTH,
+                            uiY + 35,
+                            1,
+                            Colours.White
+                        );
+                    }
+                } else {
+                    this.surface!.drawStringCenter(
+                        `${username} is offline`,
+                        uiX + HALF_WIDTH,
+                        uiY + 35,
+                        1,
+                        Colours.White
+                    );
+                }
+            } else {
+                this.surface!.drawStringCenter(
+                    `${click} a name to send a message`,
+                    uiX + HALF_WIDTH,
+                    uiY + 35,
+                    1,
+                    Colours.White
+                );
+            }
+
+            let textColour = Colours.Black;
+
+            if (
+                this.mouseX > uiX &&
+                this.mouseX < uiX + WIDTH &&
+                this.mouseY > uiY + HEIGHT - 16 &&
+                this.mouseY < uiY + HEIGHT
+            ) {
+                textColour = Colours.Yellow;
+            } else {
+                textColour = Colours.White;
+            }
+
+            this.surface!.drawStringCenter(
+                `${click} here to add a friend`,
+                uiX + HALF_WIDTH,
+                uiY + HEIGHT - 3,
+                1,
+                textColour
+            );
+        } else if (this.uiTabSocialSubTab == 1) {
+            const ignoreIndex = this.panelSocialList!.getListEntryIndex(
+                this.controlListSocialPlayers
+            );
+
+            if (
+                ignoreIndex >= 0 &&
+                this.mouseX < uiX + 176 &&
+                this.mouseX > uiX + 116
+            ) {
+                if (this.mouseX > uiX + 116) {
+                    this.surface!.drawStringCenter(
+                        `${click} to remove ` +
+                            decodeUsername(this.ignoreList[ignoreIndex]),
+                        uiX + HALF_WIDTH,
+                        uiY + 35,
+                        1,
+                        Colours.White
+                    );
+                }
+            } else {
+                this.surface!.drawStringCenter(
+                    'Blocking messages from:',
+                    uiX + HALF_WIDTH,
+                    uiY + 35,
+                    1,
+                    Colours.White
+                );
+            }
+
+            let textColour = Colours.Black;
+
+            if (
+                this.mouseX > uiX &&
+                this.mouseX < uiX + WIDTH &&
+                this.mouseY > uiY + HEIGHT - 16 &&
+                this.mouseY < uiY + HEIGHT
+            ) {
+                textColour = Colours.Yellow;
+            } else {
+                textColour = Colours.White;
+            }
+
+            this.surface!.drawStringCenter(
+                `${click} here to add a name`,
+                uiX + HALF_WIDTH,
+                uiY + HEIGHT - 3,
+                1,
+                textColour
+            );
+        }
+
+        if (!noMenus) {
+            return;
+        }
+
+        const mouseX = this.mouseX - uiX;
+        const mouseY = this.mouseY - uiY;
+
+        if (mouseX >= 0 && mouseY >= 0 && mouseX < WIDTH && mouseY < 182) {
+            this.panelSocialList!.handleMouse(
+                mouseX + uiX,
+                mouseY + uiY,
+                this.lastMouseButtonDown,
+                this.mouseButtonDown,
+                this.mouseScrollDelta
+            );
+
+            if (mouseY <= TAB_HEIGHT && this.mouseButtonClick == 1) {
+                if (mouseX < HALF_WIDTH && this.uiTabSocialSubTab == 1) {
+                    this.uiTabSocialSubTab = 0;
+                    this.panelSocialList!.resetListProps(
+                        this.controlListSocialPlayers
+                    );
+                } else if (mouseX > HALF_WIDTH && this.uiTabSocialSubTab == 0) {
+                    this.uiTabSocialSubTab = 1;
+
+                    this.panelSocialList!.resetListProps(
+                        this.controlListSocialPlayers
+                    );
+                }
+            }
+
+            if (this.mouseButtonClick == 1 && this.uiTabSocialSubTab == 0) {
+                const friendIndex = this.panelSocialList!.getListEntryIndex(
+                    this.controlListSocialPlayers
+                );
+
+                if (friendIndex >= 0 && mouseX < 176) {
+                    if (mouseX > 116) {
+                        this.friendRemove(this.friendListHashes[friendIndex]);
+                    } else if (this.friendListOnline[friendIndex] != 0) {
+                        this.showDialogSocialInput = 2;
+
+                        this.privateMessageTarget = this.friendListHashes[
+                            friendIndex
+                        ];
+
+                        this.inputPMCurrent = '';
+                        this.inputPMFinal = '';
+                    }
+                }
+            }
+
+            if (this.mouseButtonClick == 1 && this.uiTabSocialSubTab == 1) {
+                const ignoreIndex = this.panelSocialList!.getListEntryIndex(
+                    this.controlListSocialPlayers
+                );
+
+                if (ignoreIndex >= 0 && mouseX < 176 && mouseX > 116) {
+                    this.ignoreRemove(this.ignoreList[ignoreIndex]);
+                }
+            }
+
+            if (mouseY > 166 && this.mouseButtonClick == 1) {
+                this.inputTextCurrent = '';
+                this.inputTextFinal = '';
+
+                if (this.uiTabSocialSubTab == 0) {
+                    this.showDialogSocialInput = 1;
+                } else if (this.uiTabSocialSubTab == 1) {
+                    this.showDialogSocialInput = 3;
+                }
+            }
+
+            this.mouseButtonClick = 0;
+        }
+    }
+
+    showDialogTradeConfirm: bool;
+
+    drawDialogTradeConfirm(): void {
+        const DIALOG_X = 22;
+        const DIALOG_Y = 36;
+
+        this.surface!.drawBox(DIALOG_X, DIALOG_Y, 468, 16, 192);
+
+        this.surface!.drawBoxAlpha(
+            DIALOG_X,
+            DIALOG_Y + 16,
+            468,
+            246,
+            Colours.Grey,
+            160
+        );
+
+        this.surface!.drawStringCenter(
+            'Please confirm your trade with @yel@' +
+                decodeUsername(this.tradeRecipientConfirmHash),
+            DIALOG_X + 234,
+            DIALOG_Y + 12,
+            1,
+            Colours.White
+        );
+
+        this.surface!.drawStringCenter(
+            'You are about to give:',
+            DIALOG_X + 117,
+            DIALOG_Y + 30,
+            1,
+            Colours.Yellow
+        );
+
+        for (let i = 0; i < this.tradeConfirmItemsCount; i++) {
+            let itemLine = GameData.itemName[this.tradeConfirmItems[i]];
+
+            if (GameData.itemStackable[this.tradeConfirmItems[i]] == 0) {
+                itemLine +=
+                    ` x ${formatConfirmAmount(this.tradeConfirmItemCount[i])}`;
+            }
+
+            this.surface!.drawStringCenter(
+                itemLine,
+                DIALOG_X + 117,
+                DIALOG_Y + 42 + i * 12,
+                1,
+                Colours.White
+            );
+        }
+
+        if (this.tradeConfirmItemsCount == 0) {
+            this.surface!.drawStringCenter(
+                'Nothing!',
+                DIALOG_X + 117,
+                DIALOG_Y + 42,
+                1,
+                Colours.White
+            );
+        }
+
+        this.surface!.drawStringCenter(
+            'In return you will receive:',
+            DIALOG_X + 351,
+            DIALOG_Y + 30,
+            1,
+            Colours.Yellow
+        );
+
+        for (let i = 0; i < this.tradeRecipientConfirmItemsCount; i++) {
+            let itemLine = GameData.itemName[this.tradeRecipientConfirmItems[i]];
+
+            if (GameData.itemStackable[this.tradeRecipientConfirmItems[i]] == 0) {
+                itemLine +=
+                    ' x ' +
+                    formatConfirmAmount(this.tradeRecipientConfirmItemCount[i]);
+            }
+
+            this.surface!.drawStringCenter(
+                itemLine,
+                DIALOG_X + 351,
+                DIALOG_Y + 42 + i * 12,
+                1,
+                Colours.White
+            );
+        }
+
+        if (this.tradeRecipientConfirmItemsCount == 0) {
+            this.surface!.drawStringCenter(
+                'Nothing!',
+                DIALOG_X + 351,
+                DIALOG_Y + 42,
+                1,
+                Colours.White
+            );
+        }
+
+        this.surface!.drawStringCenter(
+            'Are you sure you want to do this?',
+            DIALOG_X + 234,
+            DIALOG_Y + 200,
+            4,
+            Colours.Cyan
+        );
+
+        this.surface!.drawStringCenter(
+            'There is NO WAY to reverse a trade if you change your mind.',
+            DIALOG_X + 234,
+            DIALOG_Y + 215,
+            1,
+            Colours.White
+        );
+
+        this.surface!.drawStringCenter(
+            'Remember that not all players are trustworthy',
+            DIALOG_X + 234,
+            DIALOG_Y + 230,
+            1,
+            Colours.White
+        );
+
+        if (!this.tradeConfirmAccepted) {
+            this.surface!._drawSprite_from3(
+                DIALOG_X + 118 - 35,
+                DIALOG_Y + 238,
+                this.spriteMedia + 25
+            );
+
+            this.surface!._drawSprite_from3(
+                DIALOG_X + 352 - 35,
+                DIALOG_Y + 238,
+                this.spriteMedia + 26
+            );
+        } else {
+            this.surface!.drawStringCenter(
+                'Waiting for other player...',
+                DIALOG_X + 234,
+                DIALOG_Y + 250,
+                1,
+                Colours.Yellow
+            );
+        }
+
+        if (this.mouseButtonClick == 1) {
+            if (
+                this.mouseX < DIALOG_X ||
+                this.mouseY < DIALOG_Y ||
+                this.mouseX > DIALOG_X + 468 ||
+                this.mouseY > DIALOG_Y + 262
+            ) {
+                this.showDialogTradeConfirm = false;
+                this.packetStream!.newPacket(ClientOpcodes.TRADE_DECLINE);
+                this.packetStream!.sendPacket();
+            }
+
+            if (
+                this.mouseX >= DIALOG_X + 118 - 35 &&
+                this.mouseX <= DIALOG_X + 118 + 70 &&
+                this.mouseY >= DIALOG_Y + 238 &&
+                this.mouseY <= DIALOG_Y + 238 + 21
+            ) {
+                this.tradeConfirmAccepted = true;
+                this.packetStream!.newPacket(ClientOpcodes.TRADE_CONFIRM_ACCEPT);
+                this.packetStream!.sendPacket();
+            }
+
+            if (
+                this.mouseX >= DIALOG_X + 352 - 35 &&
+                this.mouseX <= DIALOG_X + 353 + 70 &&
+                this.mouseY >= DIALOG_Y + 238 &&
+                this.mouseY <= DIALOG_Y + 238 + 21
+            ) {
+                this.showDialogTradeConfirm = false;
+                this.packetStream!.newPacket(ClientOpcodes.TRADE_DECLINE);
+                this.packetStream!.sendPacket();
+            }
+
+            this.mouseButtonClick = 0;
+        }
+    }
+
+    showDialogTrade: bool;
+
+    drawDialogTrade(): void {
+        const DIALOG_X = 22;
+        const DIALOG_Y = 36;
+
+        if (
+            this.mouseButtonClick != 0 &&
+            this.mouseButtonItemCountIncrement == 0
+        ) {
+            this.mouseButtonItemCountIncrement = 1;
+        }
+
+        if (this.mouseButtonItemCountIncrement > 0) {
+            const mouseX = this.mouseX - 22;
+            const mouseY = this.mouseY - 36;
+
+            if (mouseX >= 0 && mouseY >= 0 && mouseX < 468 && mouseY < 262) {
+                if (mouseX > 216 && mouseY > 30 && mouseX < 462 && mouseY < 235) {
+                    const slot =
+                        (((mouseX - 217) / 49) as i32) +
+                        (((mouseY - 31) / 34) as i32) * 5;
+
+                    if (slot >= 0 && slot < this.inventoryItemsCount) {
+                        let sendUpdate = false;
+                        let itemCountAdd = 0;
+
+                        const itemType = this.inventoryItemId[slot];
+
+                        for (let i = 0; i < this.tradeItemsCount; i++) {
+                            if (this.tradeItems[i] == itemType) {
+                                if (GameData.itemStackable[itemType] == 0) {
+                                    for (
+                                        let j = 0;
+                                        j < this.mouseButtonItemCountIncrement;
+                                        j++
+                                    ) {
+                                        if (
+                                            this.tradeItemCount[i] <
+                                            this.inventoryItemStackCount[slot]
+                                        ) {
+                                            this.tradeItemCount[i]++;
+                                        }
+
+                                        sendUpdate = true;
+                                    }
+                                } else {
+                                    itemCountAdd++;
+                                }
+                            }
+                        }
+
+                        if (this.getInventoryCount(itemType) <= itemCountAdd) {
+                            sendUpdate = true;
+                        }
+
+                        if (GameData.itemSpecial[itemType] == 1) {
+                            this.showMessage(
+                                'This object cannot be traded with other players',
+                                3
+                            );
+
+                            sendUpdate = true;
+                        }
+
+                        if (!sendUpdate && this.tradeItemsCount < 12) {
+                            this.tradeItems[this.tradeItemsCount] = itemType;
+                            this.tradeItemCount[this.tradeItemsCount] = 1;
+                            this.tradeItemsCount++;
+                            sendUpdate = true;
+                        }
+
+                        if (sendUpdate) {
+                            this.packetStream!.newPacket(
+                                ClientOpcodes.TRADE_ITEM_UPDATE
+                            );
+                            this.packetStream!.putByte(this.tradeItemsCount);
+
+                            for (let j = 0; j < this.tradeItemsCount; j++) {
+                                this.packetStream!.putShort(this.tradeItems[j]);
+                                this.packetStream!.putInt(this.tradeItemCount[j]);
+                            }
+
+                            this.packetStream!.sendPacket();
+                            this.tradeRecipientAccepted = false;
+                            this.tradeAccepted = false;
+                        }
+                    }
+                }
+
+                if (mouseX > 8 && mouseY > 30 && mouseX < 205 && mouseY < 133) {
+                    const itemIndex =
+                        (((mouseX - 9) / 49) as i32) + (((mouseY - 31) / 34) as i32) * 4;
+
+                    if (itemIndex >= 0 && itemIndex < this.tradeItemsCount) {
+                        const itemType = this.tradeItems[itemIndex];
+
+                        for (
+                            let i = 0;
+                            i < this.mouseButtonItemCountIncrement;
+                            i++
+                        ) {
+                            if (
+                                GameData.itemStackable[itemType] == 0 &&
+                                this.tradeItemCount[itemIndex] > 1
+                            ) {
+                                this.tradeItemCount[itemIndex]--;
+                                continue;
+                            }
+                            this.tradeItemsCount--;
+                            this.mouseButtonDownTime = 0;
+
+                            for (let j = itemIndex; j < this.tradeItemsCount; j++) {
+                                this.tradeItems[j] = this.tradeItems[j + 1];
+                                this.tradeItemCount[j] = this.tradeItemCount[j + 1];
+                            }
+
+                            break;
+                        }
+
+                        this.packetStream!.newPacket(
+                            ClientOpcodes.TRADE_ITEM_UPDATE
+                        );
+
+                        this.packetStream!.putByte(this.tradeItemsCount);
+
+                        for (let i = 0; i < this.tradeItemsCount; i++) {
+                            this.packetStream!.putShort(this.tradeItems[i]);
+                            this.packetStream!.putInt(this.tradeItemCount[i]);
+                        }
+
+                        this.packetStream!.sendPacket();
+                        this.tradeRecipientAccepted = false;
+                        this.tradeAccepted = false;
+                    }
+                }
+
+                if (
+                    mouseX >= 217 &&
+                    mouseY >= 238 &&
+                    mouseX <= 286 &&
+                    mouseY <= 259
+                ) {
+                    this.tradeAccepted = true;
+                    this.packetStream!.newPacket(ClientOpcodes.TRADE_ACCEPT);
+                    this.packetStream!.sendPacket();
+                }
+
+                if (
+                    mouseX >= 394 &&
+                    mouseY >= 238 &&
+                    mouseX < 463 &&
+                    mouseY < 259
+                ) {
+                    this.showDialogTrade = false;
+                    this.packetStream!.newPacket(ClientOpcodes.TRADE_DECLINE);
+                    this.packetStream!.sendPacket();
+                }
+            } else if (this.mouseButtonClick != 0) {
+                this.showDialogTrade = false;
+                this.packetStream!.newPacket(ClientOpcodes.TRADE_DECLINE);
+                this.packetStream!.sendPacket();
+            }
+
+            this.mouseButtonClick = 0;
+            this.mouseButtonItemCountIncrement = 0;
+        }
+
+        if (!this.showDialogTrade) {
+            return;
+        }
+
+        this.surface!.drawBox(DIALOG_X, DIALOG_Y, 468, 12, 192);
+
+        this.surface!.drawBoxAlpha(
+            DIALOG_X,
+            DIALOG_Y + 12,
+            468,
+            18,
+            Colours.Grey,
+            160
+        );
+
+        this.surface!.drawBoxAlpha(
+            DIALOG_X,
+            DIALOG_Y + 30,
+            8,
+            248,
+            Colours.Grey,
+            160
+        );
+
+        this.surface!.drawBoxAlpha(
+            DIALOG_X + 205,
+            DIALOG_Y + 30,
+            11,
+            248,
+            Colours.Grey,
+            160
+        );
+
+        this.surface!.drawBoxAlpha(
+            DIALOG_X + 462,
+            DIALOG_Y + 30,
+            6,
+            248,
+            Colours.Grey,
+            160
+        );
+
+        this.surface!.drawBoxAlpha(
+            DIALOG_X + 8,
+            DIALOG_Y + 133,
+            197,
+            22,
+            Colours.Grey,
+            160
+        );
+
+        this.surface!.drawBoxAlpha(
+            DIALOG_X + 8,
+            DIALOG_Y + 258,
+            197,
+            20,
+            Colours.Grey,
+            160
+        );
+
+        this.surface!.drawBoxAlpha(
+            DIALOG_X + 216,
+            DIALOG_Y + 235,
+            246,
+            43,
+            Colours.Grey,
+            160
+        );
+
+        this.surface!.drawBoxAlpha(
+            DIALOG_X + 8,
+            DIALOG_Y + 30,
+            197,
+            103,
+            Colours.LightGrey2,
+            160
+        );
+
+        this.surface!.drawBoxAlpha(
+            DIALOG_X + 8,
+            DIALOG_Y + 155,
+            197,
+            103,
+            Colours.LightGrey2,
+            160
+        );
+
+        this.surface!.drawBoxAlpha(
+            DIALOG_X + 216,
+            DIALOG_Y + 30,
+            246,
+            205,
+            Colours.LightGrey2,
+            160
+        );
+
+        for (let i = 0; i < 4; i++) {
+            this.surface!.drawLineHoriz(
+                DIALOG_X + 8,
+                DIALOG_Y + 30 + i * 34,
+                197,
+                Colours.Black
+            );
+        }
+
+        for (let i = 0; i < 4; i++) {
+            this.surface!.drawLineHoriz(
+                DIALOG_X + 8,
+                DIALOG_Y + 155 + i * 34,
+                197,
+                Colours.Black
+            );
+        }
+
+        for (let i = 0; i < 7; i++) {
+            this.surface!.drawLineHoriz(
+                DIALOG_X + 216,
+                DIALOG_Y + 30 + i * 34,
+                246,
+                Colours.Black
+            );
+        }
+
+        for (let i = 0; i < 6; i++) {
+            if (i < 5) {
+                this.surface!.drawLineVert(
+                    DIALOG_X + 8 + i * 49,
+                    DIALOG_Y + 30,
+                    103,
+                    Colours.Black
+                );
+                this.surface!.drawLineVert(
+                    DIALOG_X + 8 + i * 49,
+                    DIALOG_Y + 155,
+                    103,
+                    Colours.Black
+                );
+            }
+
+            this.surface!.drawLineVert(
+                DIALOG_X + 216 + i * 49,
+                DIALOG_Y + 30,
+                205,
+                Colours.Black
+            );
+        }
+
+        this.surface!.drawString(
+            'Trading with: ' + this.tradeRecipientName,
+            DIALOG_X + 1,
+            DIALOG_Y + 10,
+            1,
+            Colours.White
+        );
+
+        this.surface!.drawString(
+            'Your Offer',
+            DIALOG_X + 9,
+            DIALOG_Y + 27,
+            4,
+            Colours.White
+        );
+
+        this.surface!.drawString(
+            "Opponent's Offer",
+            DIALOG_X + 9,
+            DIALOG_Y + 152,
+            4,
+            Colours.White
+        );
+
+        this.surface!.drawString(
+            'Your Inventory',
+            DIALOG_X + 216,
+            DIALOG_Y + 27,
+            4,
+            Colours.White
+        );
+
+        if (!this.tradeAccepted) {
+            this.surface!._drawSprite_from3(
+                DIALOG_X + 217,
+                DIALOG_Y + 238,
+                this.spriteMedia + 25
+            );
+        }
+
+        this.surface!._drawSprite_from3(
+            DIALOG_X + 394,
+            DIALOG_Y + 238,
+            this.spriteMedia + 26
+        );
+
+        if (this.tradeRecipientAccepted) {
+            this.surface!.drawStringCenter(
+                'Other player',
+                DIALOG_X + 341,
+                DIALOG_Y + 246,
+                1,
+                Colours.White
+            );
+
+            this.surface!.drawStringCenter(
+                'has accepted',
+                DIALOG_X + 341,
+                DIALOG_Y + 256,
+                1,
+                Colours.White
+            );
+        }
+
+        if (this.tradeAccepted) {
+            this.surface!.drawStringCenter(
+                'Waiting for',
+                DIALOG_X + 217 + 35,
+                DIALOG_Y + 246,
+                1,
+                Colours.White
+            );
+
+            this.surface!.drawStringCenter(
+                'other player',
+                DIALOG_X + 217 + 35,
+                DIALOG_Y + 256,
+                1,
+                Colours.White
+            );
+        }
+
+        for (let i = 0; i < this.inventoryItemsCount; i++) {
+            const slotX = 217 + DIALOG_X + (i % 5) * 49;
+            const slotY = 31 + DIALOG_Y + ((i / 5) as i32) * 34;
+
+            this.surface!._spriteClipping_from9(
+                slotX,
+                slotY,
+                48,
+                32,
+                this.spriteItem + GameData.itemPicture[this.inventoryItemId[i]],
+                GameData.itemMask[this.inventoryItemId[i]],
+                0,
+                0,
+                false
+            );
+
+            if (GameData.itemStackable[this.inventoryItemId[i]] == 0) {
+                this.surface!.drawString(
+                    this.inventoryItemStackCount[i].toString(),
+                    slotX + 1,
+                    slotY + 10,
+                    1,
+                    Colours.Yellow
+                );
+            }
+        }
+
+        for (let i = 0; i < this.tradeItemsCount; i++) {
+            const slotX = 9 + DIALOG_X + (i % 4) * 49;
+            const slotY = 31 + DIALOG_Y + ((i / 4) as i32) * 34;
+
+            this.surface!._spriteClipping_from9(
+                slotX,
+                slotY,
+                48,
+                32,
+                this.spriteItem + GameData.itemPicture[this.tradeItems[i]],
+                GameData.itemMask[this.tradeItems[i]],
+                0,
+                0,
+                false
+            );
+
+            if (GameData.itemStackable[this.tradeItems[i]] == 0) {
+                this.surface!.drawString(
+                    this.tradeItemCount[i].toString(),
+                    slotX + 1,
+                    slotY + 10,
+                    1,
+                    Colours.Yellow
+                );
+            }
+
+            if (
+                this.mouseX > slotX &&
+                this.mouseX < slotX + 48 &&
+                this.mouseY > slotY &&
+                this.mouseY < slotY + 32
+            ) {
+                this.surface!.drawString(
+                    `${GameData.itemName[this.tradeItems[i]]}: @whi@` +
+                        GameData.itemDescription[this.tradeItems[i]],
+                    DIALOG_X + 8,
+                    DIALOG_Y + 273,
+                    1,
+                    Colours.Yellow
+                );
+            }
+        }
+
+        for (let i = 0; i < this.tradeRecipientItemsCount; i++) {
+            const slotX = 9 + DIALOG_X + (i % 4) * 49;
+            const slotY = 156 + DIALOG_Y + ((i / 4) as i32) * 34;
+
+            this.surface!._spriteClipping_from9(
+                slotX,
+                slotY,
+                48,
+                32,
+                this.spriteItem + GameData.itemPicture[this.tradeRecipientItems[i]],
+                GameData.itemMask[this.tradeRecipientItems[i]],
+                0,
+                0,
+                false
+            );
+
+            if (GameData.itemStackable[this.tradeRecipientItems[i]] == 0) {
+                this.surface!.drawString(
+                    this.tradeRecipientItemCount[i].toString(),
+                    slotX + 1,
+                    slotY + 10,
+                    1,
+                    Colours.Yellow
+                );
+            }
+
+            if (
+                this.mouseX > slotX &&
+                this.mouseX < slotX + 48 &&
+                this.mouseY > slotY &&
+                this.mouseY < slotY + 32
+            ) {
+                this.surface!.drawString(
+                    GameData.itemName[this.tradeRecipientItems[i]] +
+                        ': @whi@' +
+                        GameData.itemDescription[this.tradeRecipientItems[i]],
+                    DIALOG_X + 8,
+                    DIALOG_Y + 273,
+                    1,
+                    Colours.Yellow
+                );
+            }
+        }
     }
 
     showDialogWelcome: bool;
