@@ -1,3 +1,4 @@
+import ChatMessage from './chat-message';
 import ClientOpcodes from './opcodes/client';
 import Colours from './ui/colours';
 import GameCharacter from './game-character';
@@ -270,7 +271,6 @@ export default class mudclient extends GameConnection {
     showRightClickMenu: bool;
     cameraRotationYIncrement: i32 = 2;
     objectAlreadyInMenu: Int8Array = new Int8Array(OBJECTS_MAX);
-    combatStyle: i32;
 
     menuItemText1: StaticArray<string | null> = new StaticArray<string | null>(
         MENU_MAX
@@ -3228,21 +3228,21 @@ export default class mudclient extends GameConnection {
 
         if (type == 2) {
             if (
-                this.panelMessageTabs.controlFlashText[
+                this.panelMessageTabs!.controlFlashText[
                     this.controlTextListChat
                 ] ==
-                this.panelMessageTabs.controlListEntryCount[
+                this.panelMessageTabs!.controlListEntryCount[
                     this.controlTextListChat
                 ] -
                     4
             ) {
-                this.panelMessageTabs.removeListEntry(
+                this.panelMessageTabs!.removeListEntry(
                     this.controlTextListChat,
                     message,
                     true
                 );
             } else {
-                this.panelMessageTabs.removeListEntry(
+                this.panelMessageTabs!.removeListEntry(
                     this.controlTextListChat,
                     message,
                     false
@@ -3250,21 +3250,21 @@ export default class mudclient extends GameConnection {
             }
         } else if (type == 5) {
             if (
-                this.panelMessageTabs.controlFlashText[
+                this.panelMessageTabs!.controlFlashText[
                     this.controlTextListQuest
                 ] ==
-                this.panelMessageTabs.controlListEntryCount[
+                this.panelMessageTabs!.controlListEntryCount[
                     this.controlTextListQuest
                 ] -
                     4
             ) {
-                this.panelMessageTabs.removeListEntry(
+                this.panelMessageTabs!.removeListEntry(
                     this.controlTextListQuest,
                     message,
                     true
                 );
             } else {
-                this.panelMessageTabs.removeListEntry(
+                this.panelMessageTabs!.removeListEntry(
                     this.controlTextListQuest,
                     message,
                     false
@@ -3272,15 +3272,15 @@ export default class mudclient extends GameConnection {
             }
         } else if (type == 6) {
             if (
-                this.panelMessageTabs.controlFlashText[
+                this.panelMessageTabs!.controlFlashText[
                     this.controlTextListPrivate
                 ] ==
-                this.panelMessageTabs.controlListEntryCount[
+                this.panelMessageTabs!.controlListEntryCount[
                     this.controlTextListPrivate
                 ] -
                     4
             ) {
-                this.panelMessageTabs.removeListEntry(
+                this.panelMessageTabs!.removeListEntry(
                     this.controlTextListPrivate,
                     message,
                     true
@@ -3288,7 +3288,7 @@ export default class mudclient extends GameConnection {
                 return;
             }
 
-            this.panelMessageTabs.removeListEntry(
+            this.panelMessageTabs!.removeListEntry(
                 this.controlTextListPrivate,
                 message,
                 false
