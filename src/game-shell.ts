@@ -39,9 +39,9 @@ export default class GameShell {
     loadingStep: i32 = 1;
     hasRefererLogoNotUsed: bool;
     loadingProgessText: string = 'Loading';
-    fontTimesRoman15: Font = new Font('Times New Roman', 0, 15);
+    /*fontTimesRoman15: Font = new Font('Times New Roman', 0, 15);
     fontHelvetica13b: Font = new Font('Helvetica', Font.BOLD, 13);
-    fontHelvetica12: Font = new Font('Helvetica', 0, 12);
+    fontHelvetica12: Font = new Font('Helvetica', 0, 12);*/
     keyLeft: bool;
     keyRight: bool;
     keyUp: bool;
