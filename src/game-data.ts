@@ -1,3 +1,6 @@
+declare function consoleLog(str: string): void;
+
+
 import { Int322DArray } from './lib/ndarray';
 import { getUnsignedShort, getUnsignedInt, loadData } from './utility';
 
@@ -346,6 +349,7 @@ export default class GameData {
         for (i = 0; i < GameData.npcCount; i++) {
             GameData.npcCommand[i] = GameData.getString();
         }
+
 
         GameData.textureCount = GameData.getUnsignedShort();
         GameData.textureName = new StaticArray<string>(GameData.textureCount);

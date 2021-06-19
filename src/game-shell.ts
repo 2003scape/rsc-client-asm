@@ -219,7 +219,4 @@ export default class GameShell {
             this.stopTimeout = 4000 / this.targetFPS;
         }
     }
-
-    resetTimings(): void {
-    }
 }

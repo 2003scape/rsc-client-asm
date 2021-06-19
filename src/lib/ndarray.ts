@@ -3,7 +3,7 @@ export class Int82DArray {
     width: i32;
     height: i32;
 
-    constructor(width: i32, height: i32) {
+    constructor(height: i32, width: i32) {
         this.array = new Int8Array(width * height);
         this.width = width;
         this.height = height;
@@ -23,7 +23,7 @@ export class Int322DArray {
     width: i32;
     height: i32;
 
-    constructor(width: i32, height: i32) {
+    constructor(height: i32, width: i32) {
         this.array = new Int32Array(width * height);
         this.width = width;
         this.height = height;
@@ -38,7 +38,7 @@ export class Int322DArray {
     }
 
     static fromArray(array: Array<Array<i32>>): Int322DArray {
-        const wrap = new Int322DArray(unchecked(array[0]).length, array.length);
+        const wrap = new Int322DArray(array.length, unchecked(array[0]).length);
 
         for (let i = 0; i < wrap.width; i += 1) {
             for (let j = 0; j < wrap.height; j += 1) {

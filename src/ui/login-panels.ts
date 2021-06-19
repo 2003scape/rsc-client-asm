@@ -708,7 +708,7 @@ handleLoginScreenInput_0(): void {
                 );
 
                 this.drawLoginScreens();
-                this.resetTimings();
+                //this.resetTimings();
 
                 this.registerUser = this.panelLoginNewUser!.getText(
                     this.controlRegisterUser

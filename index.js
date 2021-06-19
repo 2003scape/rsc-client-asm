@@ -24,16 +24,18 @@ const canvas = document.createElement('canvas');
 canvas.width = 512;
 canvas.height = 346;
 
+document.body.appendChild(canvas);
+
 //const ctx = canvas.getContext('2d');
 
 function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function getMousePosition(canvas, e) {
-    const boundingRect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / boundingRect.width;
-    const scaleY = canvas.height / boundingRect.height;
+function getMousePosition(el, e) {
+    const boundingRect = el.getBoundingClientRect();
+    const scaleX = el.width / boundingRect.width;
+    const scaleY = el.height / boundingRect.height;
 
     return {
         x: ((e.clientX - boundingRect.left) * scaleX) | 0,
@@ -46,16 +48,152 @@ function getMousePosition(canvas, e) {
         // TODO envify
         fs.readFileSync('./dist/untouched.wasm'),
         {
-            // imports
+            'packet-stream': {
+                writeStreamBytes: (buffer, offset, length) => {
+                    console.log('writing stream bytes', offset, length);
+                }
+            },
+            'game-data': { consoleLog: (str) => console.log(__getString(str)) }
         }
     );
 
-    const { Surface, mudclient, loadData, Int8Array_ID } = exports;
-    const { __newArray, __getArrayView, __newString } = exports;
+    const {
+        GameBuffer,
+        GameConnection,
+        GameData,
+        GameModel,
+        PacketStream,
+        Panel,
+        Scene,
+        Surface,
+        mudclient,
+        World,
+        loadData,
+        Int8Array_ID
+    } = exports;
 
-    const mud = new mudclient();
+    const { __newArray, __getArrayView, __newString, __getString } = exports;
 
-    Object.assign(mud, {
+    function newPacketStream(socket) {
+        const packetStream = new PacketStream();
+
+        Object.assign(packetStream, {
+            socket,
+
+            availableStream() {
+                if (this.closing) {
+                    return 0;
+                }
+
+                return this.socket.available();
+            },
+
+            async readStream() {
+                if (this.closing) {
+                    return 0;
+                }
+
+                return await this.socket.read();
+            },
+
+            async readStreamBytes(len, off, buff) {
+                if (this.closing) {
+                    return;
+                }
+
+                await this.socket.readBytes(buff, off, len);
+            },
+
+            async getByte() {
+                return (await this.readStream()) & 0xff;
+            },
+
+            async getShort() {
+                const i = await this.getByte();
+                const j = await this.getByte();
+
+                return i * 256 + j;
+            },
+
+            async getInt() {
+                return (
+                    ((await this.getShort()) << 16) | (await this.getShort())
+                );
+            },
+
+            async getLong() {
+                return (
+                    (BigInt(await this.getInt()) << 32n) |
+                    BigInt(await this.getInt())
+                );
+            },
+
+            async readBytes(length, buffer) {
+                await this.readStreamBytes(length, 0, buffer);
+            },
+
+            async readPacket(buffer) {
+                try {
+                    this.readTries++;
+
+                    if (
+                        this.maxReadTries > 0 &&
+                        this.readTries > this.maxReadTries
+                    ) {
+                        this.socketException = true;
+                        this.socketExceptionMessage = __newString('time-out');
+                        this.maxReadTries += this.maxReadTries;
+
+                        return 0;
+                    }
+
+                    if (this.length === 0 && this.availableStream() >= 2) {
+                        this.length = await this.readStream();
+
+                        if (this.length >= 160) {
+                            this.length =
+                                (this.length - 160) * 256 +
+                                (await this.readStream());
+                        }
+                    }
+
+                    if (
+                        this.length > 0 &&
+                        this.availableStream() >= this.length
+                    ) {
+                        if (this.length >= 160) {
+                            await this.readBytes(this.length, buffer);
+                        } else {
+                            buffer[this.length - 1] =
+                                (await this.readStream()) & 0xff;
+
+                            if (this.length > 1) {
+                                await this.readBytes(this.length - 1, buffer);
+                            }
+                        }
+
+                        let i = this.length;
+
+                        this.length = 0;
+                        this.readTries = 0;
+
+                        return i;
+                    }
+                } catch (e) {
+                    this.socketException = true;
+                    this.socketExceptionMessage = __newString(e.message);
+                }
+
+                return 0;
+            }
+        });
+
+        return packetStream;
+    }
+
+    const mc = new mudclient();
+
+    Object.assign(mc, {
         fontTimesRoman15: new Font('Times New Roman', 0, 15),
         fontHelvetica13b: new Font('Helvetica', Font.BOLD, 13),
         fontHelvetica12: new Font('Helvetica', 0, 12),
@@ -83,7 +221,7 @@ function getMousePosition(canvas, e) {
             this.appletWidth = width;
             this.appletHeight = height;
 
-            this._canvas.addEventListener('mousedown', function (e) {
+            this._canvas.addEventListener('mousedown', (e) => {
                 if (e.button === 1 && e.preventDefault) {
                     e.preventDefault();
                 }
@@ -93,25 +231,25 @@ function getMousePosition(canvas, e) {
                 this.mousePressed(x, y, e.button, e.metaKey);
             });
 
-            this._canvas.addEventListener('mousemove', function (e) {
+            this._canvas.addEventListener('mousemove', (e) => {
                 const { x, y } = getMousePosition(this._canvas, e);
 
-                this.mouseMove(x, y);
+                this.mouseMoved(x, y);
             });
 
-            this._canvas.addEventListener('mouseup', function (e) {
+            this._canvas.addEventListener('mouseup', (e) => {
                 const { x, y } = getMousePosition(this._canvas, e);
 
-                this.mouseMove(x, y, e.button);
+                this.mouseReleased(x, y, e.button);
             });
 
-            this._canvas.addEventListener('mouseout', function (e) {
+            this._canvas.addEventListener('mouseout', (e) => {
                 const { x, y } = getMousePosition(this._canvas, e);
 
                 this.mouseOut(x, y);
             });
 
-            this._canvas.addEventListener('wheel', function (e) {
+            this._canvas.addEventListener('wheel', (e) => {
                 /*if (!this.options.mouseWheel) {
                     return;
                 }*/
@@ -135,7 +273,7 @@ function getMousePosition(canvas, e) {
                 return false;
             });
 
-            this._canvas.addEventListener('keydown', function (e) {
+            this._canvas.addEventListener('keydown', (e) => {
                 const code = e.keyCode;
 
                 let charCode =
@@ -156,7 +294,7 @@ function getMousePosition(canvas, e) {
                 this.keyReleased(e.keyCode);
             });
 
-            window.addEventListener('beforeunload', () => this.onClosing());
+            //window.addEventListener('beforeunload', () => this.onClosing());
 
             this.loadingStep = 1;
 
@@ -228,15 +366,22 @@ function getMousePosition(canvas, e) {
                     0
                 );
 
-                return decompressed;
+                return decompressedPtr;
             }
 
-            return archiveData;
+            return archiveDataPtr;
         },
 
         parseTGA(tgaBuffer) {
             const tgaImage = new TGA();
-            tgaImage.load(new Uint8Array(tgaBuffer.buffer));
+
+            tgaImage.load(
+                new Uint8Array(
+                    tgaBuffer.buffer,
+                    tgaBuffer.byteOffset,
+                    tgaBuffer.byteLength
+                )
+            );
 
             const canvas = tgaImage.getCanvas();
             const ctx = canvas.getContext('2d');
@@ -361,12 +506,14 @@ function getMousePosition(canvas, e) {
 
             this.graphics.fillRect(x, y, progressWidth, 20);
             this.graphics.setColor(Color.black);
+
             this.graphics.fillRect(
                 x + progressWidth,
                 y,
                 277 - progressWidth,
                 20
             );
+
             this.graphics.setColor(new Color(198, 198, 198));
 
             if (this.hasRefererLogoNotUsed) {
@@ -379,6 +526,47 @@ function getMousePosition(canvas, e) {
                 this.fontTimesRoman15,
                 x + 138,
                 y + 10
+            );
+        },
+
+        drawTextBox(top, bottom) {
+            const graphics = this.getGraphics();
+            const font = new Font('Helvetica', 1, 15);
+            const width = 512;
+            const height = 344;
+
+            graphics.setColor(Color.black);
+
+            graphics.fillRect(
+                ((width / 2) | 0) - 140,
+                ((height / 2) | 0) - 25,
+                280,
+                50
+            );
+
+            graphics.setColor(Color.white);
+
+            graphics.drawRect(
+                ((width / 2) | 0) - 140,
+                ((height / 2) | 0) - 25,
+                280,
+                50
+            );
+
+            this.drawString(
+                graphics,
+                top,
+                font,
+                (width / 2) | 0,
+                ((height / 2) | 0) - 10
+            );
+
+            this.drawString(
+                graphics,
+                bottom,
+                font,
+                (width / 2) | 0,
+                ((height / 2) | 0) + 10
             );
         },
 
@@ -414,10 +602,533 @@ function getMousePosition(canvas, e) {
             }
         },
 
+        async loadGameConfig() {
+            const configJag = await this.readDataFile(
+                `config${version.CONFIG}.jag`,
+                'Configuration',
+                10
+            );
+
+            if (!configJag) {
+                this.errorLoadingData = true;
+                return;
+            }
+
+            GameData.loadData(configJag, this.members);
+
+            const filterJag = await this.readDataFile(
+                `filter${version.FILTER}.jag`,
+                'Chat system',
+                15
+            );
+
+            if (!filterJag) {
+                this.errorLoadingData = true;
+                return;
+            }
+
+            const fragments = new GameBuffer(
+                loadData(__newString('fragmentsenc.txt'), 0, filterJag)
+            );
+
+            const badWords = new GameBuffer(
+                loadData(__newString('badenc.txt'), 0, filterJag)
+            );
+
+            const hosts = new GameBuffer(
+                loadData(__newString('hostenc.txt'), 0, filterJag)
+            );
+
+            const tlds = new GameBuffer(
+                loadData(__newString('tldlist.txt'), 0, filterJag)
+            );
+
+            //WordFilter.loadFilters(fragments, badWords, hosts, tlds);
+        },
+
+        async loadMedia() {
+            const mediaJag = await this.readDataFile(
+                `media${version.MEDIA}.jag`,
+                '2d graphics',
+                20
+            );
+
+            if (!mediaJag) {
+                this.errorLoadingData = true;
+                return;
+            }
+
+            const indexDat = loadData(__newString('index.dat'), 0, mediaJag);
+
+            const surface = Surface.wrap(this.surface);
+
+            surface.parseSprite(
+                this.spriteMedia,
+                loadData(__newString('inv1.dat'), 0, mediaJag),
+                indexDat,
+                1
+            );
+
+            surface.parseSprite(
+                this.spriteMedia + 1,
+                loadData(__newString('inv2.dat'), 0, mediaJag),
+                indexDat,
+                6
+            );
+
+            surface.parseSprite(
+                this.spriteMedia + 9,
+                loadData(__newString('bubble.dat'), 0, mediaJag),
+                indexDat,
+                1
+            );
+
+            surface.parseSprite(
+                this.spriteMedia + 10,
+                loadData(__newString('runescape.dat'), 0, mediaJag),
+                indexDat,
+                1
+            );
+
+            surface.parseSprite(
+                this.spriteMedia + 11,
+                loadData(__newString('splat.dat'), 0, mediaJag),
+                indexDat,
+                3
+            );
+
+            surface.parseSprite(
+                this.spriteMedia + 14,
+                loadData(__newString('icon.dat'), 0, mediaJag),
+                indexDat,
+                8
+            );
+
+            surface.parseSprite(
+                this.spriteMedia + 22,
+                loadData(__newString('hbar.dat'), 0, mediaJag),
+                indexDat,
+                1
+            );
+
+            surface.parseSprite(
+                this.spriteMedia + 23,
+                loadData(__newString('hbar2.dat'), 0, mediaJag),
+                indexDat,
+                1
+            );
+
+            surface.parseSprite(
+                this.spriteMedia + 24,
+                loadData(__newString('compass.dat'), 0, mediaJag),
+                indexDat,
+                1
+            );
+
+            surface.parseSprite(
+                this.spriteMedia + 25,
+                loadData(__newString('buttons.dat'), 0, mediaJag),
+                indexDat,
+                2
+            );
+
+            surface.parseSprite(
+                this.spriteUtil,
+                loadData(__newString('scrollbar.dat'), 0, mediaJag),
+                indexDat,
+                2
+            );
+
+            surface.parseSprite(
+                this.spriteUtil + 2,
+                loadData(__newString('corners.dat'), 0, mediaJag),
+                indexDat,
+                4
+            );
+
+            surface.parseSprite(
+                this.spriteUtil + 6,
+                loadData(__newString('arrows.dat'), 0, mediaJag),
+                indexDat,
+                2
+            );
+
+            surface.parseSprite(
+                this.spriteProjectile,
+                loadData(__newString('projectile.dat'), 0, mediaJag),
+                indexDat,
+                GameData.projectileSprite
+            );
+
+            let spriteCount = GameData.itemSpriteCount;
+
+            for (let i = 1; spriteCount > 0; i++) {
+                let currentSpriteCount = spriteCount;
+                spriteCount -= 30;
+
+                if (currentSpriteCount > 30) {
+                    currentSpriteCount = 30;
+                }
+
+                surface.parseSprite(
+                    this.spriteItem + (i - 1) * 30,
+                    loadData(__newString(`objects${i}.dat`), 0, mediaJag),
+                    indexDat,
+                    currentSpriteCount
+                );
+            }
+
+            surface.loadSprite(this.spriteMedia);
+            surface.loadSprite(this.spriteMedia + 9);
+
+            for (let i = 11; i <= 26; i++) {
+                surface.loadSprite(this.spriteMedia + i);
+            }
+
+            for (let i = 0; i < GameData.projectileSprite; i++) {
+                surface.loadSprite(this.spriteProjectile + i);
+            }
+
+            for (let i = 0; i < GameData.itemSpriteCount; i++) {
+                surface.loadSprite(this.spriteItem + i);
+            }
+        },
+
+        async loadEntities() {
+            const entityJag = await this.readDataFile(
+                `entity${version.ENTITY}.jag`,
+                'people and monsters',
+                30
+            );
+
+            if (!entityJag) {
+                this.errorLoadingData = true;
+                return;
+            }
+
+            const indexDat = loadData(__newString('index.dat'), 0, entityJag);
+
+            let entityJagMem = null;
+            let indexDatMem = null;
+
+            if (this.members) {
+                entityJagMem = await this.readDataFile(
+                    `entity${version.ENTITY}.mem`,
+                    'member graphics',
+                    45
+                );
+
+                if (!entityJagMem) {
+                    this.errorLoadingData = true;
+                    return;
+                }
+
+                indexDatMem = loadData(
+                    __newString('index.dat'),
+                    0,
+                    entityJagMem
+                );
+            }
+
+            let frameCount = 0;
+            this.animationIndex = 0;
+
+            const surface = Surface.wrap(this.surface);
+            const animationName = __getArrayView(GameData.animationName);
+            const animationNumber = __getArrayView(GameData.animationNumber);
+            const animationHasA = __getArrayView(GameData.animationHasA);
+            const animationHasF = __getArrayView(GameData.animationHasF);
+            const animationGender = __getArrayView(GameData.animationGender);
+
+            label0: for (let i = 0; i < GameData.animationCount; i++) {
+                let _animationName = __getString(animationName[i]);
+
+                for (let j = 0; j < i; j++) {
+                    if (
+                        __getString(animationName[j]).toLowerCase() !==
+                        _animationName.toLowerCase()
+                    ) {
+                        continue;
+                    }
+
+                    animationNumber[i] = animationNumber[j];
+                    continue label0;
+                }
+
+                let animationDat = loadData(
+                    __newString(`${_animationName}.dat`),
+                    0,
+                    entityJag
+                );
+
+                let animationIndex = indexDat;
+
+                if (!animationDat && this.members) {
+                    animationDat = loadData(
+                        __newString(`${_animationName}.dat`),
+                        0,
+                        entityJagMem
+                    );
+
+                    animationIndex = indexDatMem;
+                }
+
+                if (animationDat) {
+                    console.log(__getArrayView(animationDat));
+
+                    surface.parseSprite(
+                        this.animationIndex,
+                        animationDat,
+                        animationIndex,
+                        15
+                    );
+
+                    frameCount += 15;
+
+                    if (animationHasA[i] === 1) {
+                        let aDat = loadData(
+                            __newString(`${_animationName}a.dat`),
+                            0,
+                            entityJag
+                        );
+
+                        let aIndex = indexDat;
+
+                        if (!aDat && this.members) {
+                            aDat = loadData(
+                                __newString(`${_animationName}a.dat`),
+                                0,
+                                entityJagMem
+                            );
+
+                            aIndex = indexDatMem;
+                        }
+
+                        surface.parseSprite(
+                            this.animationIndex + 15,
+                            aDat,
+                            aIndex,
+                            3
+                        );
+
+                        frameCount += 3;
+                    }
+
+                    if (animationHasF[i] === 1) {
+                        let fDat = loadData(
+                            __newString(`${_animationName}f.dat`),
+                            0,
+                            entityJag
+                        );
+
+                        let fIndex = indexDat;
+
+                        if (!fDat && this.members) {
+                            fDat = loadData(
+                                __newString(`${_animationName}f.dat`),
+                                0,
+                                entityJagMem
+                            );
+
+                            fIndex = indexDatMem;
+                        }
+
+                        surface.parseSprite(
+                            this.animationIndex + 18,
+                            fDat,
+                            fIndex,
+                            9
+                        );
+
+                        frameCount += 9;
+                    }
+
+                    if (animationGender[i] !== 0) {
+                        for (
+                            let l = this.animationIndex;
+                            l < this.animationIndex + 27;
+                            l++
+                        ) {
+                            surface.loadSprite(l);
+                        }
+                    }
+                }
+
+                animationNumber[i] = this.animationIndex;
+
+                this.animationIndex += 27;
+            }
+
+            console.log(`Loaded: ${frameCount} frames of animation`);
+        },
+
         async createSocket(server, port) {
-            const socket = new Socket(server, port);
+            const socket = new Socket(__getString(server), port);
             await socket.connect();
             return socket;
+        },
+
+        async startGame() {
+            this.port = this.port || 43595;
+            this.maxReadTries = 1000;
+
+            GameConnection.clientVersion = version.CLIENT;
+
+            await this.loadGameConfig();
+
+            if (this.errorLoadingData) {
+                return;
+            }
+
+            this.spriteMedia = 2000;
+            this.spriteUtil = this.spriteMedia + 100;
+            this.spriteItem = this.spriteUtil + 50;
+            this.spriteLogo = this.spriteItem + 1000;
+            this.spriteProjectile = this.spriteLogo + 10;
+            this.spriteTexture = this.spriteProjectile + 50;
+            this.spriteTextureWorld = this.spriteTexture + 10;
+
+            //this.graphics = this.getGraphics();
+
+            this.setTargetFPS(50);
+
+            const surface = new Surface(
+                this.gameWidth,
+                this.gameHeight + 12,
+                4000,
+                this
+            );
+
+            surface.setBounds(0, 0, this.gameWidth, this.gameHeight + 12);
+
+            this.surface = surface;
+
+            Panel.drawBackgroundArrow = false;
+            Panel.baseSpriteStart = this.spriteUtil;
+
+            let x = this.surface.width2 - 199;
+            let y = 36;
+
+            /*if (this.options.mobile) {
+                x -= 32;
+                y = (this.gameHeight / 2 - 275 / 2) | 0;
+            }*/
+
+            const panelQuestList = new Panel(this.surface, 5);
+
+            this.controlListQuest = panelQuestList.addTextListInteractive(
+                x,
+                y + 24,
+                196,
+                251,
+                1,
+                500,
+                true
+            );
+
+            this.panelQuestList = panelQuestList;
+
+            /*if (this.options.mobile) {
+                x = 35;
+                y = (this.gameHeight / 2 - 182 / 2) | 0;
+            }*/
+
+            const panelMagic = new Panel(this.surface, 5);
+
+            this.controlListMagic = panelMagic.addTextListInteractive(
+                x,
+                y + 24,
+                196,
+                90,
+                1,
+                500,
+                true
+            );
+
+            this.panelMagic = panelMagic;
+
+            const panelSocialList = new Panel(this.surface, 5);
+
+            this.controlListSocialPlayers = panelSocialList.addTextListInteractive(
+                x,
+                y + 40,
+                196,
+                126,
+                1,
+                500,
+                true
+            );
+
+            this.panelSocialList = panelSocialList;
+
+            await this.loadMedia();
+
+            if (this.errorLoadingData) {
+                return;
+            }
+
+            await this.loadEntities();
+
+            if (this.errorLoadingData) {
+                return;
+            }
+
+            const scene = new Scene(this.surface, 15000, 15000, 1000);
+
+            scene.view = GameModel._from2(1000 * 1000, 1000);
+
+            scene.setBounds(
+                (this.gameWidth / 2) | 0,
+                (this.gameHeight / 2) | 0,
+                (this.gameWidth / 2) | 0,
+                (this.gameHeight / 2) | 0,
+                this.gameWidth,
+                9
+            );
+
+            scene.clipFar3d = 2400;
+            scene.clipFar2d = 2400;
+            scene.fogZFalloff = 1;
+            scene.fogZDistance = 2300;
+            scene._setLight_from3(-50, -10, -50);
+
+            this.scene = scene;
+
+            const world = new World(this.scene, this.surface);
+            world.baseMediaSprite = this.spriteMedia;
+
+            this.world = world;
+
+            await this.loadTextures();
+
+            if (this.errorLoadingData) {
+                return;
+            }
+
+            await this.loadModels();
+
+            if (this.errorLoadingData) {
+                return;
+            }
+
+            await this.loadMaps();
+
+            if (this.errorLoadingData) {
+                return;
+            }
+
+            if (this.members) {
+                await this.loadSounds();
+            }
+
+            if (!this.errorLoadingData) {
+                this.showLoadingProgress(100, 'Starting game...');
+                this.createMessageTabPanel();
+                this.createLoginPanels();
+                this.createAppearancePanel();
+                this.resetLoginScreenVariables();
+                this.renderLoginScreenViewports();
+            }
         },
 
         async run() {
@@ -528,5 +1239,5 @@ function getMousePosition(canvas, e) {
         }
     });
 
-    console.log(mud);
+    await mc.startApplication(512, 346, 'Runescape by Andrew Gower');
 })();

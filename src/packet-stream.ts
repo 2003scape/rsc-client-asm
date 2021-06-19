@@ -1,3 +1,5 @@
+declare function writeStreamBytes(buffer: Int8Array, offset: i32, length: i32): void;
+
 const PACKET_MAX_LENGTH = 5000;
 
 function toCharArray(s: string): Int8Array {
@@ -147,5 +149,7 @@ export default class PacketStream {
         this.writePacket(0);
     }
 
-    writeStreamBytes(buffer: Int8Array, offset: i32, length: i32): void {}
+    writeStreamBytes(buffer: Int8Array, offset: i32, length: i32): void {
+        writeStreamBytes(buffer, offset, length);
+    }
 }

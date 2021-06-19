@@ -4175,7 +4175,7 @@ export default class mudclient extends GameConnection {
 
         this.loginUserDisp = s1;
         this.drawLoginScreens();
-        this.resetTimings();
+        //this.resetTimings();
     }
 
     isValidCameraAngle(angle: i32): bool {
@@ -9104,7 +9104,7 @@ export default class mudclient extends GameConnection {
                     );
 
                     this.drawLoginScreens();
-                    this.resetTimings();
+                    //this.resetTimings();
 
                     this.registerUser = this.panelLoginNewUser!.getText(
                         this.controlRegisterUser

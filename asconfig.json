@@ -16,5 +16,8 @@
       "noAssert": true
     }
   },
-  "options": {}
+  "options": {
+      "exportRuntime": true,
+      "initialMemory": 1750
+  }
 }
