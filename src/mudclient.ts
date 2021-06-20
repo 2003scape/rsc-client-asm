@@ -9093,6 +9093,7 @@ export default class mudclient extends GameConnection {
         );
 
         //this.surface!.draw(this.graphics, 0, 0);
+        this.surface!.draw();
     }
 
     handleLoginScreenInput_0(): void {

@@ -1,3 +1,5 @@
+declare function draw(): void;
+
 import mudclient from './mudclient';
 import { getUnsignedShort } from './utility';
 
@@ -127,6 +129,11 @@ export default class Surface {
         this.boundsTopY = 0;
         this.boundsBottomX = this.width2;
         this.boundsBottomY = this.height2;
+    }
+
+    draw(): void {
+        this.setComplete();
+        draw();
     }
 
     /*draw(graphics: Graphics, x: i32, y: i32): void {

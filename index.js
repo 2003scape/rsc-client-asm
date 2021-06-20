@@ -1,13 +1,14 @@
 const BZLib = require('./js/bzlib');
 const Color = require('./js/lib/graphics/color');
-const Font = require('./js/lib/graphics/font');
 const FileDownloadStream = require('./js/lib/net/file-download-stream');
+const Font = require('./js/lib/graphics/font');
 const Graphics = require('./js/lib/graphics/graphics');
-const TGA = require('tga-js');
 const Socket = require('./js/lib/net/socket');
+const TGA = require('tga-js');
 const fs = require('fs');
 const loader = require('@assemblyscript/loader');
 const version = require('./js/version.json');
+const wasmmap = require('wasm-sourcemap');
 
 const FONTS = [
     'h11p.jf',
@@ -20,13 +21,37 @@ const FONTS = [
     'h24b.jf'
 ];
 
+const ANIMATED_MODELS = [
+    'torcha2',
+    'torcha3',
+    'torcha4',
+    'skulltorcha2',
+    'skulltorcha3',
+    'skulltorcha4',
+    'firea2',
+    'firea3',
+    'fireplacea2',
+    'fireplacea3',
+    'firespell2',
+    'firespell3',
+    'lightning2',
+    'lightning3',
+    'clawspell2',
+    'clawspell3',
+    'clawspell4',
+    'clawspell5',
+    'spellcharge2',
+    'spellcharge3'
+];
+
 const canvas = document.createElement('canvas');
 canvas.width = 512;
 canvas.height = 346;
 
 document.body.appendChild(canvas);
 
-//const ctx = canvas.getContext('2d');
+const ctx = canvas.getContext('2d');
+const imageData = ctx.createImageData(512, 346);
 
 function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -44,16 +69,49 @@ function getMousePosition(el, e) {
 }
 
 (async () => {
-    const { exports } = await loader.instantiate(
-        // TODO envify
+    const wasm = wasmmap.SetSourceMapURLRelativeTo(
         fs.readFileSync('./dist/untouched.wasm'),
+        window.location.href
+    );
+
+    let pixelarray = null;
+
+    const { exports } = await loader.instantiate(
+        wasm,
+        // TODO envify
         {
+            surface: {
+                draw: () => {
+                    //console.log('drawing!');
+                    if (!pixelarray) {
+                        pixelarray = __getArrayView(
+                            Surface.wrap(mc.surface).rgbPixels
+                        );
+                    }
+
+                    imageData.data.set(pixelarray);
+                    ctx.putImageData(imageData, 0, 0);
+                }
+            },
+            'game-model': {
+                consoleLog: (str) => console.log(__getString(str))
+            },
             'packet-stream': {
                 writeStreamBytes: (buffer, offset, length) => {
                     console.log('writing stream bytes', offset, length);
                 }
             },
-            'game-data': { consoleLog: (str) => console.log(__getString(str)) }
+            utility: {
+                bzlibDecompress: (out, outSize, input, inputSize, offset) => {
+                    BZLib.decompress(
+                        __getArrayView(out),
+                        outSize,
+                        __getArrayView(input),
+                        inputSize,
+                        offset
+                    );
+                }
+            }
         }
     );
 
@@ -69,10 +127,17 @@ function getMousePosition(el, e) {
         mudclient,
         World,
         loadData,
+        getDataFileOffset,
         Int8Array_ID
     } = exports;
 
-    const { __newArray, __getArrayView, __newString, __getString } = exports;
+    const {
+        __newArray,
+        __getArrayView,
+        __getUint8ArrayView,
+        __newString,
+        __getString
+    } = exports;
 
     function newPacketStream(socket) {
         const packetStream = new PacketStream();
@@ -874,8 +939,6 @@ function getMousePosition(el, e) {
                 }
 
                 if (animationDat) {
-                    console.log(__getArrayView(animationDat));
-
                     surface.parseSprite(
                         this.animationIndex,
                         animationDat,
@@ -960,6 +1023,166 @@ function getMousePosition(el, e) {
             }
 
             console.log(`Loaded: ${frameCount} frames of animation`);
+        },
+
+        async loadTextures() {
+            const texturesJag = await this.readDataFile(
+                `textures${version.TEXTURES}.jag`,
+                'Textures',
+                50
+            );
+
+            if (!texturesJag) {
+                this.errorLoadingData = true;
+                return;
+            }
+
+            const indexDat = loadData(__newString('index.dat'), 0, texturesJag);
+
+            const scene = Scene.wrap(this.scene);
+            const surface = Surface.wrap(this.surface);
+
+            scene.allocateTextures(GameData.textureCount, 7, 11);
+
+            for (let i = 0; i < GameData.textureCount; i++) {
+                const name = __getString(
+                    __getArrayView(GameData.textureName)[i]
+                );
+
+                let buff1 = loadData(
+                    __newString(`${name}.dat`),
+                    0,
+                    texturesJag
+                );
+
+                surface.parseSprite(this.spriteTexture, buff1, indexDat, 1);
+                surface.drawBox(0, 0, 128, 128, 0xff00ff);
+                surface._drawSprite_from3(0, 0, this.spriteTexture);
+
+                let wh = __getArrayView(surface.spriteWidthFull)[
+                    this.spriteTexture
+                ];
+
+                let nameSub = __newString(
+                    __getArrayView(GameData.textureSubtypeName)[i]
+                );
+
+                if (nameSub && nameSub.length > 0) {
+                    let buff2 = loadData(
+                        __newString(`${nameSub}.dat`),
+                        0,
+                        texturesJag
+                    );
+
+                    surface.parseSprite(this.spriteTexture, buff2, indexDat, 1);
+                    surface._drawSprite_from3(0, 0, this.spriteTexture);
+                }
+
+                surface._drawSprite_from5(
+                    this.spriteTextureWorld + i,
+                    0,
+                    0,
+                    wh,
+                    wh
+                );
+
+                const surfacePixels = __getArrayView(surface.surfacePixels);
+
+                for (let j = 0; j < wh * wh; j++) {
+                    const texturePixels = __getArrayView(
+                        surfacePixels[this.spriteTextureWorld + i]
+                    );
+
+                    if (texturePixels[j] === 65280) {
+                        texturePixels[j] = 0xff00ff;
+                    }
+                }
+
+                surface.drawWorld(this.spriteTextureWorld + i);
+
+                scene.defineTexture(
+                    i,
+                    __getArrayView(surface.spriteColoursUsed)[
+                        this.spriteTextureWorld + i
+                    ],
+                    __getArrayView(surface.spriteColourList)[
+                        this.spriteTextureWorld + i
+                    ],
+                    ((wh / 64) | 0) - 1
+                );
+            }
+        },
+
+        async loadModels() {
+            for (const modelName of ANIMATED_MODELS) {
+                GameData.getModelIndex(__newString(modelName));
+            }
+
+            const modelsJag = await this.readDataFile(
+                `models${version.MODELS}.jag`,
+                '3d models',
+                60
+            );
+
+            if (!modelsJag) {
+                this.errorLoadingData = true;
+                return;
+            }
+
+            const gameModels = __getArrayView(this.gameModels);
+
+            for (let i = 0; i < GameData.modelCount; i++) {
+                const offset = getDataFileOffset(
+                    __newString(`${GameData.modelName[i]}.ob3`),
+                    modelsJag
+                );
+
+                if (offset !== 0) {
+                    gameModels[i] = GameModel.fromBytes(modelsJag, offset);
+                } else {
+                    gameModels[i] = GameModel._from2(1, 1);
+                }
+
+                if (
+                    __getString(
+                        __getArrayView(GameData.modelName)[i]
+                    ).toLowerCase() === 'giantcrystal'
+                ) {
+                    gameModels[i].transparent = true;
+                }
+            }
+        },
+
+        async loadMaps() {
+            const world = World.wrap(this.world);
+
+            world.mapPack = await this.readDataFile(
+                `maps${version.MAPS}.jag`,
+                'map',
+                70
+            );
+
+            if (this.members) {
+                world.memberMapPack = await this.readDataFile(
+                    `maps${version.MAPS}.mem`,
+                    'members map',
+                    75
+                );
+            }
+
+            world.landscapePack = await this.readDataFile(
+                `land${version.MAPS}.jag`,
+                'landscape',
+                80
+            );
+
+            if (this.members) {
+                world.memberLandscapePack = await this.readDataFile(
+                    `land${version.MAPS}.mem`,
+                    'members landscape',
+                    85
+                );
+            }
         },
 
         async createSocket(server, port) {
@@ -1128,6 +1351,189 @@ function getMousePosition(el, e) {
                 this.createAppearancePanel();
                 this.resetLoginScreenVariables();
                 this.renderLoginScreenViewports();
+            }
+        },
+
+        async handleInputs() {
+            if (
+                this.errorLoadingCodebase ||
+                this.errorLoadingMemory ||
+                this.errorLoadingData
+            ) {
+                return;
+            }
+
+            try {
+                this.loginTimer++;
+
+                if (this.loggedIn === 0) {
+                    this.mouseActionTimeout = 0;
+                    //await this.handleLoginScreenInput();
+                } else if (this.loggedIn === 1) {
+                    this.mouseActionTimeout++;
+                    //await this.handleGameInput();
+                }
+
+                this.lastMouseButtonDown = 0;
+                this.cameraRotationTime++;
+
+                if (this.cameraRotationTime > 500) {
+                    this.cameraRotationTime = 0;
+
+                    const roll = (Math.random() * 4) | 0;
+
+                    if ((roll & 1) === 1) {
+                        this.cameraRotationX += this.cameraRotationXIncrement;
+                    }
+
+                    if ((roll & 2) === 2) {
+                        this.cameraRotationY += this.cameraRotationYIncrement;
+                    }
+                }
+
+                if (this.cameraRotationX < -50) {
+                    this.cameraRotationXIncrement = 2;
+                } else if (this.cameraRotationX > 50) {
+                    this.cameraRotationXIncrement = -2;
+                }
+
+                if (this.cameraRotationY < -50) {
+                    this.cameraRotationYIncrement = 2;
+                } else if (this.cameraRotationY > 50) {
+                    this.cameraRotationYIncrement = -2;
+                }
+
+                if (this.messageTabFlashAll > 0) {
+                    this.messageTabFlashAll--;
+                }
+
+                if (this.messageTabFlashHistory > 0) {
+                    this.messageTabFlashHistory--;
+                }
+
+                if (this.messageTabFlashQuest > 0) {
+                    this.messageTabFlashQuest--;
+                }
+
+                if (this.messageTabFlashPrivate > 0) {
+                    this.messageTabFlashPrivate--;
+                    return;
+                }
+            } catch (e) {
+                // OutOfMemory
+                console.error(e);
+                this.disposeAndCollect();
+                this.errorLoadingMemory = true;
+            }
+        },
+
+        draw() {
+            if (this.errorLoadingData) {
+                const g = this.graphics;
+
+                g.setColor(Color.black);
+                g.fillRect(0, 0, 512, 356);
+                g.setFont(new Font('Helvetica', 1, 16));
+                g.setColor(Color.yellow);
+
+                let y = 35;
+
+                g.drawString(
+                    'Sorry, an error has occured whilst loading RuneScape',
+                    30,
+                    y
+                );
+                y += 50;
+                g.setColor(Color.white);
+                g.drawString(
+                    'To fix this try the following (in order):',
+                    30,
+                    y
+                );
+                y += 50;
+                g.setColor(Color.white);
+                g.setFont(new Font('Helvetica', 1, 12));
+                g.drawString(
+                    '1: Try closing ALL open web-browser windows, and reloading',
+                    30,
+                    y
+                );
+                y += 30;
+                g.drawString(
+                    '2: Try clearing your web-browsers cache from tools->internet options',
+                    30,
+                    y
+                );
+                y += 30;
+                g.drawString('3: Try using a different game-world', 30, y);
+                y += 30;
+                g.drawString('4: Try rebooting your computer', 30, y);
+                y += 30;
+                g.drawString(
+                    '5: Try selecting a different version of Java from the play-game menu',
+                    30,
+                    y
+                );
+
+                this.setTargetFps(1);
+
+                return;
+            }
+
+            if (this.errorLoadingCodebase) {
+                const g = this.graphics;
+
+                g.setColor(Color.black);
+                g.fillRect(0, 0, 512, 356);
+                g.setFont(new Font('Helvetica', 1, 20));
+                g.setColor(Color.white);
+                g.drawString('Error - unable to load game!', 50, 50);
+                g.drawString(
+                    'To play RuneScape make sure you play from',
+                    50,
+                    100
+                );
+                g.drawString('http://www.runescape.com', 50, 150);
+
+                this.setTargetFps(1);
+
+                return;
+            }
+
+            if (this.errorLoadingMemory) {
+                const g = this.graphics;
+
+                g.setColor(Color.black);
+                g.fillRect(0, 0, 512, 356);
+                g.setFont(new Font('Helvetica', 1, 20));
+                g.setColor(Color.white);
+                g.drawString('Error - out of memory!', 50, 50);
+                g.drawString('Close ALL unnecessary programs', 50, 100);
+                g.drawString('and windows before loading the game', 50, 150);
+                g.drawString(
+                    'RuneScape needs about 48meg of spare RAM',
+                    50,
+                    200
+                );
+
+                this.setTargetFps(1);
+
+                return;
+            }
+
+            try {
+                if (this.loggedIn === 0) {
+                    this.surface.loggedIn = false;
+                    this.drawLoginScreens();
+                } else if (this.loggedIn === 1) {
+                    this.surface.loggedIn = true;
+                    this.drawGame();
+                }
+            } catch (e) {
+                // OutOfMemory
+                console.error(e);
+                this.disposeAndCollect();
+                this.errorLoadingMemory = true;
             }
         },
 

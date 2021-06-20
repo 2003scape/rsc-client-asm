@@ -32,7 +32,8 @@
     "brfs": "^2.0.2",
     "browser-resolve": "^2.0.0",
     "esmify": "^2.1.1",
-    "tga-js": "^1.1.1"
+    "tga-js": "^1.1.1",
+    "wasm-sourcemap": "^1.0.0"
   },
   "devDependencies": {
     "assemblyscript": "^0.19.1"
