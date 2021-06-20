@@ -77,7 +77,7 @@ export default class Scene {
     cameraPitch: i32;
     cameraRoll: i32;
     visiblePolygonsCount: i32;
-    visiblePolygons: StaticArray<Polygon>;
+    visiblePolygons: StaticArray<Polygon|null>;
     spriteCount: i32;
     spriteId: Int32Array;
     spriteX: Int32Array;
@@ -121,7 +121,7 @@ export default class Scene {
         this.raster = this.surface.pixels;
 
         this.models = new StaticArray<GameModel | null>(this.maxModelCount);
-        this.visiblePolygons = new StaticArray<Polygon>(polygonCount);
+        this.visiblePolygons = new StaticArray<Polygon|null>(polygonCount);
         this.view = GameModel._from2(spriteCount * 2, spriteCount);
 
         this.spriteId = new Int32Array(spriteCount);
@@ -1539,12 +1539,12 @@ export default class Scene {
     }
 
     // TODO: replace this with native sort
-    polygonsQSort(polygons: StaticArray<Polygon>, low: i32, high: i32): void {
+    polygonsQSort(polygons: StaticArray<Polygon|null>, low: i32, high: i32): void {
         if (low < high) {
             let min = low - 1;
             let max = high + 1;
             let mid = ((low + high) / 2) as i32;
-            let polygon = unchecked(polygons[mid]);
+            let polygon = unchecked(polygons[mid]!);
 
             unchecked((polygons[mid] = polygons[low]));
             unchecked((polygons[low] = polygon));
@@ -1554,11 +1554,11 @@ export default class Scene {
             while (min < max) {
                 do {
                     max--;
-                } while (unchecked(polygons[max]).depth < j1);
+                } while (unchecked(polygons[max]!).depth < j1);
 
                 do {
                     min++;
-                } while (unchecked(polygons[min]).depth > j1);
+                } while (unchecked(polygons[min]!).depth > j1);
 
                 if (min < max) {
                     let polygon_1 = polygons[min];
@@ -1574,19 +1574,19 @@ export default class Scene {
 
     polygonsIntersectSort(
         step: i32,
-        polygons: StaticArray<Polygon>,
+        polygons: StaticArray<Polygon|null>,
         count: i32
     ): void {
         for (let i = 0; i <= count; i++) {
-            unchecked((polygons[i].skipSomething = false));
-            unchecked((polygons[i].index = i));
-            unchecked((polygons[i].index2 = -1));
+            unchecked((polygons[i]!.skipSomething = false));
+            unchecked((polygons[i]!.index = i));
+            unchecked((polygons[i]!.index2 = -1));
         }
 
         let l = 0;
 
         do {
-            while (polygons[l].skipSomething) {
+            while (polygons[l]!.skipSomething) {
                 l++;
             }
 
@@ -1594,7 +1594,7 @@ export default class Scene {
                 return;
             }
 
-            let polygon = unchecked(polygons[l]);
+            let polygon = unchecked(polygons[l]!);
             polygon.skipSomething = true;
             let start = l;
             let j1 = l + step;
@@ -1604,7 +1604,7 @@ export default class Scene {
             }
 
             for (let k1 = j1; k1 >= start + 1; k1--) {
-                let other = polygons[k1];
+                let other = polygons[k1]!;
 
                 if (
                     polygon.minPlaneX < other.maxPlaneX &&
@@ -1628,12 +1628,12 @@ export default class Scene {
         } while (true);
     }
 
-    polygonsOrder(polygons: StaticArray<Polygon>, start: i32, end: i32): bool {
+    polygonsOrder(polygons: StaticArray<Polygon|null>, start: i32, end: i32): bool {
         do {
-            let polygon = unchecked(polygons[start]);
+            let polygon = unchecked(polygons[start]!);
 
             for (let k = start + 1; k <= end; k++) {
-                let polygon_1 = unchecked(polygons[k]);
+                let polygon_1 = unchecked(polygons[k]!);
 
                 if (!this.separatePolygon(polygon_1, polygon)) {
                     break;
@@ -1651,10 +1651,10 @@ export default class Scene {
                 }
             }
 
-            let polygon_2 = unchecked(polygons[end]);
+            let polygon_2 = unchecked(polygons[end]!);
 
             for (let l = end - 1; l >= start; l--) {
-                let polygon_3 = unchecked(polygons[l]);
+                let polygon_3 = unchecked(polygons[l]!);
 
                 if (!this.separatePolygon(polygon_2, polygon_3)) {
                     break;
@@ -1868,7 +1868,7 @@ export default class Scene {
                             if (viewYCount == 3) {
                                 let polygon_1 = this.visiblePolygons[
                                     this.visiblePolygonsCount
-                                ];
+                                ]!;
 
                                 polygon_1.model = gameModel;
                                 polygon_1.face = face;
@@ -1925,12 +1925,10 @@ export default class Scene {
 
                 if (vz > this.clipNear && vz < this.clipFar2d) {
                     let vw =
-                        ((this.spriteWidth[face] << this.viewDistance) / vz) |
-                        0;
+                        ((this.spriteWidth[face] << this.viewDistance) / vz) as i32;
 
                     let vh =
-                        ((this.spriteHeight[face] << this.viewDistance) / vz) |
-                        0;
+                        ((this.spriteHeight[face] << this.viewDistance) / vz) as i32;
 
                     if (
                         vx - ((vw / 2) as i32) <= this.clipX &&
@@ -1940,7 +1938,8 @@ export default class Scene {
                     ) {
                         let polygon_2 = this.visiblePolygons[
                             this.visiblePolygonsCount
-                        ];
+                        ]!;
+
                         polygon_2.model = model_2d;
                         polygon_2.face = face;
 
@@ -1948,8 +1947,8 @@ export default class Scene {
 
                         polygon_2.depth =
                             ((vz + model_2d.projectVertexZ![faceVertices[1]]) /
-                                2) |
-                            0;
+                                2) as i32
+
                         this.visiblePolygonsCount++;
                     }
                 }
@@ -1975,7 +1974,7 @@ export default class Scene {
         );
 
         for (let i = 0; i < this.visiblePolygonsCount; i++) {
-            let polygon = this.visiblePolygons[i];
+            let polygon = this.visiblePolygons[i]!;
             let gameModel_2 = polygon.model!;
             let l = polygon.face;
 
@@ -3475,7 +3474,7 @@ export default class Scene {
     }
 
     initialisePolygon3D(i: i32): void {
-        let polygon = this.visiblePolygons[i];
+        let polygon = this.visiblePolygons[i]!;
         let gameModel = polygon.model!;
         let face = polygon.face;
         let faceVertices = gameModel.faceVertices![face];
@@ -3569,7 +3568,7 @@ export default class Scene {
     }
 
     initialisePolygon2D(i: i32): void {
-        let polygon = this.visiblePolygons[i];
+        let polygon = this.visiblePolygons[i]!;
         let gameModel = polygon.model!;
         let j = polygon.face;
         let ai = gameModel.faceVertices![j];
@@ -4055,7 +4054,9 @@ export default class Scene {
         this.prepareTexture(id);
 
         if (id >= 0) {
-            return this.texturePixels![id]![0];
+            return 0;
+            // unexpected null?
+            //return this.texturePixels![id]![0];
         }
 
         if (id < 0) {

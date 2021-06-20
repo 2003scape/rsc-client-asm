@@ -1,3 +1,5 @@
+declare function consoleLog(str: string): void;
+
 import Scene from './scene';
 import { getUnsignedShort, getSignedShort } from './utility';
 
@@ -553,6 +555,7 @@ export default class GameModel {
         let destVertices = new Int32Array(numVertices);
 
         for (let inV = 0; inV < numVertices; inV++) {
+            /*
             let outV = (destVertices[inV] = model.vertexAt(
                 this.vertexX![srcVertices[inV]],
                 this.vertexY![srcVertices[inV]],
@@ -565,7 +568,7 @@ export default class GameModel {
 
             model.vertexAmbience![outV] = this.vertexAmbience![
                 srcVertices[inV]
-            ];
+            ];*/
         }
 
         let outFace = model.createFace(

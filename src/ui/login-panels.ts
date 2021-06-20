@@ -450,6 +450,184 @@ createLoginPanels(): void {
     //this.panelLoginExistingUser!.setFocus(this.controlLoginUser);
 }
 
+renderLoginScreenViewports(): void {
+    const plane = 0;
+    const regionX = 50; //49;
+    const regionY = 50; //47;
+
+    this.world!._loadSection_from3(regionX * 48 + 23, regionY * 48 + 23, plane);
+    this.world!.addModels(this.gameModels);
+
+    let x = 9728;
+    let y = 6400;
+    let zoom = 1100;
+    let rotation = 888;
+
+    this.scene!.clipFar3d = 4100;
+    this.scene!.clipFar2d = 4100;
+    this.scene!.fogZFalloff = 1;
+    this.scene!.fogZDistance = 4000;
+
+    this.surface!.blackScreen();
+
+    this.scene!.setCamera(
+        x,
+        -this.world!.getElevation(x, y),
+        y,
+        912,
+        rotation,
+        0,
+        zoom * 2
+    );
+
+    this.scene!.render();
+
+    this.surface!.fadeToBlack();
+    this.surface!.fadeToBlack();
+
+    this.surface!.drawBox(0, 0, this.gameWidth, 6, 0);
+
+    for (let i = 6; i >= 1; i--) {
+        this.surface!.drawLineAlpha(0, i, 0, i, this.gameWidth, 8);
+    }
+
+    this.surface!.drawBox(0, 194, 512, 20, 0);
+
+    for (let i = 6; i >= 1; i--) {
+        this.surface!.drawLineAlpha(0, i, 0, 194 - i, this.gameWidth, 8);
+    }
+
+    // runescape logo
+    this.surface!._drawSprite_from3(
+        ((this.gameWidth / 2) as i32) -
+            ((this.surface!.spriteWidth[this.spriteMedia + 10] / 2) as i32),
+        15,
+        this.spriteMedia + 10
+    );
+
+    this.surface!._drawSprite_from5(this.spriteLogo, 0, 0, this.gameWidth, 200);
+
+    this.surface!.drawWorld(this.spriteLogo);
+
+    x = 9216;
+    y = 9216;
+    zoom = 1100;
+    rotation = 888;
+
+    this.scene!.clipFar3d = 4100;
+    this.scene!.clipFar2d = 4100;
+    this.scene!.fogZFalloff = 1;
+    this.scene!.fogZDistance = 4000;
+
+    this.surface!.blackScreen();
+
+    this.scene!.setCamera(
+        x,
+        -this.world!.getElevation(x, y),
+        y,
+        912,
+        rotation,
+        0,
+        zoom * 2
+    );
+
+    this.scene!.render();
+
+    this.surface!.fadeToBlack();
+    this.surface!.fadeToBlack();
+    this.surface!.drawBox(0, 0, this.gameWidth, 6, 0);
+
+    for (let i = 6; i >= 1; i--) {
+        this.surface!.drawLineAlpha(0, i, 0, i, this.gameWidth, 8);
+    }
+
+    this.surface!.drawBox(0, 194, this.gameWidth, 20, 0);
+
+    for (let i = 6; i >= 1; i--) {
+        this.surface!.drawLineAlpha(0, i, 0, 194 - i, this.gameWidth, 8);
+    }
+
+    this.surface!._drawSprite_from3(
+        ((this.gameWidth / 2) | 0) -
+            ((this.surface!.spriteWidth[this.spriteMedia + 10] / 2) | 0),
+        15,
+        this.spriteMedia + 10
+    );
+
+    this.surface!._drawSprite_from5(
+        this.spriteLogo + 1,
+        0,
+        0,
+        this.gameWidth,
+        200
+    );
+
+    this.surface!.drawWorld(this.spriteLogo + 1);
+
+    for (let i = 0; i < 64; i++) {
+        this.scene!.removeModel(this.world!.roofModels[0][i]!);
+        this.scene!.removeModel(this.world!.wallModels[1][i]!);
+        this.scene!.removeModel(this.world!.roofModels[1][i]!);
+        this.scene!.removeModel(this.world!.wallModels[2][i]!);
+        this.scene!.removeModel(this.world!.roofModels[2][i]!);
+    }
+
+    x = 11136;
+    y = 10368;
+    zoom = 500;
+    rotation = 376;
+
+    this.scene!.clipFar3d = 4100;
+    this.scene!.clipFar2d = 4100;
+    this.scene!.fogZFalloff = 1;
+    this.scene!.fogZDistance = 4000;
+
+    this.surface!.blackScreen();
+
+    this.scene!.setCamera(
+        x,
+        -this.world!.getElevation(x, y),
+        y,
+        912,
+        rotation,
+        0,
+        zoom * 2
+    );
+
+    this.scene!.render();
+
+    this.surface!.fadeToBlack();
+    this.surface!.fadeToBlack();
+    this.surface!.drawBox(0, 0, this.gameWidth, 6, 0);
+
+    for (let i = 6; i >= 1; i--) {
+        this.surface!.drawLineAlpha(0, i, 0, i, this.gameWidth, 8);
+    }
+
+    this.surface!.drawBox(0, 194, this.gameWidth, 20, 0);
+
+    for (let i = 6; i >= 1; i--) {
+        this.surface!.drawLineAlpha(0, i, 0, 194, this.gameWidth, 8);
+    }
+
+    this.surface!._drawSprite_from3(
+        ((this.gameWidth / 2) | 0) -
+            ((this.surface!.spriteWidth[this.spriteMedia + 10] / 2) | 0),
+        15,
+        this.spriteMedia + 10
+    );
+
+    this.surface!._drawSprite_from5(
+        this.spriteMedia + 10,
+        0,
+        0,
+        this.gameWidth,
+        200
+    );
+
+    this.surface!.drawWorld(this.spriteMedia + 10);
+}
+
 drawLoginScreens(): void {
     this.welcomeScreenAlreadyShown = false;
 

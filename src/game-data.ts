@@ -1,6 +1,3 @@
-declare function consoleLog(str: string): void;
-
-
 import { Int322DArray } from './lib/ndarray';
 import { getUnsignedShort, getUnsignedInt, loadData } from './utility';
 

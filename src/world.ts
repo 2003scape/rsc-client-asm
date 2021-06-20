@@ -603,14 +603,14 @@ export default class World {
         }
 
         for (let i = 0; i < 64; i++) {
-            this.terrainModels[i] = null;
+            //this.terrainModels[i] = null;
 
             for (let j = 0; j < 4; j++) {
-                this.wallModels[j][i] = null;
+                //this.wallModels[j][i] = null;
             }
 
             for (let j = 0; j < 4; j++) {
-                this.roofModels[j][i] = null;
+                //this.roofModels[j][i] = null;
             }
         }
     }
@@ -1007,6 +1007,7 @@ export default class World {
         this._loadSection_from4I(l, i1 - 1, plane, 1);
         this._loadSection_from4I(l - 1, i1, plane, 2);
         this._loadSection_from4I(l, i1, plane, 3);
+
         this.setTiles();
 
         if (!this.parentModel) {
@@ -2505,7 +2506,7 @@ export default class World {
         return type != 2 ? 0 : 1;
     }
 
-    addModels(models: StaticArray<GameModel>): void {
+    addModels(models: StaticArray<GameModel|null>): void {
         for (let i = 0; i < 94; i++) {
             for (let j = 0; j < 94; j++) {
                 if (
@@ -2528,7 +2529,7 @@ export default class World {
                     this.removeObject2(i, j, k);
 
                     let gameModel = unchecked(
-                        models[GameData.objectModelIndex[k]]
+                        models[GameData.objectModelIndex[k]]!
                     )._copy_from4(false, true, false, false);
 
                     let k1 = (((i + i + i1) * AN_INT_585) / 2) as i32;

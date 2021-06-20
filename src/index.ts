@@ -8,7 +8,7 @@ import Scene from './scene';
 import Surface from './surface';
 import World from './world';
 import mudclient from './mudclient';
-import { loadData } from './utility';
+import { loadData, getDataFileOffset } from './utility';
 
 export {
     GameBuffer,
@@ -21,7 +21,8 @@ export {
     Surface,
     World,
     mudclient,
-    loadData
+    loadData,
+    getDataFileOffset
 };
 
 export const Int8Array_ID = idof<Int8Array>();

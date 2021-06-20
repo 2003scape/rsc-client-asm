@@ -1,3 +1,11 @@
+declare function bzlibDecompress(
+    out: Int8Array,
+    outSize: i32,
+    input: Int8Array,
+    inputSize: i32,
+    offset: i32
+): void;
+
 const BITMASK: StaticArray<i32> = [
     0,
     1,
@@ -328,13 +336,13 @@ export function unpackData(
             }
 
             if (fileSize != fileSizeCompressed) {
-                /*BZLib.decompress(
+                bzlibDecompress(
                     fileData,
                     fileSize,
                     archiveData,
                     fileSizeCompressed,
                     offset
-                );*/
+                );
             } else {
                 for (let j = 0; j < fileSize; j++) {
                     unchecked((fileData[j] = archiveData[offset + j]));
