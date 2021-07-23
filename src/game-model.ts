@@ -555,12 +555,13 @@ export default class GameModel {
         let destVertices = new Int32Array(numVertices);
 
         for (let inV = 0; inV < numVertices; inV++) {
-            /*
-            let outV = (destVertices[inV] = model.vertexAt(
+            let outV = model.vertexAt(
                 this.vertexX![srcVertices[inV]],
                 this.vertexY![srcVertices[inV]],
                 this.vertexZ![srcVertices[inV]]
-            ));
+            );
+
+            destVertices[inV] = outV;
 
             model.vertexIntensity![outV] = this.vertexIntensity![
                 srcVertices[inV]
@@ -568,7 +569,7 @@ export default class GameModel {
 
             model.vertexAmbience![outV] = this.vertexAmbience![
                 srcVertices[inV]
-            ];*/
+            ];
         }
 
         let outFace = model.createFace(

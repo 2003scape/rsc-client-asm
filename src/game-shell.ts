@@ -1,4 +1,4 @@
-import Font from './lib/graphics/font';
+//import Font from './lib/graphics/font';
 import KeyCodes from './lib/keycodes';
 
 const CHAR_MAP =

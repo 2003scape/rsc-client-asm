@@ -91,9 +91,11 @@ function getMousePosition(el, e) {
 
                     imageData.data.set(pixelarray);
                     ctx.putImageData(imageData, 0, 0);
-                }
+                },
+                consoleLog: (str) => console.log(__getString(str)),
+                consoleLogA: (str) => console.log(__getArrayView(str))
             },
-            'game-model': {
+            'scene': {
                 consoleLog: (str) => console.log(__getString(str))
             },
             'packet-stream': {
@@ -111,6 +113,9 @@ function getMousePosition(el, e) {
                         offset
                     );
                 }
+            },
+            panel: {
+                consoleLog: (str) => console.log(__getString(str))
             }
         }
     );
@@ -724,7 +729,6 @@ function getMousePosition(el, e) {
             }
 
             const indexDat = loadData(__newString('index.dat'), 0, mediaJag);
-
             const surface = Surface.wrap(this.surface);
 
             surface.parseSprite(

@@ -1,4 +1,6 @@
 declare function draw(): void;
+declare function consoleLog(str: string): void;
+declare function consoleLogA(farts: Int32Array): void;
 
 import mudclient from './mudclient';
 import { getUnsignedShort } from './utility';
@@ -71,8 +73,10 @@ export default class Surface {
     constructor(width: i32, height: i32, limit: i32, mudclient: mudclient) {
         this.boundsBottomY = height;
         this.boundsBottomX = width;
-        this.width1 = this.width2 = width;
-        this.height1 = this.height2 = height;
+        this.width1 = width;
+        this.width2 = width;
+        this.height1 = height;
+        this.height2 = height;
         this.area = width * height;
         this.pixels = new Int32Array(width * height);
         this.rgbPixels = Uint8Array.wrap(this.pixels.buffer);
@@ -798,7 +802,7 @@ export default class Surface {
         const pixels = new Int32Array(area);
 
         for (let i = 0; i < area; i++) {
-            let colour = unchecked(cols[idx[i]]) & 0xff;
+            let colour = unchecked(cols[idx[i] & 0xff]);
 
             if (colour == 0) {
                 colour = 1;

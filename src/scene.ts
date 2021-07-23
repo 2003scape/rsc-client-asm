@@ -1,3 +1,5 @@
+declare function consoleLog(str: string): void;
+
 import GameModel from './game-model';
 import Polygon from './polygon';
 import Scanline from './scanline';
@@ -122,6 +124,11 @@ export default class Scene {
 
         this.models = new StaticArray<GameModel | null>(this.maxModelCount);
         this.visiblePolygons = new StaticArray<Polygon|null>(polygonCount);
+
+        for (let i = 0; i < polygonCount; i += 1) {
+            this.visiblePolygons[i] = new Polygon();
+        }
+
         this.view = GameModel._from2(spriteCount * 2, spriteCount);
 
         this.spriteId = new Int32Array(spriteCount);
@@ -3903,7 +3910,7 @@ export default class Scene {
 
         this.textureLoadedNumber![id] = Scene.textureCountLoaded;
 
-        if (!this.texturePixels![id]) {
+        if (this.texturePixels![id]) {
             return;
         }
 

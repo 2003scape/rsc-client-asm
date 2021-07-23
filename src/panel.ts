@@ -1,3 +1,4 @@
+declare function consoleLog(str: string): void;
 import Surface from './surface';
 
 class ControlTypes {
@@ -26,7 +27,6 @@ const CHAR_SET =
     "-_=+[{]};:'@#~,<.>/?\\| ";
 
 export default class Panel {
-    static drawBackgroundArrow: bool = true;
     static baseSpriteStart: i32;
     static textListEntryHeightMod: i32;
 
@@ -96,6 +96,19 @@ export default class Panel {
         this.controlListEntries = new StaticArray<StaticArray<
             string | null
         > | null>(max);
+
+        this.colourScrollbarTop = this.rgbToIntMod(114, 114, 176);
+        this.colourScrollbarBottom = this.rgbToIntMod(14, 14, 62);
+        this.colourScrollbarHandleLeft = this.rgbToIntMod(200, 208, 232);
+        this.colourScrollbarHandleMid = this.rgbToIntMod(96, 129, 184);
+        this.colourScrollbarHandleRight = this.rgbToIntMod(53, 95, 115);
+        this.colourRoundedBoxOut = this.rgbToIntMod(117, 142, 171);
+        this.colourRoundedBoxMid = this.rgbToIntMod(98, 122, 158);
+        this.colourRoundedBoxIn = this.rgbToIntMod(86, 100, 136);
+        this.colourBoxTopNBottom = this.rgbToIntMod(135, 146, 179);
+        this.colourBoxTopNBottom2 = this.rgbToIntMod(97, 112, 151);
+        this.colourBoxLeftNRight2 = this.rgbToIntMod(88, 102, 136);
+        this.colourBoxLeftNRight = this.rgbToIntMod(84, 93, 120);
     }
 
     rgbToIntMod(red: i32, green: i32, blue: i32): i32 {
@@ -506,19 +519,6 @@ export default class Panel {
             this.colourBoxLeftNRight,
             this.colourBoxTopNBottom
         );
-
-        if (Panel.drawBackgroundArrow) {
-            for (let i1 = x - (y & 0x3f); i1 < x + width; i1 += 128) {
-                for (let j1 = y - (y & 0x1f); j1 < y + height; j1 += 128) {
-                    this.surface._drawSpriteAlpha_from4(
-                        i1,
-                        j1,
-                        6 + Panel.baseSpriteStart,
-                        128
-                    );
-                }
-            }
-        }
 
         this.surface.drawLineHoriz(x, y, width, this.colourBoxTopNBottom);
 
