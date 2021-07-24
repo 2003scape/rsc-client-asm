@@ -1,3 +1,5 @@
+declare function consoleLog(str: string): void;
+
 import ChatMessage from './chat-message';
 import ClientOpcodes from './opcodes/client';
 import Colours from './ui/colours';
@@ -9092,11 +9094,10 @@ export default class mudclient extends GameConnection {
             this.spriteMedia + 22
         );
 
-        //this.surface!.draw(this.graphics, 0, 0);
         this.surface!.draw();
     }
 
-    handleLoginScreenInput_0(): void {
+    handleLoginScreenInput_0(): i32 {
         if (this.worldFullTimeout > 0) {
             this.worldFullTimeout--;
         }
@@ -9157,7 +9158,7 @@ export default class mudclient extends GameConnection {
 
                 this.panelLoginExistingUser!.setFocus(this.controlLoginUser);
 
-                return;
+                return 0;
             }
         } else if (this.loginScreen == 1) {
             this.panelLoginNewUser!.handleMouse(
@@ -9186,17 +9187,17 @@ export default class mudclient extends GameConnection {
 
                     this.lastMouseButtonDown = 0;
 
-                    return;
+                    return 0;
                 }
 
                 if (this.panelLoginNewUser!.isClicked(this.controlRegisterCancel)) {
                     this.loginScreen = 0;
-                    return;
+                    return 0;
                 }
 
                 if (this.panelLoginNewUser!.isClicked(this.controlRegisterUser)) {
                     this.panelLoginNewUser!.setFocus(this.controlRegisterPassword);
-                    return;
+                    return 0;
                 }
 
                 if (
@@ -9206,7 +9207,7 @@ export default class mudclient extends GameConnection {
                         this.controlRegisterConfirmPassword
                     );
 
-                    return;
+                    return 0;
                 }
 
                 if (
@@ -9241,7 +9242,7 @@ export default class mudclient extends GameConnection {
                                 'continue!'
                         );
 
-                        return;
+                        return 0;
                     }
 
                     if (password != confirmPassword) {
@@ -9251,7 +9252,7 @@ export default class mudclient extends GameConnection {
                                 'each other!'
                         );
 
-                        return;
+                        return 0;
                     }
 
                     if (password.length < 5) {
@@ -9260,7 +9261,7 @@ export default class mudclient extends GameConnection {
                             '@yel@Your password must be at least 5 letters long'
                         );
 
-                        return;
+                        return 0;
                     }
 
                     if (
@@ -9274,7 +9275,7 @@ export default class mudclient extends GameConnection {
                                 'continue'
                         );
 
-                        return;
+                        return 0;
                     }
 
                     this.panelLoginNewUser!.updateText(
@@ -9293,6 +9294,7 @@ export default class mudclient extends GameConnection {
                         this.controlRegisterPassword
                     );
 
+                    return 2;
                     //await this.register(this.registerUser, this.registerPassword);
                 }
             } else {
@@ -9326,6 +9328,7 @@ export default class mudclient extends GameConnection {
                     this.controlLoginPassword
                 );
 
+                return 1;
                 //await this.login(this.loginUser, this.loginPass, false);
             } else if (
                 this.panelLoginExistingUser!.isClicked(this.controlLoginRecover)
@@ -9340,12 +9343,14 @@ export default class mudclient extends GameConnection {
                         ''
                     );
 
-                    return;
+                    return 0;
                 }
 
                 //await this.recoverAttempt(this.loginUser);
             }
         }
+
+        return 0;
     }
 
     drawDialogLogout(): void {

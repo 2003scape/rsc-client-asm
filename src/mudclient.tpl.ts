@@ -1,3 +1,5 @@
+declare function consoleLog(str: string): void;
+
 import ChatMessage from './chat-message';
 import ClientOpcodes from './opcodes/client';
 import Colours from './ui/colours';

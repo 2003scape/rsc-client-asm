@@ -75,6 +75,7 @@ function getMousePosition(el, e) {
     );
 
     let pixelarray = null;
+    let writeStreamBytes = null;
 
     const { exports } = await loader.instantiate(
         wasm,
@@ -95,12 +96,13 @@ function getMousePosition(el, e) {
                 consoleLog: (str) => console.log(__getString(str)),
                 consoleLogA: (str) => console.log(__getArrayView(str))
             },
-            'scene': {
+            scene: {
                 consoleLog: (str) => console.log(__getString(str))
             },
             'packet-stream': {
                 writeStreamBytes: (buffer, offset, length) => {
-                    console.log('writing stream bytes', offset, length);
+                    writeStreamBytes(buffer, offset, length);
+                    //console.log('writing stream bytes', offset, length);
                 }
             },
             utility: {
@@ -116,11 +118,15 @@ function getMousePosition(el, e) {
             },
             panel: {
                 consoleLog: (str) => console.log(__getString(str))
+            },
+            mudclient: {
+                consoleLog: (str) => console.log(__getString(str))
             }
         }
     );
 
     const {
+        ClientOpcodes,
         GameBuffer,
         GameConnection,
         GameData,
@@ -133,6 +139,8 @@ function getMousePosition(el, e) {
         World,
         loadData,
         getDataFileOffset,
+        formatAuthString,
+        encodeUsername,
         Int8Array_ID
     } = exports;
 
@@ -146,6 +154,10 @@ function getMousePosition(el, e) {
 
     function newPacketStream(socket) {
         const packetStream = new PacketStream();
+
+        writeStreamBytes = (buffer, offset, length) => {
+            socket.write(__getArrayView(buffer), offset, length);
+        };
 
         Object.assign(packetStream, {
             socket,
@@ -360,7 +372,7 @@ function getMousePosition(el, e) {
                 this.keyPressed(code, charCode);
             });
 
-            this._canvas.addEventListener('keyup', function (e) {
+            this._canvas.addEventListener('keyup', (e) => {
                 this.keyReleased(e.keyCode);
             });
 
@@ -1134,10 +1146,11 @@ function getMousePosition(el, e) {
             }
 
             const gameModels = __getArrayView(this.gameModels);
+            const modelNames = __getArrayView(GameData.modelName);
 
             for (let i = 0; i < GameData.modelCount; i++) {
                 const offset = getDataFileOffset(
-                    __newString(`${GameData.modelName[i]}.ob3`),
+                    __newString(`${__getString(modelNames[i])}.ob3`),
                     modelsJag
                 );
 
@@ -1358,6 +1371,288 @@ function getMousePosition(el, e) {
             }
         },
 
+        async login(username, password, reconnecting) {
+            if (this.worldFullTimeout > 0) {
+                this.showLoginScreenStatus(
+                    __newString('Please wait...'),
+                    __newString('Connecting to server')
+                );
+
+                await sleep(2000);
+
+                this.showLoginScreenStatus(
+                    __newString('Sorry! The server is currently full.'),
+                    __newString('Please try again later')
+                );
+
+                return;
+            }
+
+            console.log(username, password);
+            console.log(__getString(username), __getString(password));
+
+            try {
+                this.username = username;
+                username = formatAuthString(username, 20);
+
+                this.password = password;
+                password = formatAuthString(password, 20);
+
+                if (__getString(username).trim().length === 0) {
+                    this.showLoginScreenStatus(
+                        __newString('You must enter both a username'),
+                        __newString('and a password - Please try again')
+                    );
+
+                    return;
+                }
+
+                if (reconnecting) {
+                    this.drawTextBox(
+                        __newString('Connection lost! Please wait...'),
+                        __newString('Attempting to re-establish')
+                    );
+                } else {
+                    this.showLoginScreenStatus(
+                        __newString('Please wait...'),
+                        __newString('Connecting to server')
+                    );
+                }
+
+                this._packetStream = newPacketStream(
+                    await this.createSocket(this.server, this.port)
+                );
+
+                this.packetStream = this._packetStream;
+
+                this._packetStream.maxReadTries = GameConnection.maxReadTries;
+
+                this._packetStream.newPacket(ClientOpcodes.SESSION);
+                const encodedUsername = encodeUsername(username);
+
+                this._packetStream.putByte(
+                    Number((encodedUsername >> 16n) & 31n) & 0xff
+                );
+
+                this._packetStream.flushPacket();
+
+                const sessionID = await this._packetStream.getLong();
+                this.sessionID = sessionID;
+
+                if (sessionID === 0n) {
+                    this.showLoginScreenStatus(
+                        __newString('Login server offline.'),
+                        __newString('Please try again in a few mins')
+                    );
+
+                    return;
+                }
+
+                console.log('Verb: Session id: ' + sessionID);
+
+                const keys = new Int32Array(4);
+                keys[0] = (Math.random() * 99999999) | 0;
+                keys[1] = (Math.random() * 99999999) | 0;
+                keys[2] = Number(sessionID >> 32n) | 0;
+                keys[3] = Number(sessionID) | 0;
+                //keys[2] = sessionID.shiftRight(32).toInt();
+                //keys[3] = sessionID.toInt();
+
+                this._packetStream.newPacket(ClientOpcodes.LOGIN);
+
+                this._packetStream.putByte(+reconnecting);
+                this._packetStream.putShort(GameConnection.clientVersion);
+                this._packetStream.putByte(0); // limit30
+
+                this._packetStream.putByte(10);
+                this._packetStream.putInt(keys[0]);
+                this._packetStream.putInt(keys[1]);
+                this._packetStream.putInt(keys[2]);
+                this._packetStream.putInt(keys[3]);
+                this._packetStream.putInt(0); // uuid
+                this._packetStream.putString(username);
+                this._packetStream.putString(password);
+
+                this._packetStream.flushPacket();
+                //this._packetStream.seedIsaac(ai);
+
+                const response = await this._packetStream.readStream();
+                console.log('login response:' + response);
+
+                if (response === 25) {
+                    this.moderatorLevel = 1;
+                    this.autoLoginTimeout = 0;
+                    this.resetGame();
+                    return;
+                } else if (response === 0) {
+                    this.moderatorLevel = 0;
+                    this.autoLoginTimeout = 0;
+                    this.resetGame();
+                    return;
+                } else if (response === 1) {
+                    this.autoLoginTimeout = 0;
+                    return;
+                }
+
+                if (reconnecting) {
+                    username = '';
+                    password = '';
+                    this.resetLoginVars();
+                    return;
+                }
+
+                switch (response) {
+                    case -1:
+                        this.showLoginScreenStatus(
+                            __newString('Error unable to login.'),
+                            __newString('Server timed out')
+                        );
+                        return;
+                    case 3:
+                        this.showLoginScreenStatus(
+                            __newString('Invalid username or password.'),
+                            __newString('Try again, or create a new account')
+                        );
+                        return;
+                    case 4:
+                        this.showLoginScreenStatus(
+                            __newString('That username is already logged in.'),
+                            __newString('Wait 60 seconds then retry')
+                        );
+                        return;
+                    case 5:
+                        this.showLoginScreenStatus(
+                            __newString('The client has been updated.'),
+                            __newString('Please reload this page')
+                        );
+                        return;
+                    case 6:
+                        this.showLoginScreenStatus(
+                            __newString(
+                                'You may only use 1 character at once.'
+                            ),
+                            __newString('Your ip-address is already in use')
+                        );
+                        return;
+                    case 7:
+                        this.showLoginScreenStatus(
+                            __newString('Login attempts exceeded!'),
+                            __newString('Please try again in 5 minutes')
+                        );
+                        return;
+                    case 8:
+                        this.showLoginScreenStatus(
+                            __newString('Error unable to login.'),
+                            __newString('Server rejected session')
+                        );
+                        return;
+                    case 9:
+                        this.showLoginScreenStatus(
+                            __newString('Error unable to login.'),
+                            __newString('Loginserver rejected session')
+                        );
+                        return;
+                    case 10:
+                        this.showLoginScreenStatus(
+                            __newString('That username is already in use.'),
+                            __newString('Wait 60 seconds then retry')
+                        );
+                        return;
+                    case 11:
+                        this.showLoginScreenStatus(
+                            __newString('Account temporarily disabled.'),
+                            __newString('Check your message inbox for details')
+                        );
+                        return;
+                    case 12:
+                        this.showLoginScreenStatus(
+                            __newString('Account permanently disabled.'),
+                            __newString('Check your message inbox for details')
+                        );
+                        return;
+                    case 14:
+                        this.showLoginScreenStatus(
+                            __newString('Sorry! This world is currently full.'),
+                            __newString('Please try a different world')
+                        );
+
+                        this.worldFullTimeout = 1500;
+                        return;
+                    case 15:
+                        this.showLoginScreenStatus(
+                            __newString('You need a members account'),
+                            __newString('to login to this world')
+                        );
+                        return;
+                    case 16:
+                        this.showLoginScreenStatus(
+                            __newString('Error - no reply from loginserver.'),
+                            __newString('Please try again')
+                        );
+                        return;
+                    case 17:
+                        this.showLoginScreenStatus(
+                            __newString('Error - failed to decode profile.'),
+                            __newString('Contact customer support')
+                        );
+                        return;
+                    case 18:
+                        this.showLoginScreenStatus(
+                            __newString('Account suspected stolen.'),
+                            __newString(
+                                "Press 'recover a locked account' on front page."
+                            )
+                        );
+                        return;
+                    case 20:
+                        this.showLoginScreenStatus(
+                            __newString('Error - loginserver mismatch'),
+                            __newString('Please try a different world')
+                        );
+                        return;
+                    case 21:
+                        this.showLoginScreenStatus(
+                            __newString('Unable to login.'),
+                            __newString('That is not an RS-Classic account')
+                        );
+                        return;
+                    case 22:
+                        this.showLoginScreenStatus(
+                            __newString('Password suspected stolen.'),
+                            __newString(
+                                "Press 'change your password' on front page."
+                            )
+                        );
+                        return;
+                    default:
+                        this.showLoginScreenStatus(
+                            __newString('Error unable to login.'),
+                            __newString('Unrecognised response code')
+                        );
+                        return;
+                }
+            } catch (e) {
+                console.error(e);
+            }
+
+            if (this.autoLoginTimeout > 0) {
+                await sleep(5000);
+                this.autoLoginTimeout--;
+                await this.login(this.username, this.password, reconnecting);
+            }
+
+            if (reconnecting) {
+                this.username = '';
+                this.password = '';
+                this.resetLoginVars();
+            } else {
+                this.showLoginScreenStatus(
+                    __newString('Sorry! Unable to connect.'),
+                    __newString('Check internet settings or try another world')
+                );
+            }
+        },
+
         async handleInputs() {
             if (
                 this.errorLoadingCodebase ||
@@ -1372,7 +1667,11 @@ function getMousePosition(el, e) {
 
                 if (this.loggedIn === 0) {
                     this.mouseActionTimeout = 0;
-                    //await this.handleLoginScreenInput();
+                    const ret = this.handleLoginScreenInput_0();
+
+                    if (ret === 1) {
+                        await this.login(this.loginUser, this.loginPass, false);
+                    }
                 } else if (this.loggedIn === 1) {
                     this.mouseActionTimeout++;
                     //await this.handleGameInput();
@@ -1447,32 +1746,46 @@ function getMousePosition(el, e) {
                     30,
                     y
                 );
+
                 y += 50;
+
                 g.setColor(Color.white);
+
                 g.drawString(
                     'To fix this try the following (in order):',
                     30,
                     y
                 );
+
                 y += 50;
+
                 g.setColor(Color.white);
+
                 g.setFont(new Font('Helvetica', 1, 12));
+
                 g.drawString(
                     '1: Try closing ALL open web-browser windows, and reloading',
                     30,
                     y
                 );
+
                 y += 30;
+
                 g.drawString(
                     '2: Try clearing your web-browsers cache from tools->internet options',
                     30,
                     y
                 );
                 y += 30;
+
                 g.drawString('3: Try using a different game-world', 30, y);
+
                 y += 30;
+
                 g.drawString('4: Try rebooting your computer', 30, y);
+
                 y += 30;
+
                 g.drawString(
                     '5: Try selecting a different version of Java from the play-game menu',
                     30,
@@ -1492,11 +1805,13 @@ function getMousePosition(el, e) {
                 g.setFont(new Font('Helvetica', 1, 20));
                 g.setColor(Color.white);
                 g.drawString('Error - unable to load game!', 50, 50);
+
                 g.drawString(
                     'To play RuneScape make sure you play from',
                     50,
                     100
                 );
+
                 g.drawString('http://www.runescape.com', 50, 150);
 
                 this.setTargetFps(1);
@@ -1544,7 +1859,6 @@ function getMousePosition(el, e) {
         async run() {
             if (this.loadingStep === 1) {
                 this.loadingStep = 2;
-                //this.graphics = this.getGraphics();
                 await this.loadJagex();
                 this.drawLoadingScreen(0, 'Loading...');
                 await this.startGame();

@@ -1,3 +1,4 @@
+import ClientOpcodes from './opcodes/client';
 import GameBuffer from './game-buffer';
 import GameConnection from './game-connection';
 import GameData from './game-data';
@@ -8,9 +9,16 @@ import Scene from './scene';
 import Surface from './surface';
 import World from './world';
 import mudclient from './mudclient';
-import { loadData, getDataFileOffset } from './utility';
+
+import {
+    loadData,
+    getDataFileOffset,
+    formatAuthString,
+    encodeUsername
+} from './utility';
 
 export {
+    ClientOpcodes,
     GameBuffer,
     GameConnection,
     GameData,
@@ -22,7 +30,9 @@ export {
     World,
     mudclient,
     loadData,
-    getDataFileOffset
+    getDataFileOffset,
+    formatAuthString,
+    encodeUsername
 };
 
 export const Int8Array_ID = idof<Int8Array>();
