@@ -1,3 +1,5 @@
+// opcodes from client -> server
+
 export default class ClientOpcodes {
     static readonly APPEARANCE: i32 = 235;
     static readonly BANK_CLOSE: i32 = 212;

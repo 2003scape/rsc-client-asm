@@ -7,7 +7,7 @@ import GameCharacter from './game-character';
 import GameConnection from './game-connection';
 import GameData from './game-data';
 import GameModel from './game-model';
-import Panel from './panel'
+import Panel from './panel';
 import Scene from './scene';
 import Surface from './surface';
 import World from './world';
@@ -17,7 +17,12 @@ import {
     ipToString,
     encodeUsername,
     decodeUsername,
-    formatConfirmAmount
+    formatConfirmAmount,
+    getUnsignedByte,
+    getUnsignedShort,
+    getUnsignedInt,
+    getUnsignedLong,
+    getStackInt
 } from './utility';
 
 const SHORT_SKILL_NAMES = [
@@ -166,6 +171,16 @@ function arrayToIntArray(array: Array<i32>): Int32Array {
     }
 
     return int32Array;
+}
+
+function fromCharArray(a: Uint16Array): string {
+    const codes = new Array<i32>(a.length);
+
+    for (let i = 0; i < a.length; i += 1) {
+        codes[i] = a[i];
+    }
+
+    return String.fromCharCodes(codes);
 }
 
 export default class mudclient extends GameConnection {
@@ -1056,7 +1071,6 @@ export default class mudclient extends GameConnection {
 
         if (this.combatTimeout > 450) {
             this.showMessage("@cya@You can't logout during combat!", 3);
-
             return;
         }
 
@@ -4414,9 +4428,8 @@ export default class mudclient extends GameConnection {
                             unchecked(
                                 (this.menuItemText2[
                                     this.menuItemsCount
-                                ] = `@whi@${
-                                    this.players[idx]!.name!
-                                }${menuText}`)
+                                ] = `@whi@${this.players[idx]!
+                                    .name!}${menuText}`)
                             );
 
                             unchecked(
@@ -5604,4 +5617,12 @@ export default class mudclient extends GameConnection {
     }
 
     /* $_uiComponents */
+
+    handleIncomingPacket(opcode: i32, size: i32, data: Int8Array): void {
+        switch (opcode) {
+            /* $_packetHandlers */
+            default:
+                throw new Error(`unhandled packet opcode ${opcode}`);
+        }
+    }
 }

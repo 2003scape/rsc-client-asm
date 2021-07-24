@@ -389,3 +389,14 @@ export function formatConfirmAmount(amount: i32): string {
 
     return formatted;
 }
+
+export function fromCharArray(a: Uint16Array): string {
+    // docs say this should be u16 :shrug:
+    const codes = new Array<i32>(a.length);
+
+    for (let i = 0; i < a.length; i += 1) {
+        codes[i] = a[i];
+    }
+
+    return String.fromCharCodes(codes);
+}

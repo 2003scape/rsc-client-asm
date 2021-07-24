@@ -1,6 +1,5 @@
 const C_A = 'a'.charCodeAt(0);
 const C_AT = '@'.charCodeAt(0);
-//const C_CENT = '\uFFE0'.charCodeAt(0);
 const C_DOT = '.'.charCodeAt(0);
 const C_EXCLAIM = '!'.charCodeAt(0);
 const C_PERCENT = '%'.charCodeAt(0);
