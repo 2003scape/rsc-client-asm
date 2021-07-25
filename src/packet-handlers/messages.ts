@@ -1,21 +1,21 @@
 case ServerOpcodes.MESSAGE:
-    this.showServerMessage(fromCharArray(data.slice(1, size)));
+    this.showServerMessage(fromByteArray(data.slice(1, size)));
     break;
 
 case ServerOpcodes.SERVER_MESSAGE:
-    this.serverMessage = fromCharArray(data.slice(1, size));
+    this.serverMessage = fromByteArray(data.slice(1, size));
     this.showDialogServerMessage = true;
     this.serverMessageBoxTop = false;
     break;
 
 case ServerOpcodes.SERVER_MESSAGE_ONTOP:
-    this.serverMessage = fromCharArray(data.slice(1, size));
+    this.serverMessage = fromByteArray(data.slice(1, size));
     this.showDialogServerMessage = true;
     this.serverMessageBoxTop = true;
     break;
 
 case ServerOpcodes.WELCOME:
-    if (this.welcomScreenAlreadyShown) {
+    if (this.welcomeScreenAlreadyShown) {
         break;
     }
 
@@ -24,8 +24,8 @@ case ServerOpcodes.WELCOME:
     this.welcomeRecoverySetDays = data[7] & 0xff;
     this.welcomeUnreadMessages = getUnsignedShort(data, 8);
     this.showDialogWelcome = true;
-    this.welcomScreenAlreadyShown = true;
-    this.welcomeLastLoggedInHost = null;
+    this.welcomeScreenAlreadyShown = true;
+    this.welcomeLastLoggedInHost = '';
     break;
 
 case ServerOpcodes.SYSTEM_UPDATE:

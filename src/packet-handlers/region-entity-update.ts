@@ -38,7 +38,7 @@ case ServerOpcodes.REGION_ENTITY_UPDATE: {
             if (x != 0 || y != 0) {
                 if (j != entityCount) {
                     this.objectModel[entityCount] = this.objectModel[j];
-                    this.objectModel[entityCount].key = entityCount;
+                    this.objectModel[entityCount]!.key = entityCount;
                     this.objectX[entityCount] = this.objectX[j];
                     this.objectY[entityCount] = this.objectY[j];
                     this.objectId[entityCount] = this.objectId[j];
@@ -50,7 +50,7 @@ case ServerOpcodes.REGION_ENTITY_UPDATE: {
 
                 entityCount++;
             } else {
-                this.scene!.removeModel(this.objectModel[j]);
+                this.scene!.removeModel(this.objectModel[j]!);
 
                 this.world!.removeObject(
                     this.objectX[j],
@@ -73,7 +73,7 @@ case ServerOpcodes.REGION_ENTITY_UPDATE: {
                         entityCount
                     ] = this.wallObjectModel[j];
 
-                    this.wallObjectModel[entityCount].key =
+                    this.wallObjectModel[entityCount]!.key =
                         entityCount + 10000;
 
                     this.wallObjectX[entityCount] = this.wallObjectX[j];
@@ -88,7 +88,7 @@ case ServerOpcodes.REGION_ENTITY_UPDATE: {
 
                 entityCount++;
             } else {
-                this.scene!.removeModel(this.wallObjectModel[j]);
+                this.scene!.removeModel(this.wallObjectModel[j]!);
 
                 this.world!.removeWallObject(
                     this.wallObjectX[j],
@@ -102,5 +102,5 @@ case ServerOpcodes.REGION_ENTITY_UPDATE: {
         this.wallObjectCount = entityCount;
     }
 
-    break
+    break;
 }

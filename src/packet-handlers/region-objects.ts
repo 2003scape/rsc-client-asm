@@ -14,19 +14,16 @@ case ServerOpcodes.REGION_OBJECTS: {
                 if (l26 != 0 || k29 != 0) {
                     if (i != index) {
                         this.objectModel[index] = this.objectModel[i];
-                        this.objectModel[index].key = index;
+                        this.objectModel[index]!.key = index;
                         this.objectX[index] = this.objectX[i];
                         this.objectY[index] = this.objectY[i];
                         this.objectId[index] = this.objectId[i];
-
-                        this.objectDirection[
-                            index
-                        ] = this.objectDirection[i];
+                        this.objectDirection[index] = this.objectDirection[i];
                     }
 
                     index++;
                 } else {
-                    this.scene!.removeModel(this.objectModel[i]);
+                    this.scene!.removeModel(this.objectModel[i]!);
 
                     this.world!.removeObject(
                         this.objectX[i],
@@ -52,7 +49,7 @@ case ServerOpcodes.REGION_OBJECTS: {
                 ) {
                     if (i != objectIndex) {
                         this.objectModel[objectIndex] = this.objectModel[i];
-                        this.objectModel[objectIndex].key = objectIndex;
+                        this.objectModel[objectIndex]!.key = objectIndex;
                         this.objectX[objectIndex] = this.objectX[i];
                         this.objectY[objectIndex] = this.objectY[i];
                         this.objectId[objectIndex] = this.objectId[i];
@@ -64,7 +61,8 @@ case ServerOpcodes.REGION_OBJECTS: {
 
                     objectIndex++;
                 } else {
-                    this.scene!.removeModel(this.objectModel[i]);
+                    this.scene!.removeModel(this.objectModel[i]!);
+
                     this.world!.removeObject(
                         this.objectX[i],
                         this.objectY[i],
@@ -95,7 +93,7 @@ case ServerOpcodes.REGION_OBJECTS: {
                     (((areaY + areaY + height) * this.magicLoc) / 2) as i32;
 
                 const modelIndex = GameData.objectModelIndex[objectID];
-                const model = this.gameModels[modelIndex].copy();
+                const model = this.gameModels[modelIndex]!.copy();
 
                 this.scene!.addModel(model);
 
@@ -124,4 +122,6 @@ case ServerOpcodes.REGION_OBJECTS: {
             }
         }
     }
+
+    break;
 }

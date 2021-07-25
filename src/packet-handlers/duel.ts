@@ -2,7 +2,7 @@ case ServerOpcodes.DUEL_OPEN: {
     const playerIndex = getUnsignedShort(data, 1);
 
     if (this.playerServer[playerIndex]) {
-        this.duelOpponentName = this.playerServer[playerIndex].name;
+        this.duelOpponentName = this.playerServer[playerIndex]!.name!;
     }
 
     this.showDialogDuel = true;
@@ -28,18 +28,10 @@ case ServerOpcodes.DUEL_UPDATE: {
     let offset = 2;
 
     for (let i = 0; i < this.duelOfferOpponentItemCount; i++) {
-        this.duelOfferOpponentItemId[i] = getUnsignedShort(
-            data,
-            offset
-        );
-
+        this.duelOfferOpponentItemId[i] = getUnsignedShort(data, offset);
         offset += 2;
 
-        this.duelOfferOpponentItemStack[i] = getUnsignedInt(
-            data,
-            offset
-        );
-
+        this.duelOfferOpponentItemStack[i] = getUnsignedInt(data, offset);
         offset += 4;
     }
 

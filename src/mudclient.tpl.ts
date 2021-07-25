@@ -9,6 +9,7 @@ import GameData from './game-data';
 import GameModel from './game-model';
 import Panel from './panel';
 import Scene from './scene';
+import ServerOpcodes from './opcodes/server';
 import Surface from './surface';
 import World from './world';
 import { Int322DArray } from './lib/ndarray';
@@ -20,9 +21,11 @@ import {
     formatConfirmAmount,
     getUnsignedByte,
     getUnsignedShort,
+    getSignedShort,
     getUnsignedInt,
     getUnsignedLong,
-    getStackInt
+    getStackInt,
+    getBitMask
 } from './utility';
 
 const SHORT_SKILL_NAMES = [
@@ -174,6 +177,16 @@ function arrayToIntArray(array: Array<i32>): Int32Array {
 }
 
 function fromCharArray(a: Uint16Array): string {
+    const codes = new Array<i32>(a.length);
+
+    for (let i = 0; i < a.length; i += 1) {
+        codes[i] = a[i];
+    }
+
+    return String.fromCharCodes(codes);
+}
+
+function fromByteArray(a: Int8Array): string {
     const codes = new Array<i32>(a.length);
 
     for (let i = 0; i < a.length; i += 1) {
