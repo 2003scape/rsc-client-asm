@@ -79,7 +79,7 @@ export default class Scene {
     cameraPitch: i32;
     cameraRoll: i32;
     visiblePolygonsCount: i32;
-    visiblePolygons: StaticArray<Polygon|null>;
+    visiblePolygons: StaticArray<Polygon | null>;
     spriteCount: i32;
     spriteId: Int32Array;
     spriteX: Int32Array;
@@ -123,7 +123,7 @@ export default class Scene {
         this.raster = this.surface.pixels;
 
         this.models = new StaticArray<GameModel | null>(this.maxModelCount);
-        this.visiblePolygons = new StaticArray<Polygon|null>(polygonCount);
+        this.visiblePolygons = new StaticArray<Polygon | null>(polygonCount);
 
         for (let i = 0; i < polygonCount; i += 1) {
             this.visiblePolygons[i] = new Polygon();
@@ -1546,7 +1546,11 @@ export default class Scene {
     }
 
     // TODO: replace this with native sort
-    polygonsQSort(polygons: StaticArray<Polygon|null>, low: i32, high: i32): void {
+    polygonsQSort(
+        polygons: StaticArray<Polygon | null>,
+        low: i32,
+        high: i32
+    ): void {
         if (low < high) {
             let min = low - 1;
             let max = high + 1;
@@ -1581,7 +1585,7 @@ export default class Scene {
 
     polygonsIntersectSort(
         step: i32,
-        polygons: StaticArray<Polygon|null>,
+        polygons: StaticArray<Polygon | null>,
         count: i32
     ): void {
         for (let i = 0; i <= count; i++) {
@@ -1635,7 +1639,11 @@ export default class Scene {
         } while (true);
     }
 
-    polygonsOrder(polygons: StaticArray<Polygon|null>, start: i32, end: i32): bool {
+    polygonsOrder(
+        polygons: StaticArray<Polygon | null>,
+        start: i32,
+        end: i32
+    ): bool {
         do {
             let polygon = unchecked(polygons[start]!);
 
@@ -1931,11 +1939,11 @@ export default class Scene {
                 let vz = model_2d.projectVertexZ![vertex0];
 
                 if (vz > this.clipNear && vz < this.clipFar2d) {
-                    let vw =
-                        ((this.spriteWidth[face] << this.viewDistance) / vz) as i32;
+                    let vw = ((this.spriteWidth[face] << this.viewDistance) /
+                        vz) as i32;
 
-                    let vh =
-                        ((this.spriteHeight[face] << this.viewDistance) / vz) as i32;
+                    let vh = ((this.spriteHeight[face] << this.viewDistance) /
+                        vz) as i32;
 
                     if (
                         vx - ((vw / 2) as i32) <= this.clipX &&
@@ -1952,9 +1960,9 @@ export default class Scene {
 
                         this.initialisePolygon2D(this.visiblePolygonsCount);
 
-                        polygon_2.depth =
-                            ((vz + model_2d.projectVertexZ![faceVertices[1]]) /
-                                2) as i32
+                        polygon_2.depth = ((vz +
+                            model_2d.projectVertexZ![faceVertices[1]]) /
+                            2) as i32;
 
                         this.visiblePolygonsCount++;
                     }
@@ -4202,7 +4210,11 @@ export default class Scene {
         let flag = false;
 
         if (unchecked(ai1[k]) < unchecked(ai3[i1])) {
-            for (l = k; unchecked(ai1[l]) < unchecked(ai3[i1]); l = (l + 1) % i);
+            for (
+                l = k;
+                unchecked(ai1[l]) < unchecked(ai3[i1]);
+                l = (l + 1) % i
+            );
             for (; unchecked(ai1[k]) < unchecked(ai3[i1]); k = (k - 1 + i) % i);
 
             let k1 = this.method306(

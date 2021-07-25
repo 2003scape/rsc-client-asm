@@ -975,6 +975,7 @@ export default class mudclient extends GameConnection {
         this.resetPMText();
         this.surface!.blackScreen();
         //this.surface!.draw(this.graphics, 0, 0);
+        this.surface!.draw();
 
         for (let i = 0; i < this.objectCount; i++) {
             this.scene!.removeModel(unchecked(this.objectModel[i]!));
@@ -2739,7 +2740,7 @@ export default class mudclient extends GameConnection {
             );
 
             this.drawChatMessageTabs();
-            //this.surface!.draw(this.graphics, 0, 0);
+            this.surface!.draw();
 
             return;
         }
@@ -3268,7 +3269,7 @@ export default class mudclient extends GameConnection {
         this.drawUI();
         this.surface!.loggedIn = false;
         this.drawChatMessageTabs();
-        //this.surface!.draw(this.graphics, 0, 0);
+        this.surface!.draw();
 
         /*if (this.options.mobile) {
             this.drawMobileUI();

@@ -1388,9 +1388,6 @@ function getMousePosition(el, e) {
                 return;
             }
 
-            console.log(username, password);
-            console.log(__getString(username), __getString(password));
-
             try {
                 this.username = username;
                 username = formatAuthString(username, 20);
@@ -1653,6 +1650,70 @@ function getMousePosition(el, e) {
             }
         },
 
+        async lostConnection() {
+            try {
+                throw new Error('');
+            } catch (e) {
+                console.error(e);
+            }
+
+            this.autoLoginTimeout = 10;
+
+            /*if (this.options.retryLoginOnDisconnect) {
+                this.autoLoginTimeout = 10;
+            }*/
+
+            await this.login(this.username, this.password, true);
+        },
+
+        async checkConnection() {
+            // packetTick?
+            const timestamp = Date.now();
+
+            if (this._packetStream.hasPacket()) {
+                this.packetLastRead = timestamp;
+            }
+
+            if (timestamp - this.packetLastRead > 5000) {
+                this._packetLastRead = timestamp;
+                this._packetStream.newPacket(ClientOpcodes.PING);
+                this._packetStream.sendPacket();
+            }
+
+            try {
+                this._packetStream.writePacket(20);
+            } catch (e) {
+                await this.lostConnection();
+                return;
+            }
+
+            const incomingPacket = __getArrayView(this.incomingPacket);
+            const length = await this._packetStream.readPacket(incomingPacket);
+
+            if (length > 0) {
+                /*const opcode = this._packetStream.isaacCommand(
+                    this.incomingPacket[0] & 0xff
+                );*/
+
+                const opcode = incomingPacket[0] & 0xff;
+
+                console.log('opcode:' + opcode + ' psize:' + length);
+                this.handleIncomingPacket(opcode, length, this.incomingPacket);
+            }
+        },
+
+        async handleMesssageTabsInput() {
+            this.handleMesssageTabsInput_0();
+        },
+
+        async handleGameInput() {
+            this.handleGameInput_0();
+            await this.checkConnection();
+            this.handleGameInput_1();
+            await this.handleMesssageTabsInput();
+            this.handleGameInput_2();
+        },
+
         async handleInputs() {
             if (
                 this.errorLoadingCodebase ||
@@ -1674,7 +1735,7 @@ function getMousePosition(el, e) {
                     }
                 } else if (this.loggedIn === 1) {
                     this.mouseActionTimeout++;
-                    //await this.handleGameInput();
+                    await this.handleGameInput();
                 }
 
                 this.lastMouseButtonDown = 0;

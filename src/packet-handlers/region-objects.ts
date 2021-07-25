@@ -1,4 +1,5 @@
 case ServerOpcodes.REGION_OBJECTS: {
+    break;
     for (let offset = 1; offset < size; ) {
         if (getUnsignedByte(data[offset]) == 255) {
             let index = 0;
