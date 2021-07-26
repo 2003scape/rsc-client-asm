@@ -1,3 +1,4 @@
+declare function consoleLog(str: string): void;
 declare function writeStreamBytes(buffer: Int8Array, offset: i32, length: i32): void;
 
 const PACKET_MAX_LENGTH = 5000;
@@ -60,7 +61,6 @@ export default class PacketStream {
     }
 
     sendPacket(): void {
-        // what the fuck is this even for? legacy?
         if (this.packet8Check != 8) {
             this.packetEnd++;
         }

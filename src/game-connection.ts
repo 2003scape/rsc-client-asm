@@ -33,7 +33,6 @@ export default class GameConnection extends GameShell {
     port: i32 = 43595;
 
     incomingPacket: Int8Array = new Int8Array(5000);
-    packetLastRead: i32;
     packetStream: PacketStream | null;
 
     constructor() {

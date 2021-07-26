@@ -3178,9 +3178,8 @@ export default class mudclient extends GameConnection {
             );
         }
 
-        // retro fps counter
         if (this.options.fpsCounter) {
-            // how much the wilderness skull needs to move for the fps counter
+            // skull offset
             const offset = this.isInWild ? 70 : 0;
 
             this.surface!.drawString(
@@ -9744,13 +9743,6 @@ export default class mudclient extends GameConnection {
             );
         }
 
-        /*
-        this.uiOpenX = uiX;
-        this.uiOpenY = uiY;
-        this.uiOpenWidth = WIDTH;
-        this.uiOpenHeight = HEIGHT;
-        */
-
         this.surface!.drawBox(uiX, uiY, WIDTH, HEIGHT, 0);
         this.surface!.setBounds(uiX, uiY, uiX + WIDTH, uiY + HEIGHT);
 
@@ -15335,6 +15327,117 @@ export default class mudclient extends GameConnection {
             default:
                 throw new Error(`unhandled packet opcode ${opcode}`);
         }
+    }
+
+    startGame_0(): void {
+        this.port = this.port || 43595;
+        mudclient.maxReadTries = 1000;
+
+        //GameConnection.clientVersion = Version.CLIENT;
+        GameConnection.clientVersion = 204;
+
+        //await this.loadGameConfig();
+    }
+
+    startGame_1(): void {
+        if (this.errorLoadingData) {
+            return;
+        }
+
+        this.spriteMedia = 2000;
+        this.spriteUtil = this.spriteMedia + 100;
+        this.spriteItem = this.spriteUtil + 50;
+        this.spriteLogo = this.spriteItem + 1000;
+        this.spriteProjectile = this.spriteLogo + 10;
+        this.spriteTexture = this.spriteProjectile + 50;
+        this.spriteTextureWorld = this.spriteTexture + 10;
+
+        this.setTargetFPS(50);
+
+        const surface = new Surface(
+            this.gameWidth,
+            this.gameHeight + 12,
+            4000,
+            this
+        );
+
+        surface.setBounds(0, 0, this.gameWidth, this.gameHeight + 12);
+
+        this.surface = surface;
+
+        Panel.baseSpriteStart = this.spriteUtil;
+
+        let x = surface.width2 - 199;
+        let y = 36;
+
+        const panelQuestList = new Panel(this.surface!, 5);
+
+        this.controlListQuest = panelQuestList.addTextListInteractive(
+            x,
+            y + 24,
+            196,
+            251,
+            1,
+            500,
+            true
+        );
+
+        this.panelQuestList = panelQuestList;
+
+        const panelMagic = new Panel(this.surface!, 5);
+
+        this.controlListMagic = panelMagic.addTextListInteractive(
+            x,
+            y + 24,
+            196,
+            90,
+            1,
+            500,
+            true
+        );
+
+        this.panelMagic = panelMagic;
+
+        const panelSocialList = new Panel(this.surface!, 5);
+
+        this.controlListSocialPlayers = panelSocialList.addTextListInteractive(
+            x,
+            y + 40,
+            196,
+            126,
+            1,
+            500,
+            true
+        );
+
+        this.panelSocialList = panelSocialList;
+    }
+
+    startGame_2(): void {
+        const scene = new Scene(this.surface!, 15000, 15000, 1000);
+        scene.view = GameModel._from2(1000 * 1000, 1000);
+
+        scene.setBounds(
+            (this.gameWidth / 2) as i32,
+            (this.gameHeight / 2) as i32,
+            (this.gameWidth / 2) as i32,
+            (this.gameHeight / 2) as i32,
+            this.gameWidth,
+            9
+        );
+
+        scene.clipFar3d = 2400;
+        scene.clipFar2d = 2400;
+        scene.fogZFalloff = 1;
+        scene.fogZDistance = 2300;
+        scene._setLight_from3(-50, -10, -50);
+
+        this.scene = scene;
+
+        const world = new World(this.scene!, this.surface!);
+        world.baseMediaSprite = this.spriteMedia;
+
+        this.world = world;
     }
 }
 

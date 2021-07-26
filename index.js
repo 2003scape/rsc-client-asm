@@ -97,8 +97,8 @@ function getMousePosition(el, e) {
             'packet-stream': {
                 writeStreamBytes: (buffer, offset, length) => {
                     writeStreamBytes(buffer, offset, length);
-                    //console.log('writing stream bytes', offset, length);
-                }
+                },
+                consoleLog: (str) => console.log(__getString(str))
             },
             utility: {
                 bzlibDecompress: (out, outSize, input, inputSize, offset) => {
@@ -156,7 +156,9 @@ function getMousePosition(el, e) {
         const packetStream = new PacketStream();
 
         writeStreamBytes = (buffer, offset, length) => {
-            socket.write(__getArrayView(buffer), offset, length);
+            buffer = __getArrayView(buffer);
+            console.log(`${Date.now()}: write stream bytes (${offset}, ${length})` + buffer.slice(offset, offset+length));
+            socket.write(buffer, offset, length);
         };
 
         Object.assign(packetStream, {
@@ -1206,98 +1208,9 @@ function getMousePosition(el, e) {
         },
 
         async startGame() {
-            this.port = this.port || 43595;
-            this.maxReadTries = 1000;
-
-            GameConnection.clientVersion = version.CLIENT;
-
+            this.startGame_0();
             await this.loadGameConfig();
-
-            if (this.errorLoadingData) {
-                return;
-            }
-
-            this.spriteMedia = 2000;
-            this.spriteUtil = this.spriteMedia + 100;
-            this.spriteItem = this.spriteUtil + 50;
-            this.spriteLogo = this.spriteItem + 1000;
-            this.spriteProjectile = this.spriteLogo + 10;
-            this.spriteTexture = this.spriteProjectile + 50;
-            this.spriteTextureWorld = this.spriteTexture + 10;
-
-            //this.graphics = this.getGraphics();
-
-            this.setTargetFPS(50);
-
-            const surface = new Surface(
-                this.gameWidth,
-                this.gameHeight + 12,
-                4000,
-                this
-            );
-
-            surface.setBounds(0, 0, this.gameWidth, this.gameHeight + 12);
-
-            this.surface = surface;
-
-            Panel.drawBackgroundArrow = false;
-            Panel.baseSpriteStart = this.spriteUtil;
-
-            let x = surface.width2 - 199;
-            let y = 36;
-
-            /*if (this.options.mobile) {
-                x -= 32;
-                y = (this.gameHeight / 2 - 275 / 2) | 0;
-            }*/
-
-            const panelQuestList = new Panel(this.surface, 5);
-
-            this.controlListQuest = panelQuestList.addTextListInteractive(
-                x,
-                y + 24,
-                196,
-                251,
-                1,
-                500,
-                true
-            );
-
-            this.panelQuestList = panelQuestList;
-
-            /*if (this.options.mobile) {
-                x = 35;
-                y = (this.gameHeight / 2 - 182 / 2) | 0;
-            }*/
-
-            const panelMagic = new Panel(this.surface, 5);
-
-            this.controlListMagic = panelMagic.addTextListInteractive(
-                x,
-                y + 24,
-                196,
-                90,
-                1,
-                500,
-                true
-            );
-
-            this.panelMagic = panelMagic;
-
-            const panelSocialList = new Panel(this.surface, 5);
-
-            this.controlListSocialPlayers = panelSocialList.addTextListInteractive(
-                x,
-                y + 40,
-                196,
-                126,
-                1,
-                500,
-                true
-            );
-
-            this.panelSocialList = panelSocialList;
-
+            this.startGame_1();
             await this.loadMedia();
 
             if (this.errorLoadingData) {
@@ -1310,31 +1223,7 @@ function getMousePosition(el, e) {
                 return;
             }
 
-            const scene = new Scene(this.surface, 15000, 15000, 1000);
-
-            scene.view = GameModel._from2(1000 * 1000, 1000);
-
-            scene.setBounds(
-                (this.gameWidth / 2) | 0,
-                (this.gameHeight / 2) | 0,
-                (this.gameWidth / 2) | 0,
-                (this.gameHeight / 2) | 0,
-                this.gameWidth,
-                9
-            );
-
-            scene.clipFar3d = 2400;
-            scene.clipFar2d = 2400;
-            scene.fogZFalloff = 1;
-            scene.fogZDistance = 2300;
-            scene._setLight_from3(-50, -10, -50);
-
-            this.scene = scene;
-
-            const world = new World(this.scene, this.surface);
-            world.baseMediaSprite = this.spriteMedia;
-
-            this.world = world;
+            this.startGame_2();
 
             await this.loadTextures();
 
@@ -1672,7 +1561,7 @@ function getMousePosition(el, e) {
             }
 
             if (timestamp - this.packetLastRead > 5000) {
-                this._packetLastRead = timestamp;
+                this.packetLastRead = timestamp;
                 this._packetStream.newPacket(ClientOpcodes.PING);
                 this._packetStream.sendPacket();
             }

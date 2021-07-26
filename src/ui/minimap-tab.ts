@@ -29,13 +29,6 @@ drawUiTabMinimap(noMenus: bool): void {
         );
     }
 
-    /*
-    this.uiOpenX = uiX;
-    this.uiOpenY = uiY;
-    this.uiOpenWidth = WIDTH;
-    this.uiOpenHeight = HEIGHT;
-    */
-
     this.surface!.drawBox(uiX, uiY, WIDTH, HEIGHT, 0);
     this.surface!.setBounds(uiX, uiY, uiX + WIDTH, uiY + HEIGHT);
 

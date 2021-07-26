@@ -9,7 +9,6 @@ const COLOUR_TRANSPARENT = 12345678;
 const REGION_WIDTH = 96;
 const REGION_HEIGHT = 96;
 const AN_INT_585 = 128;
-const BASE_MEDIA_SPRITE = 750;
 
 const PLANE_COUNT = 4;
 const TILE_COUNT = 2304;
@@ -37,7 +36,6 @@ export default class World {
     wallsRoof: Int82DArray = new Int82DArray(PLANE_COUNT, TILE_COUNT);
     terrainHeight: Int82DArray = new Int82DArray(PLANE_COUNT, TILE_COUNT);
     terrainColour: Int82DArray = new Int82DArray(PLANE_COUNT, TILE_COUNT);
-    localY: Int32Array = new Int32Array(18432);
     tileDecoration: Int82DArray = new Int82DArray(PLANE_COUNT, TILE_COUNT);
     routeVia: Int322DArray = new Int322DArray(REGION_WIDTH, REGION_HEIGHT);
     wallsDiagonal: Int322DArray = new Int322DArray(PLANE_COUNT, TILE_COUNT);
@@ -59,7 +57,11 @@ export default class World {
         64
     );
 
+    localY: Int32Array = new Int32Array(18432);
     localX: Int32Array = new Int32Array(18432);
+
+    baseMediaSprite: i32 = 750;
+
     memberLandscapePack: Int8Array | null;
     memberMapPack: Int8Array | null;
 
@@ -1853,7 +1855,7 @@ export default class World {
 
         if (flag) {
             this.surface.drawSpriteMinimap(
-                BASE_MEDIA_SPRITE - 1,
+                this.baseMediaSprite - 1,
                 0,
                 0,
                 285,
