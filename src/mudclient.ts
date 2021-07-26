@@ -2731,6 +2731,8 @@ export default class mudclient extends GameConnection {
     }
 
     drawGame(): void {
+        this.surface!.loggedIn = true;
+
         if (this.deathScreenTimeout != 0) {
             this.surface!.fadeToBlack();
 
@@ -9060,6 +9062,7 @@ export default class mudclient extends GameConnection {
     }
 
     drawLoginScreens(): void {
+        this.surface!.loggedIn = false;
         this.welcomeScreenAlreadyShown = false;
 
         this.surface!.interlace = false;
@@ -14556,7 +14559,6 @@ export default class mudclient extends GameConnection {
                             const modelIndex = GameData.objectModelIndex[objectID];
                             const model = this.gameModels[modelIndex]!.copy();
 
-                            consoleLog("test 1");
                             this.scene!.addModel(model);
 
                             model.key = this.objectCount;
@@ -14568,7 +14570,6 @@ export default class mudclient extends GameConnection {
                                 modelY
                             );
 
-                            consoleLog("test 2");
                             model._setLight_from6(true, 48, 48, -50, -10, -50);
 
                             this.world!.removeObject2(areaX, areaY, objectID);
@@ -14577,15 +14578,11 @@ export default class mudclient extends GameConnection {
                                 model.translate(0, -480, 0);
                             }
 
-                            consoleLog("test 3");
-
                             this.objectX[this.objectCount] = areaX;
                             this.objectY[this.objectCount] = areaY;
                             this.objectId[this.objectCount] = objectID;
                             this.objectDirection[this.objectCount] = direction;
                             this.objectModel[this.objectCount++] = model;
-
-                            consoleLog("test 4");
                         }
                     }
                 }

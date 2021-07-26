@@ -629,6 +629,7 @@ renderLoginScreenViewports(): void {
 }
 
 drawLoginScreens(): void {
+    this.surface!.loggedIn = false;
     this.welcomeScreenAlreadyShown = false;
 
     this.surface!.interlace = false;

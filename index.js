@@ -641,7 +641,7 @@ function getMousePosition(el, e) {
             );
 
             this.drawString(
-                graphics,
+                this.graphics,
                 bottom,
                 font,
                 (width / 2) | 0,
@@ -1900,10 +1900,8 @@ function getMousePosition(el, e) {
 
             try {
                 if (this.loggedIn === 0) {
-                    this.surface.loggedIn = false;
                     this.drawLoginScreens();
                 } else if (this.loggedIn === 1) {
-                    this.surface.loggedIn = true;
                     this.drawGame();
                 }
             } catch (e) {

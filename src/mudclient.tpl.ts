@@ -2729,6 +2729,8 @@ export default class mudclient extends GameConnection {
     }
 
     drawGame(): void {
+        this.surface!.loggedIn = true;
+
         if (this.deathScreenTimeout != 0) {
             this.surface!.fadeToBlack();
 
