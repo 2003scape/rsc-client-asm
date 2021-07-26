@@ -1,4 +1,5 @@
 declare function consoleLog(str: string): void;
+declare function consoleLogA(farts: StaticArray<GameModel|null>): void;
 
 import ChatMessage from './chat-message';
 import ClientOpcodes from './opcodes/client';
@@ -2985,6 +2986,7 @@ export default class mudclient extends GameConnection {
                         32,
                         0
                     );
+
                     this.spriteCount++;
                 }
             }
@@ -3030,6 +3032,7 @@ export default class mudclient extends GameConnection {
                 64,
                 i + 20000
             );
+
             this.spriteCount++;
         }
 
@@ -3061,6 +3064,7 @@ export default class mudclient extends GameConnection {
                     64,
                     i + 50000
                 );
+
                 this.spriteCount++;
             }
         }

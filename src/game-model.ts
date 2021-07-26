@@ -1,4 +1,5 @@
 declare function consoleLog(str: string): void;
+declare function consoleLogA(farts: Int32Array): void;
 
 import Scene from './scene';
 import { getUnsignedShort, getSignedShort } from './utility';
@@ -107,9 +108,7 @@ export default class GameModel {
 
     static _from2A(pieces: StaticArray<GameModel>, count: i32): GameModel {
         const gameModel = new GameModel();
-
         gameModel.merge(pieces, count, true);
-
         return gameModel;
     }
 
@@ -166,6 +165,10 @@ export default class GameModel {
 
         gameModel.allocate(numVertices, numFaces);
         gameModel.faceTransStateThing = new StaticArray<Int32Array>(numFaces);
+
+        for (let i = 0; i < numFaces; i++) {
+            gameModel.faceTransStateThing![i] = new Int32Array(1);
+        }
 
         for (let i = 0; i < numVertices; i++) {
             gameModel.vertexX![i] = getSignedShort(data, offset);
@@ -291,10 +294,21 @@ export default class GameModel {
         this.numVertices = 0;
         this.maxVerts = numVertices;
         this.maxFaces = numFaces;
-        this.baseX = this.baseY = this.baseZ = 0;
-        this.orientationYaw = this.orientationPitch = this.orientationRoll = 0;
-        this.scaleFx = this.scaleFy = this.scaleFz = 256;
-        this.shearXy = this.shearXz = this.shearYx = this.shearYz = this.shearZx = this.shearZy = 256;
+        this.baseX = 0;
+        this.baseY = 0;
+        this.baseZ = 0;
+        this.orientationYaw = 0;
+        this.orientationPitch = 0;
+        this.orientationRoll = 0;
+        this.scaleFx = 256;
+        this.scaleFy = 256;
+        this.scaleFz = 256;
+        this.shearXy = 256;
+        this.shearXz = 256;
+        this.shearYx = 256;
+        this.shearYz = 256;
+        this.shearZx = 256;
+        this.shearZy = 256;
         this.transformKind = 0;
     }
 
@@ -1177,10 +1191,21 @@ export default class GameModel {
             this.vertexZ![i] = this.vertexTransformedZ![i];
         }
 
-        this.baseX = this.baseY = this.baseZ = 0;
-        this.orientationYaw = this.orientationPitch = this.orientationRoll = 0;
-        this.scaleFx = this.scaleFy = this.scaleFz = 256;
-        this.shearXy = this.shearXz = this.shearYx = this.shearYz = this.shearZx = this.shearZy = 256;
+        this.baseX = 0;
+        this.baseY = 0;
+        this.baseZ = 0;
+        this.orientationYaw = 0;
+        this.orientationPitch = 0;
+        this.orientationRoll = 0;
+        this.scaleFx = 256;
+        this.scaleFy = 256;
+        this.scaleFz = 256;
+        this.shearXy = 256;
+        this.shearXz = 256;
+        this.shearYx = 256;
+        this.shearYz = 256;
+        this.shearZx = 256;
+        this.shearZy = 256;
         this.transformKind = 0;
     }
 

@@ -69,28 +69,23 @@ function getMousePosition(el, e) {
 }
 
 (async () => {
-    const wasm = wasmmap.SetSourceMapURLRelativeTo(
-        fs.readFileSync('./dist/untouched.wasm'),
-        window.location.href
-    );
-
-    let pixelarray = null;
+    let pixelArray = null;
     let writeStreamBytes = null;
 
     const { exports } = await loader.instantiate(
-        wasm,
+        fetch('./untouched.wasm'),
         // TODO envify
         {
             surface: {
                 draw: () => {
                     //console.log('drawing!');
-                    if (!pixelarray) {
-                        pixelarray = __getArrayView(
+                    if (!pixelArray) {
+                        pixelArray = __getArrayView(
                             Surface.wrap(mc.surface).rgbPixels
                         );
                     }
 
-                    imageData.data.set(pixelarray);
+                    imageData.data.set(pixelArray);
                     ctx.putImageData(imageData, 0, 0);
                 },
                 consoleLog: (str) => console.log(__getString(str)),
@@ -119,8 +114,13 @@ function getMousePosition(el, e) {
             panel: {
                 consoleLog: (str) => console.log(__getString(str))
             },
+            'game-model': {
+                consoleLog: (str) => console.log(__getString(str)),
+                consoleLogA: (str) => console.log(__getArrayView(str))
+            },
             mudclient: {
-                consoleLog: (str) => console.log(__getString(str))
+                consoleLog: (str) => console.log(__getString(str)),
+                consoleLogA: (str) => console.log(__getArrayView(str))
             }
         }
     );
@@ -297,8 +297,6 @@ function getMousePosition(el, e) {
             this._canvas.tabIndex = 0;
             this._canvas.width = width;
             this._canvas.height = height;
-
-            console.log('Started application');
 
             this.appletWidth = width;
             this.appletHeight = height;
@@ -612,23 +610,22 @@ function getMousePosition(el, e) {
         },
 
         drawTextBox(top, bottom) {
-            const graphics = this.getGraphics();
             const font = new Font('Helvetica', 1, 15);
             const width = 512;
             const height = 344;
 
-            graphics.setColor(Color.black);
+            this.graphics.setColor(Color.black);
 
-            graphics.fillRect(
+            this.graphics.fillRect(
                 ((width / 2) | 0) - 140,
                 ((height / 2) | 0) - 25,
                 280,
                 50
             );
 
-            graphics.setColor(Color.white);
+            this.graphics.setColor(Color.white);
 
-            graphics.drawRect(
+            this.graphics.drawRect(
                 ((width / 2) | 0) - 140,
                 ((height / 2) | 0) - 25,
                 280,
@@ -636,7 +633,7 @@ function getMousePosition(el, e) {
             );
 
             this.drawString(
-                graphics,
+                this.graphics,
                 top,
                 font,
                 (width / 2) | 0,
@@ -1246,7 +1243,7 @@ function getMousePosition(el, e) {
             Panel.drawBackgroundArrow = false;
             Panel.baseSpriteStart = this.spriteUtil;
 
-            let x = this.surface.width2 - 199;
+            let x = surface.width2 - 199;
             let y = 36;
 
             /*if (this.options.mobile) {
@@ -1697,7 +1694,7 @@ function getMousePosition(el, e) {
 
                 const opcode = incomingPacket[0] & 0xff;
 
-                console.log('opcode:' + opcode + ' psize:' + length);
+                //console.log('opcode:' + opcode + ' psize:' + length);
                 this.handleIncomingPacket(opcode, length, this.incomingPacket);
             }
         },
